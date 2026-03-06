@@ -4,6 +4,8 @@ dist
 coverage
 .next
 .vercel
+.tmp
+tmp
 *.tsbuildinfo
 *.db
 *.db-shm

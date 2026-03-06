@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build": "corepack pnpm -r build",
+    "check": "corepack pnpm lint && corepack pnpm typecheck && corepack pnpm test",
     "lint": "biome check .",
     "format": "biome format --write .",
     "test": "vitest run",
