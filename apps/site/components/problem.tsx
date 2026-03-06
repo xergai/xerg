@@ -2,16 +2,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 
 const cards = [
   {
-    title: 'Most teams can see tokens, not economics',
-    body: 'Tracing and spend dashboards tell you what happened. They do not tell you whether the work was worth what it cost.',
+    title: 'Spend dashboards stop at totals',
+    body: 'Knowing what you spent is table stakes. It does not tell you which retries, loops, or model choices are leaking money.',
   },
   {
-    title: 'Agent loops hide compounding waste',
-    body: 'Retries, loop churn, and oversized context quietly inflate spend. Without local analysis, the waste is easy to miss.',
+    title: 'Routers optimize price, not workflow economics',
+    body: 'Cheaper routing helps, but it still does not tell you whether the workflow was wasteful, brittle, or worth the spend.',
   },
   {
-    title: 'Finance eventually asks a harder question',
-    body: 'The real question is not what your models cost. It is what your AI agents produce per dollar and where to improve it.',
+    title: 'Xerg turns cost into decisions',
+    body: 'It highlights structural waste, surfaces the next savings tests, and creates a path from raw spend to cost per outcome.',
   },
 ];
 
@@ -25,8 +25,8 @@ export function ProblemSection() {
             <CardDescription>{card.body}</CardDescription>
           </CardHeader>
           <CardContent className="border-t border-[color:var(--border)] pt-5 text-sm text-[color:var(--muted)]">
-            Xerg starts by making waste visible locally, before asking teams to wire up anything
-            else.
+            Xerg starts locally so the first report is useful before a team has to instrument
+            anything else.
           </CardContent>
         </Card>
       ))}

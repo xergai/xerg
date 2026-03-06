@@ -6,185 +6,239 @@ Date: March 6, 2026
 
 ## 1. What Xerg Is
 
-Xerg is a local-first economics layer for AI agent workflows.
+Xerg is an economic intelligence layer for AI agent systems.
 
-It starts by helping teams answer a simple question:
+It is built around one question that most current AI tooling does not answer well:
 
-> Where is our agent spend going, and how much of it is waste?
+> What is this AI workflow costing us, where is value leaking, and what should we change next?
 
-The first product is a CLI that audits OpenClaw logs and session transcripts, computes spend, and reports:
+The long-term ambition is bigger:
 
-- total spend
-- observed versus estimated cost
-- spend by workflow
-- spend by model
-- high-confidence waste findings
-- lower-confidence optimization opportunities
+> What is the cost per outcome of our AI systems, and how do we improve it?
 
-## 2. What Xerg Is Not Yet
+But Xerg does not earn the right to answer that by hand-waving. It earns it in stages.
 
-Xerg is not yet:
+Today, Xerg starts with a local-first CLI that audits OpenClaw logs and session transcripts, computes spend, surfaces structural waste, and points to the next savings tests worth running.
 
-- a hosted dashboard
-- an SDK product
-- a policy engine
-- a runtime control plane
-- an outcome-tracking system
-- a cost-per-outcome product
-- a general-purpose observability layer
+That is the first product.
 
-Those may come later. They do not govern the current build.
+## 2. The Category Claim
 
-## 3. The Wedge
+Most AI tools in this market stop in one of three places:
 
-The first wedge is:
+- spend visibility
+- tracing and observability
+- model routing
 
-- OpenClaw users
-- local analysis
-- waste intelligence
+Those are useful, but they are not the same thing as economic intelligence.
 
-This wedge is intentionally narrow because it shortens the trust loop. The first thing Xerg has to earn is belief in the report.
+Spend visibility tells you what you spent.
+Tracing tells you what happened.
+Routing tells you how to pay less for a call.
 
-## 4. Product Principles
+Xerg sits one layer higher:
 
-### 4.1 Local-first before cloud-first
+- it turns spend into operational decisions
+- it identifies where money is leaking
+- it distinguishes confirmed waste from directional opportunities
+- it gives teams a path from raw spend to unit economics
 
-The first meaningful report should not require sign-up, billing, dashboards, or hosted ingestion.
+That is the unique value.
 
-### 4.2 Honest before impressive
+## 3. What Xerg Does Today
 
-Xerg must clearly separate:
+Today Xerg answers a tighter, lower-altitude question:
 
-- confirmed cost
-- estimated cost
-- high-confidence waste
-- lower-confidence opportunities
+> Where is our agent spend going, how much of it looks wasteful, and what should we test next?
 
-The product should never label speculation as proof.
+The current product:
 
-### 4.3 Economic framing over token framing
+- reads OpenClaw gateway logs and session transcripts locally
+- computes total, observed, and estimated spend
+- breaks spend down by workflow and model
+- flags high-confidence waste
+- flags lower-confidence optimization opportunities
+- preserves the difference between measured facts and recommendations
 
-The report should help a technical buyer reason in dollars, workflows, and operational waste, not only in tokens and traces.
+This is intentionally narrower than the long-term vision. It is also much more credible.
 
-### 4.4 Horizontal architecture, vertical go-to-market
+## 4. What Xerg Ultimately Aims To Do
 
-The internal data model can stay general. The first distribution and product story should stay narrow.
+Xerg is being built in layers.
 
-## 5. The Core Primitives Now
+### Layer 1: Waste intelligence
 
-The current product only needs these primitives:
+This is the current layer.
 
-- `source_file`: an imported log or session file
-- `run`: one normalized workflow execution
-- `call`: one model invocation inside a run
-- `finding`: one waste or opportunity insight
-- `pricing_catalog`: the pricing basis used for estimates
-- `audit_snapshot`: one persisted report summary
+It answers:
 
-These primitives are enough to support the v0 CLI.
+- where money is leaking
+- which workflows look structurally inefficient
+- which model choices deserve testing
 
-## 6. What Xerg Measures Now
+### Layer 2: Unit economics
 
-### 6.1 Spend
+This comes later, after the audit earns trust.
 
-Xerg reports:
+It answers:
+
+- cost per successful workflow outcome
+- comparative efficiency across workflows or teams
+- whether improvements are real over time
+
+### Layer 3: Economic governance
+
+This comes after outcome-aware reporting exists.
+
+It answers:
+
+- how AI spend should be governed
+- which changes should be blocked or escalated
+- where AI capital should be allocated
+
+## 5. Why Agent Systems First
+
+Xerg targets agent execution loops first, not general-purpose copilots.
+
+Agent systems are a better first wedge because they produce closed loops:
+
+- goal
+- plan
+- model call
+- tool call
+- retry
+- result
+
+That makes them more economically legible.
+
+You can observe loop waste, retry waste, context bloat, and idle spend in ways that are much harder to prove for open-ended copilots.
+
+This is why the wedge is:
+
+- agent systems first
+- OpenClaw first
+- local analysis first
+
+## 6. What Makes Xerg Different
+
+### 6.1 Not another spend dashboard
+
+If a tool ends at "you spent $47 today," it is not enough.
+
+Xerg has to answer:
+
+- why the spend happened
+- which parts look wasteful
+- what is worth changing first
+
+### 6.2 Not another observability layer
+
+Xerg is not competing to be the best trace viewer or evaluation product.
+
+Observability tools help teams inspect runtime behavior.
+Xerg uses economic framing to help teams decide what to fix.
+
+### 6.3 Not just a router
+
+Routing is a tactic, not the product.
+
+A router can lower cost per call.
+Xerg is trying to improve cost relative to useful work.
+
+## 7. The Current Product Surface
+
+The active user-facing product surface is small by design:
+
+- `xerg doctor`
+- `xerg audit`
+- the marketing site at `xerg.ai`
+- the waitlist flow
+
+There is no dashboard, billing, auth system, or hosted ingestion path in the current build scope.
+
+## 8. The Current Core Primitives
+
+The v0 CLI only needs these primitives:
+
+- `source_file`
+- `run`
+- `call`
+- `finding`
+- `pricing_catalog`
+- `audit_snapshot`
+
+Those are enough to build a trustworthy waste-intelligence report without pretending the full hosted product already exists.
+
+## 9. What Xerg Measures Now
+
+Current metrics:
 
 - total spend
 - observed spend
 - estimated spend
 - spend by workflow
 - spend by model
+- high-confidence waste
+- lower-confidence opportunities
 
-### 6.2 Findings
-
-Each finding has:
-
-- classification: `waste` or `opportunity`
-- confidence: `high`, `medium`, or `low`
-- scope: run, workflow, or global
-- cost impact
-- short explanation
-
-### 6.3 High-confidence findings now
-
-Current examples:
+Examples of high-confidence waste:
 
 - retry waste
 - repeated-error spend
-- explicit loop waste when directly observable
+- explicit loop waste
 
-### 6.4 Opportunities now
-
-Current examples:
+Examples of opportunities:
 
 - context outliers
-- candidate downgrade opportunities
+- candidate downgrade tests
 - likely idle or monitoring spend
 
-## 7. What Xerg Intentionally Does Not Measure Yet
+## 10. What Xerg Does Not Claim Yet
 
 Xerg does not currently claim:
 
 - cost per outcome
-- outcome yield
 - ROI
+- outcome yield
 - business value realization
 
-Those require outcome and value data that the current product does not ingest.
+Those require outcome and valuation data that the current product does not ingest.
 
-## 8. Data Sources Now
+The point of the current product is to earn trust first, then expand upward.
 
-The active data sources are:
+## 11. The Product Promise
 
-- OpenClaw gateway JSONL logs
-- OpenClaw session JSONL transcripts as fallback
+The promise of Xerg is not "we show your AI spend."
 
-Detection order:
+The promise is:
 
-1. explicit CLI flags
-2. configured overrides later if needed
-3. default OpenClaw gateway path
-4. default OpenClaw session path
+> We help you understand what your AI workflows are worth by starting with the part you can verify today: where spend is leaking and what to do next.
 
-## 9. Privacy Model
+That is the narrative the current product needs to reinforce everywhere:
 
-The CLI should persist only the economic metadata required for reporting.
+- docs
+- site
+- CLI output
+- future distribution
 
-The product should not store:
+## 12. Distribution Posture
 
-- prompt content
-- response content
+Current order of operations:
 
-unless that becomes an explicit future feature with a new privacy contract.
-
-## 10. Distribution
-
-Current planned order:
-
-1. private beta in `github.com/xergai/xerg`
-2. npm package
+1. private repo and private beta
+2. npm distribution
 3. OpenClaw Hub
 4. `skills.sh`
 
-The repo remains private through the first CLI beta.
-
-## 11. Open-Core Boundary
-
-The long-term intention is still open-core, but the repository is private during the current validation phase.
-
-The active question is not licensing yet. It is whether the CLI report is useful enough to deserve broader distribution.
-
-## 12. Current Product Surface
-
-The current user-facing surface is:
-
-- `xerg doctor`
-- `xerg audit`
-- the marketing site at `xerg.ai`
-- the waitlist form
-
-That is the full active product surface for now.
+The repo remains private through the first CLI beta because the main question is still validation, not maximum distribution.
 
 ## 13. What Governs Decisions
 
-If a proposed feature does not make the local audit more trustworthy, easier to adopt, or easier to distribute, it is probably not part of the current build.
+If a proposed feature does not improve one of these, it is probably not part of the current build:
+
+- audit trust
+- audit usefulness
+- time to first value
+- distribution of the CLI
+
+Xerg should feel like a focused product with a strong point of view, not a half-built platform.

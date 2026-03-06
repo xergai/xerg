@@ -8,10 +8,10 @@ export function HowItStartsSection() {
     <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)]">
       <Card className="overflow-hidden">
         <CardHeader>
-          <CardTitle>How Xerg starts</CardTitle>
+          <CardTitle>Audit. Fix. Re-audit.</CardTitle>
           <CardDescription>
-            Xerg begins with an OpenClaw-first CLI experience: local logs in, economics report out.
-            No account. No hosted telemetry. No dashboard dependency.
+            Xerg starts with one job: turn local agent logs into a report that tells you more than a
+            spend dashboard can.
           </CardDescription>
         </CardHeader>
         <div className="border-t border-[color:var(--border)] p-6">
@@ -19,18 +19,26 @@ export function HowItStartsSection() {
             <Terminal className="size-4" />
             CLI-first workflow
           </div>
-          <pre className="mt-4 overflow-x-auto rounded-[22px] border border-[color:var(--border)] bg-[color:rgba(6,8,12,0.9)] p-5 font-[family-name:var(--font-geist-mono)] text-sm leading-7 text-[color:var(--text)]">
-            <code>{`npx @xergai/cli audit
+          <div className="mt-4 grid gap-4 lg:grid-cols-2">
+            <pre className="overflow-x-auto rounded-[22px] border border-[color:var(--border)] bg-[color:rgba(6,8,12,0.9)] p-5 font-[family-name:var(--font-geist-mono)] text-sm leading-7 text-[color:var(--text)]">
+              <code>{`# Before
+npx audit-tool report
 
 Total spend: $0.0660
-High-confidence waste:
-- Retry waste is consuming measurable spend
-- policy_reviewer ran beyond efficient loop bounds
+Runs analyzed: 8
+Top workflow: daily_summary
+Top model: Sonnet`}</code>
+            </pre>
+            <pre className="overflow-x-auto rounded-[22px] border border-[color:var(--border)] bg-[color:rgba(6,8,12,0.9)] p-5 font-[family-name:var(--font-geist-mono)] text-sm leading-7 text-[color:var(--text)]">
+              <code>{`# After
+npx @xergai/cli audit
 
-Opportunities:
-- daily_summary context is above baseline
-- heartbeat_monitor may not need Opus`}</code>
-          </pre>
+Retry waste: $0.0054
+Loop waste: policy_reviewer
+Downgrade test: heartbeat_monitor
+Potential impact: $0.0348`}</code>
+            </pre>
+          </div>
         </div>
       </Card>
       <Card className="justify-between">
@@ -38,7 +46,7 @@ Opportunities:
           <CardTitle>Get on the waitlist</CardTitle>
           <CardDescription>
             Join for launch updates, early access to the CLI, and design partner invites for the
-            first team workflows.
+            first workflows where economic signal is clean.
           </CardDescription>
         </CardHeader>
         <div className="mt-auto">

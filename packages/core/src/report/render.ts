@@ -19,6 +19,29 @@ function topRows(rows: { key: string; spendUsd: number; observedShare: number }[
   });
 }
 
+function topFinding(summary: AuditSummary, classification: 'waste' | 'opportunity') {
+  return summary.findings
+    .filter((finding) => finding.classification === classification)
+    .sort((left, right) => right.costImpactUsd - left.costImpactUsd)[0];
+}
+
+function topSavingsTest(summary: AuditSummary) {
+  return (
+    summary.findings
+      .filter((finding) => finding.classification === 'opportunity')
+      .sort((left, right) => {
+        const leftPriority = left.kind === 'candidate-downgrade' ? 1 : 0;
+        const rightPriority = right.kind === 'candidate-downgrade' ? 1 : 0;
+
+        if (leftPriority !== rightPriority) {
+          return rightPriority - leftPriority;
+        }
+
+        return right.costImpactUsd - left.costImpactUsd;
+      })[0] ?? null
+  );
+}
+
 export function renderDoctorReport(report: DoctorReport) {
   const sections = [
     '# Xerg doctor',
@@ -46,6 +69,8 @@ export function renderTerminalSummary(summary: AuditSummary) {
   const opportunityFindings = summary.findings.filter(
     (finding) => finding.classification === 'opportunity',
   );
+  const topWaste = topFinding(summary, 'waste');
+  const topOpportunity = topSavingsTest(summary);
 
   return [
     '# Xerg audit',
@@ -55,6 +80,8 @@ export function renderTerminalSummary(summary: AuditSummary) {
     `Estimated spend: ${formatUsd(summary.estimatedSpendUsd)}`,
     `Runs analyzed: ${summary.runCount}`,
     `Model calls: ${summary.callCount}`,
+    `Structural waste identified: ${formatUsd(summary.wasteSpendUsd)} (${formatPercent(summary.structuralWasteRate)})`,
+    `Potential impact surfaced: ${formatUsd(summary.opportunitySpendUsd)}`,
     '',
     'Cost per outcome: N/A (enable outcome tracking in a future release)',
     '',
@@ -78,6 +105,17 @@ export function renderTerminalSummary(summary: AuditSummary) {
         })
       : ['- none detected']),
     '',
+    '## What Xerg adds beyond spend visibility',
+    ...(topWaste
+      ? [`- Biggest confirmed leak: ${topWaste.title}`]
+      : ['- No confirmed leak detected']),
+    ...(topOpportunity
+      ? [`- First savings test: ${topOpportunity.title}`]
+      : ['- No optimization tests surfaced']),
+    ...(summary.spendByWorkflow[0]
+      ? [`- Workflow to inspect first: ${summary.spendByWorkflow[0].key}`]
+      : ['- No workflow breakdown available']),
+    '',
     '## Notes',
     ...summary.notes.map((note) => `- ${note}`),
   ].join('\n');
@@ -91,6 +129,8 @@ export function renderMarkdownSummary(summary: AuditSummary) {
     `- Total spend: ${formatUsd(summary.totalSpendUsd)}`,
     `- Observed spend: ${formatUsd(summary.observedSpendUsd)}`,
     `- Estimated spend: ${formatUsd(summary.estimatedSpendUsd)}`,
+    `- Structural waste identified: ${formatUsd(summary.wasteSpendUsd)} (${formatPercent(summary.structuralWasteRate)})`,
+    `- Potential impact surfaced: ${formatUsd(summary.opportunitySpendUsd)}`,
     `- Runs analyzed: ${summary.runCount}`,
     `- Model calls: ${summary.callCount}`,
     '',

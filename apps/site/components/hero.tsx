@@ -1,4 +1,4 @@
-import { Binary, Gauge, Sparkles, WalletCards } from 'lucide-react';
+import { ArrowRightLeft, Gauge, ScanSearch, WalletCards } from 'lucide-react';
 
 import { SignupForm } from '@/components/signup-form';
 import { Badge } from '@/components/ui/badge';
@@ -6,19 +6,19 @@ import { Badge } from '@/components/ui/badge';
 const valuePoints = [
   {
     icon: WalletCards,
-    title: 'See where agent spend goes',
+    title: 'Find where money leaks',
   },
   {
     icon: Gauge,
-    title: 'Find high-confidence waste',
+    title: 'Separate waste from guesses',
   },
   {
-    icon: Binary,
-    title: 'Work toward cost per outcome',
+    icon: ScanSearch,
+    title: 'Turn logs into next actions',
   },
   {
-    icon: Sparkles,
-    title: 'Start locally with OpenClaw',
+    icon: ArrowRightLeft,
+    title: 'Build toward cost per outcome',
   },
 ];
 
@@ -28,14 +28,14 @@ export function Hero() {
       <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.04),transparent_35%,transparent)]" />
       <div className="relative grid gap-10 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-end">
         <div className="space-y-6">
-          <Badge>CLI-first waste intelligence for OpenClaw</Badge>
+          <Badge>Economic audit for AI agents</Badge>
           <div className="space-y-4">
             <h1 className="max-w-4xl text-4xl font-semibold leading-[1.02] tracking-tight text-white sm:text-5xl lg:text-7xl">
-              Know what your AI agents are worth.
+              Most AI tools show spend. Xerg shows waste.
             </h1>
             <p className="max-w-2xl text-base leading-7 text-[color:var(--muted-strong)] sm:text-lg">
-              Xerg helps teams understand AI agent spend in economic terms, starting with local
-              waste intelligence for OpenClaw workflows.
+              Run a local audit on OpenClaw logs and get the answer engineering and finance both
+              want: where money is leaking, what to fix first, and what savings to test next.
             </p>
           </div>
           <SignupForm />
@@ -53,26 +53,27 @@ export function Hero() {
             ))}
           </div>
         </div>
-        <div className="rounded-[28px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(14,18,28,0.92),rgba(10,12,18,0.9))] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
-          <div className="mb-4 flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[color:var(--muted)]">
-            <span>Example audit</span>
-            <span>v0.1</span>
+        <div className="space-y-4 rounded-[28px] border border-[color:var(--border)] bg-[linear-gradient(180deg,rgba(14,18,28,0.92),rgba(10,12,18,0.9))] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+          <div className="mb-1 flex items-center justify-between text-xs uppercase tracking-[0.2em] text-[color:var(--muted)]">
+            <span>CLI view</span>
+            <span>before / after</span>
           </div>
           <div className="space-y-3 rounded-[22px] border border-[color:var(--border)] bg-[color:rgba(255,255,255,0.02)] p-5 font-[family-name:var(--font-geist-mono)] text-sm leading-6 text-[color:var(--text)]">
-            <p>Total spend: $0.0660</p>
-            <p>Observed spend: $0.0660</p>
-            <p>Estimated spend: $0.0000</p>
-            <p>Runs analyzed: 7</p>
-            <p>Model calls: 15</p>
-            <div className="mt-3 border-t border-[color:var(--border)] pt-3 text-[color:var(--muted-strong)]">
-              <p>High-confidence waste</p>
-              <p>Retry waste is consuming measurable spend</p>
-              <p>Workflow &quot;policy_reviewer&quot; ran beyond efficient loop bounds</p>
+            <div className="space-y-2">
+              <p className="text-[color:var(--muted)]">Before: generic spend report</p>
+              <p>Total spend: $0.0660</p>
+              <p>Runs analyzed: 8</p>
+              <p>Top workflow: daily_summary</p>
+              <p>Top model: anthropic/claude-sonnet-4-5</p>
             </div>
-            <div className="mt-3 border-t border-[color:var(--border)] pt-3 text-[color:var(--muted-strong)]">
-              <p>Opportunities</p>
-              <p>Context usage in &quot;daily_summary&quot; is well above its baseline</p>
-              <p>Candidate model downgrade opportunity in &quot;heartbeat_monitor&quot;</p>
+            <div className="border-t border-[color:var(--border)] pt-3" />
+            <div className="space-y-2">
+              <p className="text-[color:var(--muted)]">After: xerg audit</p>
+              <p>Retry waste: $0.0054</p>
+              <p>Loop waste: policy_reviewer</p>
+              <p>Context outlier: daily_summary</p>
+              <p>First savings test: heartbeat_monitor → Haiku</p>
+              <p className="text-[color:var(--accent)]">Potential impact identified: $0.0348</p>
             </div>
           </div>
         </div>

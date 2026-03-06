@@ -5,18 +5,18 @@ import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/ca
 const items = [
   {
     icon: ScanSearch,
-    title: 'Waste intelligence now',
-    body: 'Read OpenClaw logs locally and surface measurable waste plus clearly labeled opportunities.',
+    title: 'What Xerg does now',
+    body: 'Audits OpenClaw logs locally and turns spend into waste findings, opportunities, and prioritized next actions.',
   },
   {
     icon: ArrowRightLeft,
-    title: 'Unit economics next',
-    body: 'Move from cost visibility toward cost per outcome once teams are ready to connect business outcomes.',
+    title: 'Why that is different',
+    body: 'Most products stop at tokens, traces, or routing. Xerg shows retry waste, loop waste, context bloat, and downgrade tests.',
   },
   {
     icon: Radar,
-    title: 'Governance later',
-    body: 'Build toward economic discipline only after the trust loop is established with real usage and believable metrics.',
+    title: 'Where it can go later',
+    body: 'Once teams trust the audit, Xerg can grow into cost per outcome, trend analysis, and economic governance.',
   },
 ];
 

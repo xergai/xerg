@@ -6,7 +6,8 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Xerg',
-  description: 'Know what your AI agents are worth.',
+  description:
+    'Most AI tools show spend. Xerg shows where agent workflows are wasting money and what to fix next.',
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://xerg.ai'),
 };
 

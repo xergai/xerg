@@ -107,6 +107,9 @@ export interface AuditSummary {
   totalSpendUsd: number;
   observedSpendUsd: number;
   estimatedSpendUsd: number;
+  wasteSpendUsd: number;
+  opportunitySpendUsd: number;
+  structuralWasteRate: number;
   spendByWorkflow: SpendBreakdown[];
   spendByModel: SpendBreakdown[];
   findings: Finding[];

@@ -48,6 +48,12 @@ export function buildAuditSummary(input: {
   const totalSpendUsd = input.runs.reduce((sum, run) => sum + run.totalCostUsd, 0);
   const observedSpendUsd = input.runs.reduce((sum, run) => sum + run.observedCostUsd, 0);
   const estimatedSpendUsd = input.runs.reduce((sum, run) => sum + run.estimatedCostUsd, 0);
+  const wasteSpendUsd = input.findings
+    .filter((finding) => finding.classification === 'waste')
+    .reduce((sum, finding) => sum + finding.costImpactUsd, 0);
+  const opportunitySpendUsd = input.findings
+    .filter((finding) => finding.classification === 'opportunity')
+    .reduce((sum, finding) => sum + finding.costImpactUsd, 0);
   const generatedAt = isoNow();
 
   return {
@@ -61,6 +67,11 @@ export function buildAuditSummary(input: {
     totalSpendUsd: Number(totalSpendUsd.toFixed(6)),
     observedSpendUsd: Number(observedSpendUsd.toFixed(6)),
     estimatedSpendUsd: Number(estimatedSpendUsd.toFixed(6)),
+    wasteSpendUsd: Number(wasteSpendUsd.toFixed(6)),
+    opportunitySpendUsd: Number(opportunitySpendUsd.toFixed(6)),
+    structuralWasteRate: Number(
+      (totalSpendUsd === 0 ? 0 : wasteSpendUsd / totalSpendUsd).toFixed(4),
+    ),
     spendByWorkflow: buildBreakdown(
       input.runs.map((run) => ({
         key: run.workflow,

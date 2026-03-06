@@ -11,7 +11,7 @@ export default function HomePage() {
       <section className="space-y-4 pt-6">
         <p className="text-sm uppercase tracking-[0.18em] text-[color:var(--muted)]">Why now</p>
         <h2 className="max-w-3xl text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-          Spend visibility is not enough once agents start acting in loops.
+          Most teams can already see spend. The harder problem is knowing what to fix.
         </h2>
       </section>
       <ProblemSection />
@@ -20,7 +20,7 @@ export default function HomePage() {
           What Xerg is
         </p>
         <h2 className="max-w-3xl text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-          An economics layer for AI agents, starting with local waste intelligence you can trust.
+          An economic audit for AI agents that starts with local waste intelligence.
         </h2>
       </section>
       <WhatItIsSection />
@@ -29,7 +29,7 @@ export default function HomePage() {
           How it starts
         </p>
         <h2 className="max-w-3xl text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-          OpenClaw first. Local first. Honest first.
+          OpenClaw first. Local first. Fix the leak before you build the platform.
         </h2>
       </section>
       <HowItStartsSection />
