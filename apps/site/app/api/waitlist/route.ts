@@ -1,3 +1,4 @@
+import { track } from '@vercel/analytics/server';
 import { NextResponse } from 'next/server';
 
 import { getResendClient, notifyWaitlistSignup } from '@/lib/resend';
@@ -31,7 +32,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: result.error.message }, { status: 502 });
     }
 
-    await notifyWaitlistSignup(parsed.data.email);
+    try {
+      await Promise.all([
+        notifyWaitlistSignup(parsed.data.email),
+        track('Waitlist Signup', {
+          source: 'website',
+        }),
+      ]);
+    } catch (error) {
+      console.error('Xerg waitlist side effects failed', error);
+    }
 
     return NextResponse.json({ ok: true });
   } catch (error) {

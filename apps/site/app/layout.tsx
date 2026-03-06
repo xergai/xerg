@@ -1,3 +1,4 @@
+import { Analytics } from '@vercel/analytics/next';
 import { GeistMono, GeistSans } from 'geist/font';
 import type { Metadata } from 'next';
 
@@ -12,7 +13,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html className="dark" lang="en">
-      <body className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}>{children}</body>
+      <body className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
