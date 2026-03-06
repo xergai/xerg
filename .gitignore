@@ -1,0 +1,14 @@
+.DS_Store
+node_modules
+dist
+coverage
+.next
+.vercel
+*.tsbuildinfo
+*.db
+*.db-shm
+*.db-wal
+.env
+.env.local
+.env.*.local
+!.env.example

@@ -1,0 +1,30 @@
+{
+  "name": "@xergai/cli",
+  "version": "0.1.0",
+  "description": "CLI waste intelligence for OpenClaw workflows.",
+  "type": "module",
+  "bin": {
+    "xerg": "./dist/index.js"
+  },
+  "files": ["dist"],
+  "main": "./dist/index.js",
+  "exports": {
+    ".": {
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --minify",
+    "dev": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@xergai/core": "workspace:*",
+    "commander": "^14.0.0",
+    "picocolors": "^1.1.1"
+  },
+  "devDependencies": {
+    "tsup": "^8.4.0",
+    "tsx": "^4.20.3"
+  }
+}

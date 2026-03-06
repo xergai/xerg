@@ -1,0 +1,30 @@
+{
+  "name": "xerg",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.6.2",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "build": "corepack pnpm -r build",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "test": "vitest run",
+    "typecheck": "corepack pnpm -r typecheck",
+    "changeset": "changeset",
+    "release": "changeset version",
+    "site:dev": "corepack pnpm --filter @xergai/site dev",
+    "cli:dev": "corepack pnpm --filter @xergai/cli dev"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@changesets/cli": "^2.29.6",
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.1.5",
+    "@types/react-dom": "^19.1.7",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "@xerg/cli",
+  "version": "0.0.1",
+  "description": "Unit economics engine for AI agents. Know what your AI is worth.",
+  "keywords": ["ai", "llm", "cost", "unit-economics", "agents", "finops", "opentelemetry"],
+  "homepage": "https://xerg.ai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xerg/xerg"
+  },
+  "license": "MIT",
+  "author": "Xerg <jason@xerg.ai>",
+  "bin": {
+    "xerg": "./bin/xerg.js"
+  },
+  "files": ["bin", "README.md", "LICENSE"],
+  "engines": {
+    "node": ">=18"
+  }
+}
