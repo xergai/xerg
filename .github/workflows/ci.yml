@@ -13,31 +13,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.6.2
+          run_install: false
+
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: pnpm
 
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Setup pnpm
-        run: corepack prepare pnpm@10.6.2 --activate
-
       - name: Install
-        run: corepack pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Lint
-        run: corepack pnpm lint
+        run: pnpm lint
 
       - name: Typecheck
-        run: corepack pnpm typecheck
+        run: pnpm typecheck
 
       - name: Test
-        run: corepack pnpm test
+        run: pnpm test
 
       - name: Build
-        run: corepack pnpm build
+        run: pnpm build
 
       - name: CLI smoke test
-        run: corepack pnpm --filter @xergai/cli exec node dist/index.js --help
+        run: pnpm --filter @xergai/cli exec node dist/index.js --help
