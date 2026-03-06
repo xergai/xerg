@@ -6,8 +6,8 @@ export function Footer() {
         <a className="transition hover:text-white" href="https://github.com/xergai">
           github.com/xergai
         </a>
-        <a className="transition hover:text-white" href="mailto:hello@xerg.ai">
-          hello@xerg.ai
+        <a className="transition hover:text-white" href="mailto:query@xerg.ai">
+          query@xerg.ai
         </a>
       </div>
     </footer>
