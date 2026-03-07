@@ -21,6 +21,17 @@ export function getResendClient() {
   return new Resend(apiKey);
 }
 
+function getResendFromAddress() {
+  const fromEmail = process.env.RESEND_FROM_EMAIL?.trim();
+  const fromName = process.env.RESEND_FROM_NAME?.trim();
+
+  if (!fromEmail) {
+    return null;
+  }
+
+  return fromName ? `${fromName} <${fromEmail}>` : fromEmail;
+}
+
 function isDuplicateContactError(error: ResendApiError) {
   const message = error.message.toLowerCase();
   return message.includes('already') || message.includes('exists');
@@ -43,7 +54,7 @@ function isRestrictedApiKeyError(error: ResendApiError) {
 
 async function sendWaitlistNotification(resend: Resend, email: string) {
   const notifyTarget = process.env.WAITLIST_NOTIFY_EMAIL;
-  const from = process.env.RESEND_FROM_EMAIL;
+  const from = getResendFromAddress();
 
   if (!notifyTarget || !from) {
     return {
@@ -76,10 +87,6 @@ export async function captureWaitlistSignup(email: string): Promise<WaitlistCapt
   const result = await resend.contacts.create({
     email: normalizedEmail,
     unsubscribed: false,
-    properties: {
-      source: 'website',
-      product: 'xerg',
-    },
   });
 
   if (!result.error) {
@@ -116,7 +123,7 @@ export async function notifyWaitlistSignup(email: string) {
 }
 
 export async function sendWaitlistConfirmationEmail(email: string, origin?: string) {
-  const from = process.env.RESEND_FROM_EMAIL;
+  const from = getResendFromAddress();
 
   if (!from) {
     return {
@@ -131,6 +138,7 @@ export async function sendWaitlistConfirmationEmail(email: string, origin?: stri
   const result = await resend.emails.send({
     from,
     to: normalizedEmail,
+    replyTo: process.env.WAITLIST_REPLY_TO?.trim() || 'query@xerg.ai',
     subject: 'Confirm your Xerg waitlist signup',
     text: [
       'Confirm your email to join the Xerg waitlist.',

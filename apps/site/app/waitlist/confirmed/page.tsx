@@ -50,6 +50,7 @@ export default async function WaitlistConfirmedPage({
           <a
             className="inline-flex items-center gap-2 rounded-lg bg-[color:var(--accent)] px-5 py-3 text-sm font-medium text-[color:var(--accent-foreground)]"
             href="/"
+            style={{ color: 'var(--accent-foreground)' }}
           >
             Back to xerg.ai
           </a>
