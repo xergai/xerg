@@ -17,6 +17,7 @@ export function SignupForm({
   inputClassName,
   note = 'We will send a confirmation email first. No spam, just launch updates and early invites.',
   noteClassName,
+  source = 'website-homepage',
   submitLabel = 'Get launch updates',
   successMessage = 'Check your inbox to confirm your email. You are only added after you click the link.',
   successClassName,
@@ -29,6 +30,7 @@ export function SignupForm({
   inputClassName?: string;
   note?: string;
   noteClassName?: string;
+  source?: string;
   submitLabel?: string;
   successMessage?: string;
   successClassName?: string;
@@ -46,7 +48,7 @@ export function SignupForm({
     setStatus('idle');
     setErrorMessage('');
 
-    const payload = { email, company };
+    const payload = { email, company, source };
 
     startTransition(async () => {
       try {
@@ -97,6 +99,14 @@ export function SignupForm({
           onChange={(event) => setCompany(event.target.value)}
           tabIndex={-1}
           value={company}
+        />
+        <input
+          aria-hidden="true"
+          className="hidden"
+          name="source"
+          readOnly
+          tabIndex={-1}
+          value={source}
         />
         <Button
           className={cn(compact ? 'sm:w-auto' : 'w-full sm:w-fit', buttonClassName)}

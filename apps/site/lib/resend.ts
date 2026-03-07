@@ -1,6 +1,10 @@
 import { Resend } from 'resend';
 
-import { buildWaitlistConfirmationUrl, normalizeWaitlistEmail } from '@/lib/waitlist';
+import {
+  buildWaitlistConfirmationUrl,
+  normalizeWaitlistEmail,
+  normalizeWaitlistSource,
+} from '@/lib/waitlist';
 
 type ResendApiError = {
   message: string;
@@ -56,7 +60,14 @@ function isRestrictedApiKeyError(error: ResendApiError) {
   );
 }
 
-async function sendWaitlistNotification(resend: Resend, email: string) {
+async function sendInternalWaitlistNotification(
+  resend: Resend,
+  options: {
+    email: string;
+    source: string;
+    stage: 'submitted' | 'confirmed';
+  },
+) {
   const notifyTarget = process.env.WAITLIST_NOTIFY_EMAIL;
   const from = getResendFromAddress();
 
@@ -71,8 +82,14 @@ async function sendWaitlistNotification(resend: Resend, email: string) {
   const result = await resend.emails.send({
     from,
     to: notifyTarget,
-    subject: `Confirmed Xerg waitlist signup: ${email}`,
-    text: `${email} confirmed their Xerg waitlist signup.`,
+    subject:
+      options.stage === 'submitted'
+        ? `Waitlist confirmation requested: ${options.email}`
+        : `Confirmed Xerg waitlist signup: ${options.email}`,
+    text:
+      options.stage === 'submitted'
+        ? `${options.email} requested a Xerg waitlist confirmation email.\nSource: ${options.source}`
+        : `${options.email} confirmed their Xerg waitlist signup.\nSource: ${options.source}`,
   });
 
   if (result.error) {
@@ -133,7 +150,11 @@ export async function captureWaitlistSignup(email: string): Promise<WaitlistCapt
   }
 
   if (isRestrictedApiKeyError(result.error)) {
-    const notificationResult = await sendWaitlistNotification(resend, normalizedEmail);
+    const notificationResult = await sendInternalWaitlistNotification(resend, {
+      email: normalizedEmail,
+      source: 'fallback',
+      stage: 'confirmed',
+    });
     if (notificationResult.ok) {
       return { ok: true, mode: 'notification' };
     }
@@ -152,12 +173,29 @@ export async function captureWaitlistSignup(email: string): Promise<WaitlistCapt
   };
 }
 
-export async function notifyWaitlistSignup(email: string) {
+export async function notifyWaitlistConfirmed(email: string, source: string) {
   const resend = getResendClient();
-  return sendWaitlistNotification(resend, normalizeWaitlistEmail(email));
+  return sendInternalWaitlistNotification(resend, {
+    email: normalizeWaitlistEmail(email),
+    source: normalizeWaitlistSource(source),
+    stage: 'confirmed',
+  });
 }
 
-export async function sendWaitlistConfirmationEmail(email: string, origin?: string) {
+export async function notifyWaitlistSubmission(email: string, source: string) {
+  const resend = getResendClient();
+  return sendInternalWaitlistNotification(resend, {
+    email: normalizeWaitlistEmail(email),
+    source: normalizeWaitlistSource(source),
+    stage: 'submitted',
+  });
+}
+
+export async function sendWaitlistConfirmationEmail(
+  email: string,
+  source: string,
+  origin?: string,
+) {
   const from = getResendFromAddress();
 
   if (!from) {
@@ -168,7 +206,8 @@ export async function sendWaitlistConfirmationEmail(email: string, origin?: stri
   }
 
   const normalizedEmail = normalizeWaitlistEmail(email);
-  const confirmationUrl = buildWaitlistConfirmationUrl(normalizedEmail, origin);
+  const normalizedSource = normalizeWaitlistSource(source);
+  const confirmationUrl = buildWaitlistConfirmationUrl(normalizedEmail, normalizedSource, origin);
   const resend = getResendClient();
   const result = await resend.emails.send({
     from,

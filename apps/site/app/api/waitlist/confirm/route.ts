@@ -1,12 +1,17 @@
 import { track } from '@vercel/analytics/server';
 import { NextResponse } from 'next/server';
 
-import { captureWaitlistSignup, notifyWaitlistSignup } from '@/lib/resend';
+import {
+  consumeRateLimit,
+  getRequestIp,
+  getWaitlistConfirmRateLimitOptions,
+} from '@/lib/rate-limit';
+import { captureWaitlistSignup, notifyWaitlistConfirmed } from '@/lib/resend';
 import { verifyWaitlistConfirmationToken } from '@/lib/waitlist';
 
 function redirectToStatus(
   requestUrl: string,
-  status: 'confirmed' | 'expired' | 'invalid' | 'error',
+  status: 'confirmed' | 'expired' | 'invalid' | 'error' | 'rate-limit',
 ) {
   return NextResponse.redirect(new URL(`/waitlist/confirmed?status=${status}`, requestUrl));
 }
@@ -14,6 +19,15 @@ function redirectToStatus(
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const token = url.searchParams.get('token');
+  const requestIp = getRequestIp(request);
+  const confirmLimit = consumeRateLimit(
+    `waitlist-confirm:ip:${requestIp}`,
+    getWaitlistConfirmRateLimitOptions(),
+  );
+
+  if (!confirmLimit.ok) {
+    return redirectToStatus(request.url, 'rate-limit');
+  }
 
   if (!token) {
     return redirectToStatus(request.url, 'invalid');
@@ -35,14 +49,14 @@ export async function GET(request: Request) {
     try {
       const sideEffects = [];
 
-      if (result.mode === 'contact') {
-        sideEffects.push(notifyWaitlistSignup(verification.email));
+      if (result.mode !== 'duplicate') {
+        sideEffects.push(notifyWaitlistConfirmed(verification.email, verification.source));
       }
 
       if (result.mode !== 'duplicate') {
         sideEffects.push(
           track('Waitlist Signup Confirmed', {
-            source: 'website',
+            source: verification.source,
             mode: result.mode,
           }),
         );

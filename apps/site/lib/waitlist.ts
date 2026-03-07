@@ -4,11 +4,16 @@ const WAITLIST_TOKEN_TTL_SECONDS = 60 * 60 * 24 * 7;
 
 type WaitlistTokenPayload = {
   email: string;
+  source: string;
   expiresAt: number;
 };
 
 export function normalizeWaitlistEmail(email: string) {
   return email.trim().toLowerCase();
+}
+
+export function normalizeWaitlistSource(source: string) {
+  return source.trim().toLowerCase();
 }
 
 function getWaitlistSigningSecret() {
@@ -32,9 +37,10 @@ function signPayload(encodedPayload: string) {
     .digest('base64url');
 }
 
-export function buildWaitlistConfirmationToken(email: string) {
+export function buildWaitlistConfirmationToken(email: string, source: string) {
   const payload = encodePayload({
     email: normalizeWaitlistEmail(email),
+    source: normalizeWaitlistSource(source),
     expiresAt: Math.floor(Date.now() / 1000) + WAITLIST_TOKEN_TTL_SECONDS,
   });
 
@@ -45,9 +51,9 @@ export function getSiteUrl(origin?: string) {
   return origin ?? process.env.NEXT_PUBLIC_SITE_URL ?? 'https://xerg.ai';
 }
 
-export function buildWaitlistConfirmationUrl(email: string, origin?: string) {
+export function buildWaitlistConfirmationUrl(email: string, source: string, origin?: string) {
   const baseUrl = getSiteUrl(origin);
-  const token = buildWaitlistConfirmationToken(email);
+  const token = buildWaitlistConfirmationToken(email, source);
   return `${baseUrl}/api/waitlist/confirm?token=${encodeURIComponent(token)}`;
 }
 
@@ -74,7 +80,7 @@ export function verifyWaitlistConfirmationToken(token: string) {
       Buffer.from(encodedPayload, 'base64url').toString('utf8'),
     ) as WaitlistTokenPayload;
 
-    if (!payload.email || !payload.expiresAt) {
+    if (!payload.email || !payload.source || !payload.expiresAt) {
       return { ok: false as const, reason: 'invalid' as const };
     }
 
@@ -85,6 +91,7 @@ export function verifyWaitlistConfirmationToken(token: string) {
     return {
       ok: true as const,
       email: normalizeWaitlistEmail(payload.email),
+      source: normalizeWaitlistSource(payload.source),
     };
   } catch {
     return { ok: false as const, reason: 'invalid' as const };

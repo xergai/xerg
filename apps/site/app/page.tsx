@@ -623,6 +623,7 @@ export default function HomePage() {
             inputClassName="rounded-lg border-[color:var(--border-bright)] bg-[color:var(--bg-card)] px-4 text-[color:var(--text-bright)]"
             note="We will send a confirmation email first. No spam, just launch updates and early invites."
             noteClassName="text-[13px] text-[color:var(--text-dim)]"
+            source="website-homepage"
             submitLabel="Get launch updates →"
             successMessage="Check your inbox to confirm your email. You are only added after you click the link."
           />

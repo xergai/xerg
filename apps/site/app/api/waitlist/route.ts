@@ -1,7 +1,13 @@
 import { track } from '@vercel/analytics/server';
 import { NextResponse } from 'next/server';
 
-import { sendWaitlistConfirmationEmail } from '@/lib/resend';
+import {
+  consumeRateLimit,
+  getRequestIp,
+  getWaitlistEmailRateLimitOptions,
+  getWaitlistSubmitRateLimitOptions,
+} from '@/lib/rate-limit';
+import { notifyWaitlistSubmission, sendWaitlistConfirmationEmail } from '@/lib/resend';
 import { normalizeWaitlistEmail } from '@/lib/waitlist';
 import { waitlistSchema } from '@/lib/waitlist-schema';
 
@@ -18,8 +24,50 @@ export async function POST(request: Request) {
   }
 
   try {
+    const requestIp = getRequestIp(request);
+    const ipLimit = consumeRateLimit(
+      `waitlist-submit:ip:${requestIp}`,
+      getWaitlistSubmitRateLimitOptions(),
+    );
+
+    if (!ipLimit.ok) {
+      return NextResponse.json(
+        { error: `Too many signup attempts. Try again in ${ipLimit.retryAfterSeconds} seconds.` },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(ipLimit.retryAfterSeconds),
+          },
+        },
+      );
+    }
+
+    const normalizedEmail = normalizeWaitlistEmail(parsed.data.email);
+    const emailLimit = consumeRateLimit(
+      `waitlist-submit:email:${normalizedEmail}`,
+      getWaitlistEmailRateLimitOptions(),
+    );
+
+    if (!emailLimit.ok) {
+      return NextResponse.json(
+        {
+          error: `That address was just used. Try again in ${emailLimit.retryAfterSeconds} seconds.`,
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(emailLimit.retryAfterSeconds),
+          },
+        },
+      );
+    }
+
     const origin = new URL(request.url).origin;
-    const result = await sendWaitlistConfirmationEmail(parsed.data.email, origin);
+    const result = await sendWaitlistConfirmationEmail(
+      parsed.data.email,
+      parsed.data.source,
+      origin,
+    );
 
     if (!result.ok) {
       return NextResponse.json(
@@ -29,10 +77,13 @@ export async function POST(request: Request) {
     }
 
     try {
-      await track('Waitlist Confirmation Sent', {
-        source: 'website',
-        email_domain: normalizeWaitlistEmail(parsed.data.email).split('@')[1] ?? 'unknown',
-      });
+      await Promise.all([
+        notifyWaitlistSubmission(parsed.data.email, parsed.data.source),
+        track('Waitlist Confirmation Sent', {
+          source: parsed.data.source,
+          email_domain: normalizedEmail.split('@')[1] ?? 'unknown',
+        }),
+      ]);
     } catch (error) {
       console.error('Xerg waitlist side effects failed', error);
     }

@@ -21,6 +21,12 @@ const content = {
     description:
       'Try the waitlist form again. If it still fails, reply to the confirmation email or contact query@xerg.ai.',
   },
+  'rate-limit': {
+    eyebrow: 'Too many attempts',
+    title: 'Please wait before confirming again.',
+    description:
+      'That confirmation link has been hit too many times in a short window. Wait a moment and try again.',
+  },
 } as const;
 
 type Status = keyof typeof content;
