@@ -32,6 +32,10 @@ function getResendFromAddress() {
   return fromName ? `${fromName} <${fromEmail}>` : fromEmail;
 }
 
+function getConfirmedWaitlistSegmentId() {
+  return process.env.RESEND_CONFIRMED_WAITLIST_SEGMENT_ID?.trim() || null;
+}
+
 function isDuplicateContactError(error: ResendApiError) {
   const message = error.message.toLowerCase();
   return message.includes('already') || message.includes('exists');
@@ -81,12 +85,38 @@ async function sendWaitlistNotification(resend: Resend, email: string) {
   return { ok: true as const };
 }
 
+async function attachConfirmedWaitlistSegment(resend: Resend, email: string) {
+  const segmentId = getConfirmedWaitlistSegmentId();
+
+  if (!segmentId) {
+    return { ok: true as const };
+  }
+
+  const result = await resend.contacts.segments.add({
+    email,
+    segmentId,
+  });
+
+  if (!result.error || isDuplicateContactError(result.error)) {
+    return { ok: true as const };
+  }
+
+  return {
+    ok: false as const,
+    message: result.error.message,
+    statusCode: result.error.statusCode,
+  };
+}
+
 export async function captureWaitlistSignup(email: string): Promise<WaitlistCaptureResult> {
   const normalizedEmail = normalizeWaitlistEmail(email);
   const resend = getResendClient();
   const result = await resend.contacts.create({
     email: normalizedEmail,
     unsubscribed: false,
+    segments: getConfirmedWaitlistSegmentId()
+      ? [{ id: getConfirmedWaitlistSegmentId() as string }]
+      : undefined,
   });
 
   if (!result.error) {
@@ -94,6 +124,11 @@ export async function captureWaitlistSignup(email: string): Promise<WaitlistCapt
   }
 
   if (isDuplicateContactError(result.error)) {
+    const segmentResult = await attachConfirmedWaitlistSegment(resend, normalizedEmail);
+    if (!segmentResult.ok) {
+      return segmentResult;
+    }
+
     return { ok: true, mode: 'duplicate' };
   }
 
