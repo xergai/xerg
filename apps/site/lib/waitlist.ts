@@ -12,7 +12,9 @@ export function normalizeWaitlistEmail(email: string) {
 }
 
 function getWaitlistSigningSecret() {
-  const secret = process.env.WAITLIST_SIGNING_SECRET ?? process.env.RESEND_API_KEY;
+  const dedicatedSecret = process.env.WAITLIST_SIGNING_SECRET?.trim();
+  const resendApiKey = process.env.RESEND_API_KEY?.trim();
+  const secret = dedicatedSecret || resendApiKey;
   if (!secret) {
     throw new Error('WAITLIST_SIGNING_SECRET or RESEND_API_KEY must be configured.');
   }
