@@ -78,7 +78,7 @@ const wasteCategories = [
     amountClassName: 'text-[color:var(--blue)]',
   },
   {
-    amount: '$0.00',
+    amount: '$3.37',
     name: 'Idle waste',
     description: 'Heartbeats and crons that burn tokens without triggering actions.',
     amountClassName: 'text-[color:var(--text-dim)]',
@@ -402,7 +402,7 @@ export default function HomePage() {
               </p>
               <div className="mt-9 flex flex-wrap items-center gap-3">
                 <a
-                  className="inline-flex items-center gap-2 rounded-lg bg-[color:var(--accent)] px-6 py-3 font-mono text-sm font-medium text-[color:var(--bg)] transition hover:-translate-y-0.5 hover:bg-[#3be0b6] hover:shadow-[0_4px_20px_rgba(45,212,168,0.25)]"
+                  className="inline-flex items-center gap-2 rounded-lg bg-[color:var(--accent)] px-6 py-3 font-mono text-sm font-medium text-[color:var(--accent-foreground)] transition hover:-translate-y-0.5 hover:bg-[#3be0b6] hover:shadow-[0_4px_20px_rgba(45,212,168,0.25)]"
                   href="#start"
                 >
                   npx xerg audit →
