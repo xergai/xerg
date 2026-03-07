@@ -4,70 +4,71 @@ Status: current pricing posture, not public launch pricing
 
 Date: March 6, 2026
 
-## 1. Current State
+## 1. What Pricing Means Right Now
 
-Xerg does not have launch-ready paid pricing yet.
+Pricing is not a spreadsheet exercise yet.
 
-That is intentional.
+It is a product-truth exercise.
 
-The current product is still validating the first wedge:
+Until Xerg proves that teams trust the audit and want it in their workflow, detailed launch pricing is mostly fake precision.
 
-- local CLI
-- OpenClaw users
-- waste intelligence
-
-Publishing detailed paid tiers before this wedge earns trust would create false precision.
-
-## 2. What Is Free Right Now
-
-The current posture is:
+That is why the current stance is simple:
 
 - the CLI beta should be free
-- the marketing site is just a waitlist and messaging layer
+- the site is a waitlist and messaging layer
+- billing should not be built yet
 
-No billing system should be built yet.
+## 2. Why We Are Not Publishing Full Tiers Yet
 
-## 3. What Pricing Has To Prove Later
+The current wedge is still being validated:
 
-Before Xerg publishes real paid plans, it needs evidence that teams will pay for:
+- OpenClaw first
+- local waste intelligence first
+- trust first
+
+Publishing polished paid tiers before that wedge is proven would signal confidence we have not earned yet.
+
+The product has to deserve pricing before it gets pricing.
+
+## 3. What Has To Be Proven Before Real Pricing
+
+Before Xerg publishes real paid plans, it needs evidence that teams will pay for one or more of these:
 
 - trustworthy economic reporting
-- team-level visibility
-- historical comparison
+- historical comparison and shared visibility
 - outcome-aware reporting
-- governance or controls
+- decision support that leadership trusts
+- governance and controls
 
-That evidence does not exist yet in a strong enough form.
+Right now, the strongest candidate is trustworthy reporting, not full platform governance.
 
-## 4. Pricing Principles
+## 4. The Pricing Principle
 
-### 4.1 Price on durable value, not novelty
+The eventual goal is not to charge for access to a command-line tool.
 
-The product should eventually charge for:
+The eventual goal is to charge for durable value:
 
-- team value
+- team visibility
 - retained history
-- collaboration
+- shared decision support
 - outcome-aware economics
 - governance
 
-not just for access to a CLI.
+That means the free CLI is not the business model. It is the adoption wedge.
 
-### 4.2 Do not price before the product surface exists
+## 5. What Is Free Now
 
-Hosted pricing should follow the hosted product, not the other way around.
+Current posture:
 
-### 4.3 Keep the CLI easy to adopt
+- local CLI beta: free
+- local audits: free
+- marketing site: free
 
-The easiest path to distribution is:
+No Stripe work should exist in the repo yet.
 
-- free local CLI
-- low-friction install
-- useful report without account creation
+## 6. Likely Future Packaging
 
-## 5. Likely Future Packaging
-
-This is directional, not committed.
+This is directional only.
 
 ### Free
 
@@ -78,15 +79,16 @@ This is directional, not committed.
 ### Team
 
 - hosted history
-- team visibility
 - shared reports
+- team visibility
 - longer retention
 
 ### Business
 
+- broader workflow coverage
 - stronger controls
 - more history
-- support for broader workflows
+- support for economic reporting across teams
 
 ### Enterprise
 
@@ -94,22 +96,36 @@ This is directional, not committed.
 - policy
 - custom support
 
-## 6. What We Are Explicitly Not Doing Yet
+These are future packaging shapes, not commitments.
+
+## 7. What We Are Explicitly Not Doing Yet
 
 Not now:
 
 - public paid tiers
-- Stripe implementation
+- billing implementation
 - usage billing
-- seat model debates
-- enterprise pricing pages
+- seat-count debates
+- pricing page optimization
+- enterprise quote workflows
 
-## 7. What Governs Future Pricing
+All of that is downstream of product truth.
 
-Pricing should not be finalized until Xerg can show one of these clearly:
+## 8. What Governs Future Pricing
+
+Pricing should not harden until Xerg can clearly show at least one of these:
 
 - repeatable operational savings
-- decision support that leadership trusts
-- measurable value from outcome-aware reporting
+- credible decision support for engineering or finance
+- measurable improvement in cost efficiency over time
+- strong demand for shared or hosted visibility
 
-Until then, the right posture is free CLI plus design-partner learning.
+Until then, the correct pricing posture is:
+
+- free CLI
+- learn from design partners
+- delay premature packaging decisions
+
+That is not hesitation.
+
+It is discipline.

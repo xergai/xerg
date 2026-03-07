@@ -4,18 +4,78 @@ Status: current build-now plan
 
 Date: March 6, 2026
 
-## 1. Goal
+## 1. What This Plan Is For
 
-Build and validate two things:
+This is not the build plan for the whole company.
 
-- a local CLI for OpenClaw waste intelligence
-- a one-page marketing site with waitlist capture
+It is the build plan for proving the wedge.
 
-Do not build the hosted product yet.
+The wedge is simple:
 
-## 2. Current Stack
+- local-first CLI
+- OpenClaw workflows first
+- waste intelligence first
 
-### Core repo defaults
+The goal is to ship one report that people trust, not to build the entire eventual platform up front.
+
+## 2. The Core Build Decision
+
+The most important technical decision in Xerg right now is not which cloud vendor to use.
+
+It is this:
+
+> Build the product that proves the insight before building the platform that scales the company.
+
+That is why the active scope is narrow:
+
+- a local CLI
+- a one-page site
+- a waitlist flow
+
+Everything else is deferred until the audit proves it deserves to exist.
+
+## 3. What We Are Building Now
+
+### 3.1 The CLI
+
+The CLI is the product.
+
+It should:
+
+- find OpenClaw data with minimal setup
+- compute spend cleanly
+- surface structural waste
+- surface clearly labeled opportunities
+- point to the next optimization tests worth running
+
+### 3.2 The site
+
+The site is not a second product.
+
+Its job is to:
+
+- explain Xerg clearly
+- make the wedge legible quickly
+- collect waitlist demand
+
+### 3.3 What we are not building now
+
+Not now:
+
+- dashboard
+- hosted API
+- SDK suite
+- auth
+- billing
+- policy engine
+- outcome tracking
+- team collaboration features
+
+## 4. Current Stack
+
+The stack is intentionally boring and current.
+
+### Repo defaults
 
 - Node `24.14.0`
 - pnpm `10.6.2`
@@ -44,7 +104,7 @@ Do not build the hosted product yet.
 - Resend
 - Vercel Analytics
 
-## 3. Current Repo Structure
+## 5. Repo Structure
 
 ```text
 xerg/
@@ -63,67 +123,43 @@ xerg/
 └── .github/workflows/
 ```
 
-## 4. Current Packages
+This repo stays small until reality forces it to split.
+
+## 6. Current Packages
 
 ### `packages/core`
 
-Purpose:
+This is the shared engine.
+
+It owns:
 
 - source detection
-- OpenClaw normalization
-- pricing catalog
-- findings engine
-- SQLite persistence
-- report formatting
+- normalization
+- pricing
+- findings
+- report generation
+- local persistence
+
+If logic is needed in more than one place, it should usually live here.
 
 ### `packages/cli`
 
-Purpose:
+This is the user-facing interface to the product.
 
-- user-facing `xerg` command
-- `doctor`
-- `audit`
-
-### `apps/site`
-
-Purpose:
-
-- explain Xerg clearly
-- capture waitlist emails
-- send optional internal notifications
-- collect basic traffic and waitlist analytics
-
-## 5. Current CLI Scope
-
-Commands shipped now:
+Current commands:
 
 - `xerg doctor`
 - `xerg audit`
 
-Supported flags now:
+### `apps/site`
 
-- `--log-file`
-- `--sessions-dir`
-- `--since`
-- `--json`
-- `--markdown`
-- `--db`
-- `--no-db`
+This is the marketing surface.
 
-Not in scope now:
+It exists to explain, capture interest, and support early distribution. It is not the hosted product.
 
-- SDKs
-- outcome ingestion
-- cost-per-outcome
-- hosted ingestion
-- auth
-- billing
-- dashboard
-- policy engine
+## 7. Current Data Model
 
-## 6. Current Data Model
-
-Tables in the local SQLite layer:
+The current local data model is intentionally small:
 
 - `source_files`
 - `runs`
@@ -132,42 +168,52 @@ Tables in the local SQLite layer:
 - `pricing_catalog`
 - `audit_snapshots`
 
-Not present by design:
+This is enough to support the CLI honestly.
 
-- `outcome_events`
-- `work_units`
-- policy tables
-- tenant or auth tables
+It intentionally excludes:
 
-## 7. Current Site Scope
+- outcome events
+- work units
+- multi-tenant records
+- auth records
+- policy definitions
 
-The site does four things:
+## 8. Current Audit Scope
 
-- explains what Xerg is
-- communicates the current wedge
-- captures waitlist signups
-- routes signups into Resend Contacts
+The CLI should answer four questions well:
 
-The current site also includes:
+1. How much did this workflow spend?
+2. Where does the spend cluster?
+3. What looks like confirmed waste?
+4. What should we test next?
 
-- Vercel Analytics page tracking
-- a server-side `Waitlist Signup` event
+That is the product bar for now.
 
-## 8. Deployment Plan Now
+## 9. Current Site Scope
+
+The site should do three things clearly:
+
+1. explain the category claim
+2. show how Xerg differs from generic spend tooling
+3. capture waitlist demand
+
+Everything else is noise right now.
+
+## 10. Deployment
 
 ### Site
 
-- host on Vercel
+- hosted on Vercel
 - production domain: `xerg.ai`
 - `www.xerg.ai` redirects to apex
-- built-in preview URLs for branch previews
+- branch previews use Vercel preview URLs for now
 
 ### CLI
 
-- local-only for now
-- npm distribution later
+- local-only
+- npm later
 
-### Infrastructure not in use now
+### Infrastructure we are intentionally not using now
 
 - Cloudflare
 - Neon
@@ -175,18 +221,13 @@ The current site also includes:
 - PostHog
 - Stripe
 
-## 9. Environment Variables
+Those are not bad tools. They are just not necessary to prove the current wedge.
 
-### Site
+## 11. CI
 
-- `RESEND_API_KEY`
-- `NEXT_PUBLIC_SITE_URL`
-- `WAITLIST_NOTIFY_EMAIL`
-- `RESEND_FROM_EMAIL`
+The CI pipeline should protect the repo from drift, not become a second product.
 
-## 10. CI
-
-The GitHub Actions pipeline currently runs:
+Current checks:
 
 - install
 - lint
@@ -195,46 +236,46 @@ The GitHub Actions pipeline currently runs:
 - build
 - CLI smoke test
 
-The site build is part of CI.
-
-## 11. Node Workflow
+## 12. Node Workflow
 
 This repo pins Node in `.nvmrc`.
 
-Recommended workflow:
+Recommended local flow:
 
 ```bash
 nvm use
 corepack prepare pnpm@10.6.2 --activate
 pnpm install
+pnpm check
 ```
 
-If another repo uses a different patch version, switch per repo rather than forcing one global default.
+If another repo uses a different Node patch version, switch per repo rather than forcing one global default.
 
-## 12. Current Validation Goals
+## 13. Current Validation Goals
 
-The active validation goals are:
+The build should optimize for these outcomes:
 
-- the CLI report is trustworthy
-- a new user can run it quickly
-- the site explains the product clearly
-- the waitlist flow works reliably
+- the audit feels trustworthy
+- the audit feels useful
+- time to first value stays low
+- the site makes the wedge obvious
+- the waitlist flow is dependable
 
 Everything else is secondary.
 
-## 13. Next Build Steps
+## 14. What Happens Next
 
 Near-term engineering steps:
 
-1. tighten CLI fixture coverage and parser robustness
-2. improve report quality on real OpenClaw data
+1. improve parser robustness on real OpenClaw data
+2. improve report quality and prioritization
 3. prepare npm release mechanics for `@xergai/cli`
 4. keep the repo private through the first beta
 5. prepare OpenClaw Hub packaging
 
-## 14. Deferred Work
+## 15. What Is Deferred On Purpose
 
-Deferred until after CLI validation:
+Deferred until the CLI proves the wedge:
 
 - public OSS launch
 - Homebrew
@@ -244,3 +285,7 @@ Deferred until after CLI validation:
 - outcome tagging
 - pricing and billing implementation
 - governance and policy engine
+
+The discipline here matters.
+
+Xerg should feel like a focused product with a point of view, not a sprawling half-built platform.
