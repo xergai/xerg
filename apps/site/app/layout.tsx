@@ -5,9 +5,9 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Xerg',
+  title: 'Xerg — Know what your AI is worth',
   description:
-    'Most AI tools show spend. Xerg shows where agent workflows are wasting money and what to fix next.',
+    'Xerg reads your agent logs and shows exactly where money is leaking across retries, context bloat, wrong-model calls, and runaway loops.',
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://xerg.ai'),
 };
 

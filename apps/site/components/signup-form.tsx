@@ -1,14 +1,37 @@
 'use client';
 
-import { ArrowRight, LoaderCircle } from 'lucide-react';
+import { LoaderCircle } from 'lucide-react';
 import { startTransition, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 type SubmitState = 'idle' | 'success' | 'error';
 
-export function SignupForm({ compact = false }: { compact?: boolean }) {
+export function SignupForm({
+  align = 'left',
+  buttonClassName,
+  className,
+  compact = true,
+  inputClassName,
+  note = 'Join the waitlist for CLI launch news, early team access, and design partner invites.',
+  noteClassName,
+  submitLabel = 'Get launch updates',
+  successClassName,
+  errorClassName,
+}: {
+  align?: 'left' | 'center';
+  buttonClassName?: string;
+  className?: string;
+  compact?: boolean;
+  inputClassName?: string;
+  note?: string;
+  noteClassName?: string;
+  submitLabel?: string;
+  successClassName?: string;
+  errorClassName?: string;
+}) {
   const [email, setEmail] = useState('');
   const [company, setCompany] = useState('');
   const [status, setStatus] = useState<SubmitState>('idle');
@@ -46,12 +69,15 @@ export function SignupForm({ compact = false }: { compact?: boolean }) {
   }
 
   return (
-    <form className="w-full max-w-xl space-y-3" onSubmit={onSubmit}>
+    <form
+      className={cn('w-full max-w-xl space-y-3', align === 'center' && 'text-center', className)}
+      onSubmit={onSubmit}
+    >
       <div className={compact ? 'flex flex-col gap-3 sm:flex-row' : 'flex flex-col gap-3'}>
         <Input
           aria-label="Email address"
           autoComplete="email"
-          className="flex-1"
+          className={cn('h-12 flex-1', inputClassName)}
           onChange={(event) => setEmail(event.target.value)}
           placeholder="you@company.com"
           required
@@ -67,30 +93,24 @@ export function SignupForm({ compact = false }: { compact?: boolean }) {
           value={company}
         />
         <Button
-          className={compact ? 'sm:w-auto' : 'w-full sm:w-fit'}
+          className={cn(compact ? 'sm:w-auto' : 'w-full sm:w-fit', buttonClassName)}
           size="lg"
           type="submit"
           disabled={pending}
         >
-          {pending ? (
-            <LoaderCircle className="size-4 animate-spin" />
-          ) : (
-            <ArrowRight className="size-4" />
-          )}
-          Get launch updates
+          {pending ? <LoaderCircle className="size-4 animate-spin" /> : null}
+          {submitLabel}
         </Button>
       </div>
-      <p className="text-sm text-[color:var(--muted)]">
-        Join the waitlist for CLI launch news, early team access, and design partner invites.
-      </p>
+      <p className={cn('text-sm text-[color:var(--muted)]', noteClassName)}>{note}</p>
       {status === 'success' ? (
-        <p className="text-sm text-[color:var(--accent)]">
+        <p className={cn('text-sm text-[color:var(--accent)]', successClassName)}>
           You&apos;re on the list. We&apos;ll send launch updates and early access when it&apos;s
           ready.
         </p>
       ) : null}
       {status === 'error' ? (
-        <p className="text-sm text-[color:var(--warning)]">
+        <p className={cn('text-sm text-[color:var(--warning)]', errorClassName)}>
           Signup failed. Check your Resend configuration and try again.
         </p>
       ) : null}

@@ -1,18 +1,32 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #06080d;
-  --surface: rgba(18, 24, 36, 0.72);
-  --surface-strong: rgba(28, 36, 52, 0.92);
-  --text: #f4f7fb;
-  --muted: #8c99ad;
-  --muted-strong: #b7c2d4;
-  --accent: #6ae3ff;
-  --accent-soft: #8cecfe;
-  --accent-foreground: #071018;
-  --border: rgba(255, 255, 255, 0.1);
-  --border-strong: rgba(255, 255, 255, 0.18);
-  --warning: #f7b267;
+  --bg: #0a0e14;
+  --bg-raised: #0f1319;
+  --bg-card: #131820;
+  --bg-card-hover: #171d27;
+  --surface: #131820;
+  --surface-strong: #171d27;
+  --text: #c8d0dc;
+  --text-dim: #6b7a8d;
+  --text-bright: #e8ecf2;
+  --heading: #f0f3f7;
+  --muted: #6b7a8d;
+  --muted-strong: #c8d0dc;
+  --accent: #2dd4a8;
+  --accent-soft: #3be0b6;
+  --accent-dim: #1a8a6c;
+  --accent-glow: rgba(45, 212, 168, 0.08);
+  --accent-foreground: #07120f;
+  --border: #1a2030;
+  --border-bright: #243040;
+  --border-strong: #243040;
+  --warning: #fbbf24;
+  --red: #f87171;
+  --red-dim: rgba(248, 113, 113, 0.12);
+  --amber: #fbbf24;
+  --amber-dim: rgba(251, 191, 36, 0.1);
+  --blue: #60a5fa;
 }
 
 * {
@@ -25,11 +39,11 @@ html {
 
 body {
   min-height: 100vh;
-  background: radial-gradient(circle at top, rgba(53, 105, 162, 0.22), transparent 26%),
-    radial-gradient(circle at bottom right, rgba(106, 227, 255, 0.14), transparent 24%),
-    linear-gradient(180deg, #090c12 0%, #06080d 55%, #05070b 100%);
+  background: var(--bg);
   color: var(--text);
   font-family: var(--font-geist-sans), sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 a {
@@ -38,6 +52,18 @@ a {
 }
 
 ::selection {
-  background: rgba(106, 227, 255, 0.28);
+  background: rgba(45, 212, 168, 0.24);
   color: white;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
