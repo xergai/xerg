@@ -1,7 +1,7 @@
 import { track } from '@vercel/analytics/server';
 import { NextResponse } from 'next/server';
 
-import { getResendClient, notifyWaitlistSignup } from '@/lib/resend';
+import { captureWaitlistSignup, notifyWaitlistSignup } from '@/lib/resend';
 import { waitlistSchema } from '@/lib/waitlist-schema';
 
 export async function POST(request: Request) {
@@ -17,33 +17,37 @@ export async function POST(request: Request) {
   }
 
   try {
-    const resend = getResendClient();
-    const result = await resend.contacts.create({
-      email: parsed.data.email,
-      unsubscribed: false,
-    });
+    const result = await captureWaitlistSignup(parsed.data.email);
 
-    if (result.error) {
-      const errorText = result.error.message.toLowerCase();
-      if (errorText.includes('already') || errorText.includes('exists')) {
-        return NextResponse.json({ ok: true });
-      }
-
-      return NextResponse.json({ error: result.error.message }, { status: 502 });
+    if (!result.ok) {
+      return NextResponse.json(
+        { error: result.message },
+        { status: result.statusCode && result.statusCode >= 400 ? result.statusCode : 502 },
+      );
     }
 
     try {
-      await Promise.all([
-        notifyWaitlistSignup(parsed.data.email),
-        track('Waitlist Signup', {
-          source: 'website',
-        }),
-      ]);
+      const sideEffects = [];
+
+      if (result.mode === 'contact') {
+        sideEffects.push(notifyWaitlistSignup(parsed.data.email));
+      }
+
+      if (result.mode !== 'duplicate') {
+        sideEffects.push(
+          track('Waitlist Signup', {
+            source: 'website',
+            mode: result.mode,
+          }),
+        );
+      }
+
+      await Promise.all(sideEffects);
     } catch (error) {
       console.error('Xerg waitlist side effects failed', error);
     }
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, mode: result.mode });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unexpected error';
     return NextResponse.json({ error: message }, { status: 500 });

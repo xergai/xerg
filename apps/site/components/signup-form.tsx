@@ -35,12 +35,14 @@ export function SignupForm({
   const [email, setEmail] = useState('');
   const [company, setCompany] = useState('');
   const [status, setStatus] = useState<SubmitState>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
   const [pending, setPending] = useState(false);
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setPending(true);
     setStatus('idle');
+    setErrorMessage('');
 
     const payload = { email, company };
 
@@ -55,12 +57,14 @@ export function SignupForm({
         });
 
         if (!response.ok) {
-          throw new Error('Request failed');
+          const data = (await response.json().catch(() => null)) as { error?: string } | null;
+          throw new Error(data?.error ?? 'Request failed');
         }
 
         setStatus('success');
         setEmail('');
-      } catch {
+      } catch (error) {
+        setErrorMessage(error instanceof Error ? error.message : 'Request failed');
         setStatus('error');
       } finally {
         setPending(false);
@@ -111,7 +115,7 @@ export function SignupForm({
       ) : null}
       {status === 'error' ? (
         <p className={cn('text-sm text-[color:var(--warning)]', errorClassName)}>
-          Signup failed. Check your Resend configuration and try again.
+          {errorMessage || 'Signup failed. Check your Resend configuration and try again.'}
         </p>
       ) : null}
     </form>
