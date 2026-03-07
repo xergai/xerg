@@ -404,6 +404,7 @@ export default function HomePage() {
                 <a
                   className="inline-flex items-center gap-2 rounded-lg bg-[color:var(--accent)] px-6 py-3 font-mono text-sm font-medium text-[color:var(--accent-foreground)] transition hover:-translate-y-0.5 hover:bg-[#3be0b6] hover:shadow-[0_4px_20px_rgba(45,212,168,0.25)]"
                   href="#start"
+                  style={{ color: 'var(--accent-foreground)' }}
                 >
                   npx xerg audit →
                 </a>
