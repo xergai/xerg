@@ -621,9 +621,10 @@ export default function HomePage() {
             buttonClassName="rounded-lg px-6 font-mono text-sm"
             className="max-w-[28.75rem]"
             inputClassName="rounded-lg border-[color:var(--border-bright)] bg-[color:var(--bg-card)] px-4 text-[color:var(--text-bright)]"
-            note="No spam. Just launch updates and early invites."
+            note="We will send a confirmation email first. No spam, just launch updates and early invites."
             noteClassName="text-[13px] text-[color:var(--text-dim)]"
             submitLabel="Get launch updates →"
+            successMessage="Check your inbox to confirm your email. You are only added after you click the link."
           />
         </div>
       </section>

@@ -15,9 +15,10 @@ export function SignupForm({
   className,
   compact = true,
   inputClassName,
-  note = 'Join the waitlist for CLI launch news, early team access, and design partner invites.',
+  note = 'We will send a confirmation email first. No spam, just launch updates and early invites.',
   noteClassName,
   submitLabel = 'Get launch updates',
+  successMessage = 'Check your inbox to confirm your email. You are only added after you click the link.',
   successClassName,
   errorClassName,
 }: {
@@ -29,6 +30,7 @@ export function SignupForm({
   note?: string;
   noteClassName?: string;
   submitLabel?: string;
+  successMessage?: string;
   successClassName?: string;
   errorClassName?: string;
 }) {
@@ -109,8 +111,7 @@ export function SignupForm({
       <p className={cn('text-sm text-[color:var(--muted)]', noteClassName)}>{note}</p>
       {status === 'success' ? (
         <p className={cn('text-sm text-[color:var(--accent)]', successClassName)}>
-          You&apos;re on the list. We&apos;ll send launch updates and early access when it&apos;s
-          ready.
+          {successMessage}
         </p>
       ) : null}
       {status === 'error' ? (

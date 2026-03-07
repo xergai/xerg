@@ -1,7 +1,8 @@
 import { track } from '@vercel/analytics/server';
 import { NextResponse } from 'next/server';
 
-import { captureWaitlistSignup, notifyWaitlistSignup } from '@/lib/resend';
+import { sendWaitlistConfirmationEmail } from '@/lib/resend';
+import { normalizeWaitlistEmail } from '@/lib/waitlist';
 import { waitlistSchema } from '@/lib/waitlist-schema';
 
 export async function POST(request: Request) {
@@ -17,7 +18,8 @@ export async function POST(request: Request) {
   }
 
   try {
-    const result = await captureWaitlistSignup(parsed.data.email);
+    const origin = new URL(request.url).origin;
+    const result = await sendWaitlistConfirmationEmail(parsed.data.email, origin);
 
     if (!result.ok) {
       return NextResponse.json(
@@ -27,27 +29,15 @@ export async function POST(request: Request) {
     }
 
     try {
-      const sideEffects = [];
-
-      if (result.mode === 'contact') {
-        sideEffects.push(notifyWaitlistSignup(parsed.data.email));
-      }
-
-      if (result.mode !== 'duplicate') {
-        sideEffects.push(
-          track('Waitlist Signup', {
-            source: 'website',
-            mode: result.mode,
-          }),
-        );
-      }
-
-      await Promise.all(sideEffects);
+      await track('Waitlist Confirmation Sent', {
+        source: 'website',
+        email_domain: normalizeWaitlistEmail(parsed.data.email).split('@')[1] ?? 'unknown',
+      });
     } catch (error) {
       console.error('Xerg waitlist side effects failed', error);
     }
 
-    return NextResponse.json({ ok: true, mode: result.mode });
+    return NextResponse.json({ ok: true });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unexpected error';
     return NextResponse.json({ error: message }, { status: 500 });

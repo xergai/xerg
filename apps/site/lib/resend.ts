@@ -1,5 +1,7 @@
 import { Resend } from 'resend';
 
+import { buildWaitlistConfirmationUrl, normalizeWaitlistEmail } from '@/lib/waitlist';
+
 type ResendApiError = {
   message: string;
   name?: string;
@@ -54,8 +56,8 @@ async function sendWaitlistNotification(resend: Resend, email: string) {
   const result = await resend.emails.send({
     from,
     to: notifyTarget,
-    subject: `New Xerg waitlist signup: ${email}`,
-    text: `${email} joined the Xerg waitlist.`,
+    subject: `Confirmed Xerg waitlist signup: ${email}`,
+    text: `${email} confirmed their Xerg waitlist signup.`,
   });
 
   if (result.error) {
@@ -69,9 +71,10 @@ async function sendWaitlistNotification(resend: Resend, email: string) {
 }
 
 export async function captureWaitlistSignup(email: string): Promise<WaitlistCaptureResult> {
+  const normalizedEmail = normalizeWaitlistEmail(email);
   const resend = getResendClient();
   const result = await resend.contacts.create({
-    email,
+    email: normalizedEmail,
     unsubscribed: false,
     properties: {
       source: 'website',
@@ -88,7 +91,7 @@ export async function captureWaitlistSignup(email: string): Promise<WaitlistCapt
   }
 
   if (isRestrictedApiKeyError(result.error)) {
-    const notificationResult = await sendWaitlistNotification(resend, email);
+    const notificationResult = await sendWaitlistNotification(resend, normalizedEmail);
     if (notificationResult.ok) {
       return { ok: true, mode: 'notification' };
     }
@@ -109,5 +112,59 @@ export async function captureWaitlistSignup(email: string): Promise<WaitlistCapt
 
 export async function notifyWaitlistSignup(email: string) {
   const resend = getResendClient();
-  return sendWaitlistNotification(resend, email);
+  return sendWaitlistNotification(resend, normalizeWaitlistEmail(email));
+}
+
+export async function sendWaitlistConfirmationEmail(email: string, origin?: string) {
+  const from = process.env.RESEND_FROM_EMAIL;
+
+  if (!from) {
+    return {
+      ok: false as const,
+      message: 'RESEND_FROM_EMAIL is not configured.',
+    };
+  }
+
+  const normalizedEmail = normalizeWaitlistEmail(email);
+  const confirmationUrl = buildWaitlistConfirmationUrl(normalizedEmail, origin);
+  const resend = getResendClient();
+  const result = await resend.emails.send({
+    from,
+    to: normalizedEmail,
+    subject: 'Confirm your Xerg waitlist signup',
+    text: [
+      'Confirm your email to join the Xerg waitlist.',
+      '',
+      confirmationUrl,
+      '',
+      'This link expires in 7 days.',
+    ].join('\n'),
+    html: `
+      <div style="margin:0;padding:32px;background:#0a0e14;color:#c8d0dc;font-family:Inter,Arial,sans-serif;">
+        <div style="max-width:560px;margin:0 auto;padding:32px;border:1px solid #1a2030;border-radius:16px;background:#131820;">
+          <p style="margin:0 0 12px;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#2dd4a8;">Xerg waitlist</p>
+          <h1 style="margin:0 0 16px;font-size:28px;line-height:1.15;color:#f0f3f7;">Confirm your email</h1>
+          <p style="margin:0 0 24px;font-size:16px;line-height:1.7;color:#c8d0dc;">
+            Click the button below to confirm your email and join the Xerg waitlist.
+          </p>
+          <a href="${confirmationUrl}" style="display:inline-block;padding:12px 20px;border-radius:10px;background:#2dd4a8;color:#07120f;font-size:15px;font-weight:600;text-decoration:none;">
+            Confirm email
+          </a>
+          <p style="margin:24px 0 0;font-size:13px;line-height:1.7;color:#6b7a8d;">
+            This link expires in 7 days. If you did not request this, you can ignore this email.
+          </p>
+        </div>
+      </div>
+    `,
+  });
+
+  if (result.error) {
+    return {
+      ok: false as const,
+      message: result.error.message,
+      statusCode: result.error.statusCode,
+    };
+  }
+
+  return { ok: true as const };
 }
