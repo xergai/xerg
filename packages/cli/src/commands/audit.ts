@@ -4,6 +4,7 @@ export interface AuditCommandOptions {
   logFile?: string;
   sessionsDir?: string;
   since?: string;
+  compare?: boolean;
   json?: boolean;
   markdown?: boolean;
   db?: string;
@@ -15,6 +16,7 @@ export async function runAuditCommand(options: AuditCommandOptions) {
     logFile: options.logFile,
     sessionsDir: options.sessionsDir,
     since: options.since,
+    compare: options.compare,
     dbPath: options.db,
     noDb: options.noDb,
   });

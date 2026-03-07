@@ -35,6 +35,22 @@ pnpm --filter @xergai/cli dev -- doctor
 pnpm --filter @xergai/cli dev -- audit
 ```
 
+Common CLI flows:
+
+```bash
+# Inspect your local OpenClaw sources first
+pnpm --filter @xergai/cli dev -- doctor
+
+# Run the first local audit
+pnpm --filter @xergai/cli dev -- audit
+
+# Make a workflow/model fix, then compare against your prior local snapshot
+pnpm --filter @xergai/cli dev -- audit --compare
+
+# Optional: limit the audit window
+pnpm --filter @xergai/cli dev -- audit --since 24h --compare
+```
+
 Run the site locally:
 
 ```bash

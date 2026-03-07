@@ -7,6 +7,7 @@ import type {
 } from '../types.js';
 import { sha1 } from '../utils/hash.js';
 import { isoNow } from '../utils/time.js';
+import { buildComparisonKey, buildTaxonomyBuckets } from './comparison.js';
 
 function buildBreakdown(
   items: { key: string; spendUsd: number; observedSpendUsd: number }[],
@@ -61,6 +62,11 @@ export function buildAuditSummary(input: {
       `${generatedAt}:${input.runs.length}:${input.sources.map((source) => source.path).join('|')}`,
     ),
     generatedAt,
+    comparisonKey: buildComparisonKey({
+      sources: input.sources,
+      since: input.since,
+    }),
+    comparison: null,
     since: input.since,
     runCount: input.runs.length,
     callCount,
@@ -72,6 +78,8 @@ export function buildAuditSummary(input: {
     structuralWasteRate: Number(
       (totalSpendUsd === 0 ? 0 : wasteSpendUsd / totalSpendUsd).toFixed(4),
     ),
+    wasteByKind: buildTaxonomyBuckets(input.findings, 'waste'),
+    opportunityByKind: buildTaxonomyBuckets(input.findings, 'opportunity'),
     spendByWorkflow: buildBreakdown(
       input.runs.map((run) => ({
         key: run.workflow,
