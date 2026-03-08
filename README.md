@@ -12,6 +12,20 @@ This repository currently contains:
 - `docs/v1`: the archived original planning docs
 - `skills/xerg`: the skill package for ecosystem listings
 
+## Install
+
+Run Xerg without a global install:
+
+```bash
+npx @xergai/cli audit
+```
+
+Or install it globally:
+
+```bash
+npm install -g @xergai/cli
+```
+
 ## Requirements
 
 - Node `24.14.0`
@@ -50,6 +64,11 @@ pnpm --filter @xergai/cli dev -- audit --compare
 # Optional: limit the audit window
 pnpm --filter @xergai/cli dev -- audit --since 24h --compare
 ```
+
+Beta-facing docs:
+
+- sample report: `docs/v2/xerg-cli-sample-report.md`
+- beta checklist: `docs/v2/xerg-cli-beta-checklist.md`
 
 Run the site locally:
 
