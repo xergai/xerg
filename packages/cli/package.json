@@ -6,7 +6,7 @@
   "homepage": "https://xerg.ai",
   "repository": {
     "type": "git",
-    "url": "https://github.com/xergai/xerg.git",
+    "url": "git+https://github.com/xergai/xerg.git",
     "directory": "packages/cli"
   },
   "bugs": {
@@ -17,7 +17,7 @@
   "license": "MIT",
   "type": "module",
   "bin": {
-    "xerg": "./dist/index.js"
+    "xerg": "dist/index.js"
   },
   "files": ["dist", "README.md", "LICENSE"],
   "main": "./dist/index.js",
