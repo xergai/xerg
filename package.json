@@ -1,5 +1,5 @@
 {
-  "name": "xerg",
+  "name": "xerg-workspace",
   "private": true,
   "version": "0.1.0",
   "packageManager": "pnpm@10.6.2",
@@ -17,8 +17,8 @@
     "release": "changeset version",
     "release:beta": "changeset publish --tag beta",
     "site:dev": "corepack pnpm --filter @xergai/site dev",
-    "cli:dev": "corepack pnpm --filter @xergai/cli dev",
-    "cli:pack": "corepack pnpm --filter @xergai/cli exec npm pack --dry-run",
+    "cli:dev": "corepack pnpm --filter xerg dev",
+    "cli:pack": "corepack pnpm --filter xerg exec npm pack --dry-run",
     "cli:smoke": "node scripts/smoke-cli-package.mjs"
   },
   "devDependencies": {

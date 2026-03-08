@@ -1,5 +1,5 @@
 {
-  "name": "@xergai/cli",
+  "name": "xerg",
   "version": "0.1.0",
   "description": "CLI waste intelligence for OpenClaw workflows.",
   "keywords": ["ai", "agents", "finops", "llm", "openclaw", "cost", "cli"],
@@ -28,9 +28,6 @@
   },
   "engines": {
     "node": "24.x"
-  },
-  "publishConfig": {
-    "access": "public"
   },
   "scripts": {
     "build": "tsup",

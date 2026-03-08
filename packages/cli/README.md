@@ -9,13 +9,13 @@ you can see what changed after a fix.
 ## Install
 
 ```bash
-npm install -g @xergai/cli
+npm install -g xerg
 ```
 
 Or run it without a global install:
 
 ```bash
-npx @xergai/cli audit
+npx xerg audit
 ```
 
 ## Commands

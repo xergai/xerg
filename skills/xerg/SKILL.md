@@ -11,15 +11,15 @@ Use this skill when you want a quick local economic audit of OpenClaw activity.
 ## Commands
 
 ```bash
-npx @xergai/cli doctor
-npx @xergai/cli audit
+npx xerg doctor
+npx xerg audit
 ```
 
 Optional paths:
 
 ```bash
-npx @xergai/cli audit --log-file /tmp/openclaw/openclaw-2026-03-06.log
-npx @xergai/cli audit --sessions-dir ~/.openclaw/agents
+npx xerg audit --log-file /tmp/openclaw/openclaw-2026-03-06.log
+npx xerg audit --sessions-dir ~/.openclaw/agents
 ```
 
 ## Notes
@@ -27,4 +27,3 @@ npx @xergai/cli audit --sessions-dir ~/.openclaw/agents
 - Xerg is local-first in v0
 - It does not upload prompts or responses
 - Cost per outcome is intentionally out of scope for this first release
-

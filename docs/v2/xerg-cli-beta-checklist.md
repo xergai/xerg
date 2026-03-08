@@ -21,7 +21,7 @@ These must be completed before public invite:
 2. Confirm the findings remain believable on real logs, not just fixtures.
 3. Confirm the pricing catalog covers the models that appear in those logs.
 4. Verify a clean-machine install path from npm.
-5. Publish the first beta package and verify `npx @xergai/cli --help` outside the repo.
+5. Publish the first beta package and verify `npx xerg --help` outside the repo.
 6. Monitor `query@xerg.ai` during beta.
 7. Decide the beta feedback intake path while the repo remains private.
 
@@ -61,7 +61,7 @@ Complete at least three runs like this before public invite:
 
 ## Beta publish steps
 
-1. Create or update a changeset for `@xergai/cli`.
+1. Create or update a changeset for `xerg`.
 2. Run `corepack pnpm install`.
 3. Run `corepack pnpm check`.
 4. Run `corepack pnpm build`.
@@ -69,7 +69,7 @@ Complete at least three runs like this before public invite:
 6. Run `corepack pnpm cli:smoke`.
 7. Version with `corepack pnpm changeset version`.
 8. Publish beta with `corepack pnpm release:beta`.
-9. Verify the package on a clean machine with `npx @xergai/cli --help`.
+9. Verify the package on a clean machine with `npx xerg --help`.
 
 ## Definition of ready for public invite
 
