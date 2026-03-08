@@ -11,15 +11,15 @@ Use this skill when you want a quick local economic audit of OpenClaw activity.
 ## Commands
 
 ```bash
-npx xerg doctor
-npx xerg audit
+npx @xerg/cli doctor
+npx @xerg/cli audit
 ```
 
 Optional paths:
 
 ```bash
-npx xerg audit --log-file /tmp/openclaw/openclaw-2026-03-06.log
-npx xerg audit --sessions-dir ~/.openclaw/agents
+npx @xerg/cli audit --log-file /tmp/openclaw/openclaw-2026-03-06.log
+npx @xerg/cli audit --sessions-dir ~/.openclaw/agents
 ```
 
 ## Notes

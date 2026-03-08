@@ -1,5 +1,5 @@
 {
-  "name": "xerg",
+  "name": "@xerg/cli",
   "version": "0.1.0",
   "description": "CLI waste intelligence for OpenClaw workflows.",
   "keywords": ["ai", "agents", "finops", "llm", "openclaw", "cost", "cli"],

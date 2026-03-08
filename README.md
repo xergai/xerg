@@ -5,7 +5,7 @@ intelligence for OpenClaw workflows.
 
 This repository currently contains:
 
-- `packages/cli`: the `xerg` CLI, published as `xerg`
+- `packages/cli`: the `xerg` CLI, published as `@xerg/cli`
 - `packages/core`: the local economics engine, parsers, storage, and reporting logic
 - `apps/site`: the Vercel-hosted marketing site and waitlist form
 - `docs/v2`: the current product, build, and pricing docs
@@ -17,13 +17,19 @@ This repository currently contains:
 Run Xerg without a global install:
 
 ```bash
-npx xerg audit
+npx @xerg/cli audit
 ```
 
 Or install it globally:
 
 ```bash
-npm install -g xerg
+npm install -g @xerg/cli
+```
+
+After a global install, the command is still:
+
+```bash
+xerg audit
 ```
 
 ## Requirements
@@ -45,24 +51,24 @@ pnpm build
 Run the CLI locally:
 
 ```bash
-pnpm --filter xerg dev -- doctor
-pnpm --filter xerg dev -- audit
+pnpm --filter @xerg/cli dev -- doctor
+pnpm --filter @xerg/cli dev -- audit
 ```
 
 Common CLI flows:
 
 ```bash
 # Inspect your local OpenClaw sources first
-pnpm --filter xerg dev -- doctor
+pnpm --filter @xerg/cli dev -- doctor
 
 # Run the first local audit
-pnpm --filter xerg dev -- audit
+pnpm --filter @xerg/cli dev -- audit
 
 # Make a workflow/model fix, then compare against your prior local snapshot
-pnpm --filter xerg dev -- audit --compare
+pnpm --filter @xerg/cli dev -- audit --compare
 
 # Optional: limit the audit window
-pnpm --filter xerg dev -- audit --since 24h --compare
+pnpm --filter @xerg/cli dev -- audit --since 24h --compare
 ```
 
 Beta-facing docs:

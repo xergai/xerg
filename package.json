@@ -17,8 +17,8 @@
     "release": "changeset version",
     "release:beta": "changeset publish --tag beta",
     "site:dev": "corepack pnpm --filter @xergai/site dev",
-    "cli:dev": "corepack pnpm --filter xerg dev",
-    "cli:pack": "corepack pnpm --filter xerg exec npm pack --dry-run",
+    "cli:dev": "corepack pnpm --filter @xerg/cli dev",
+    "cli:pack": "corepack pnpm --filter @xerg/cli exec npm pack --dry-run",
     "cli:smoke": "node scripts/smoke-cli-package.mjs"
   },
   "devDependencies": {

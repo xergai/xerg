@@ -269,7 +269,7 @@ Near-term engineering steps:
 
 1. improve parser robustness on real OpenClaw data
 2. improve report quality and prioritization
-3. prepare npm release mechanics for `xerg`
+3. prepare npm release mechanics for `@xerg/cli`
 4. keep the repo private through the first beta
 5. prepare OpenClaw Hub packaging
 
