@@ -21,6 +21,9 @@
     "cli:pack": "corepack pnpm --filter @xerg/cli exec npm pack --dry-run",
     "cli:smoke": "node scripts/smoke-cli-package.mjs"
   },
+  "pnpm": {
+    "onlyBuiltDependencies": ["better-sqlite3"]
+  },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@changesets/cli": "^2.29.6",
