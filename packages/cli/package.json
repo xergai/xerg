@@ -1,29 +1,50 @@
 {
-  "name": "@xergai/cli",
+  "name": "@xerg/cli",
   "version": "0.1.0",
   "description": "CLI waste intelligence for OpenClaw workflows.",
+  "keywords": ["ai", "agents", "finops", "llm", "openclaw", "cost", "cli"],
+  "homepage": "https://xerg.ai",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xergai/xerg.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "email": "query@xerg.ai",
+    "url": "https://xerg.ai"
+  },
+  "author": "Xerg <query@xerg.ai>",
+  "license": "MIT",
   "type": "module",
   "bin": {
-    "xerg": "./dist/index.js"
+    "xerg": "dist/index.js"
   },
-  "files": ["dist"],
+  "files": ["dist", "README.md", "LICENSE"],
   "main": "./dist/index.js",
   "exports": {
     ".": {
       "default": "./dist/index.js"
     }
   },
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --minify",
+    "build": "tsup",
     "dev": "tsx src/index.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@xergai/core": "workspace:*",
+    "better-sqlite3": "^11.10.0",
     "commander": "^14.0.0",
-    "picocolors": "^1.1.1"
+    "drizzle-orm": "^0.44.2",
+    "env-paths": "^3.0.0",
+    "fast-glob": "^3.3.3",
+    "picocolors": "^1.1.1",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@xergai/core": "workspace:*",
     "tsup": "^8.4.0",
     "tsx": "^4.20.3"
   }

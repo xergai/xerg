@@ -16,6 +16,7 @@ program
   .option('--log-file <path>', 'explicit OpenClaw gateway log file to analyze')
   .option('--sessions-dir <path>', 'explicit OpenClaw sessions directory to analyze')
   .option('--since <duration>', 'look back window such as 24h, 7d, or 30m')
+  .option('--compare', 'compare this audit to the newest compatible prior local snapshot')
   .option('--json', 'render the report as JSON')
   .option('--markdown', 'render the report as Markdown')
   .option('--db <path>', 'custom SQLite database path')

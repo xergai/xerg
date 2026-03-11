@@ -12,6 +12,7 @@ export interface AuditOptions {
   since?: string;
   dbPath?: string;
   noDb?: boolean;
+  compare?: boolean;
 }
 
 export interface DetectedSourceFile {
@@ -98,9 +99,66 @@ export interface SpendBreakdown {
   observedShare: number;
 }
 
+export interface FindingTaxonomyBucket {
+  kind: string;
+  label: string;
+  classification: FindingClassification;
+  spendUsd: number;
+  findingCount: number;
+}
+
+export interface SpendDelta {
+  key: string;
+  baselineSpendUsd: number;
+  currentSpendUsd: number;
+  deltaSpendUsd: number;
+}
+
+export interface FindingChange {
+  kind: string;
+  title: string;
+  scope: Finding['scope'];
+  scopeId: string;
+  baselineCostImpactUsd?: number;
+  currentCostImpactUsd?: number;
+  deltaCostImpactUsd: number;
+}
+
+export interface FindingChanges {
+  newHighConfidenceWaste: FindingChange[];
+  resolvedHighConfidenceWaste: FindingChange[];
+  worsenedHighConfidenceWaste: FindingChange[];
+}
+
+export interface AuditComparison {
+  baselineAuditId: string;
+  baselineGeneratedAt: string;
+  baselineRunCount: number;
+  baselineCallCount: number;
+  baselineTotalSpendUsd: number;
+  baselineObservedSpendUsd: number;
+  baselineEstimatedSpendUsd: number;
+  baselineWasteSpendUsd: number;
+  baselineOpportunitySpendUsd: number;
+  baselineStructuralWasteRate: number;
+  deltaTotalSpendUsd: number;
+  deltaObservedSpendUsd: number;
+  deltaEstimatedSpendUsd: number;
+  deltaWasteSpendUsd: number;
+  deltaOpportunitySpendUsd: number;
+  deltaStructuralWasteRate: number;
+  deltaRunCount: number;
+  deltaCallCount: number;
+  workflowDeltas: SpendDelta[];
+  modelDeltas: SpendDelta[];
+  findingChanges: FindingChanges;
+}
+
 export interface AuditSummary {
   auditId: string;
   generatedAt: string;
+  comparisonKey: string;
+  comparison?: AuditComparison | null;
   since?: string;
   runCount: number;
   callCount: number;
@@ -110,6 +168,8 @@ export interface AuditSummary {
   wasteSpendUsd: number;
   opportunitySpendUsd: number;
   structuralWasteRate: number;
+  wasteByKind: FindingTaxonomyBucket[];
+  opportunityByKind: FindingTaxonomyBucket[];
   spendByWorkflow: SpendBreakdown[];
   spendByModel: SpendBreakdown[];
   findings: Finding[];

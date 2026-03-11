@@ -8,3 +8,5 @@ Files:
 - `xerg-build-plan.md`: the build-now engineering plan and current implementation state
 - `xerg-pricing.md`: the current pricing posture and what is intentionally deferred
 - `xerg-v1-to-v2-changes.md`: explicit deviations from the original docs
+- `xerg-cli-sample-report.md`: a concrete before/after CLI report example for v0
+- `xerg-cli-beta-checklist.md`: the current gate for public CLI beta readiness

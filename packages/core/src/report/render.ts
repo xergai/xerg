@@ -1,4 +1,12 @@
-import type { AuditSummary, DoctorReport } from '../types.js';
+import type {
+  AuditSummary,
+  DoctorReport,
+  Finding,
+  FindingChange,
+  FindingTaxonomyBucket,
+  SpendBreakdown,
+  SpendDelta,
+} from '../types.js';
 
 function formatUsd(value: number) {
   return new Intl.NumberFormat('en-US', {
@@ -13,10 +21,47 @@ function formatPercent(value: number) {
   return `${(value * 100).toFixed(0)}%`;
 }
 
-function topRows(rows: { key: string; spendUsd: number; observedShare: number }[], limit = 5) {
+function formatPercentDelta(value: number) {
+  const points = value * 100;
+  const sign = points > 0 ? '+' : '';
+  return `${sign}${points.toFixed(0)} pts`;
+}
+
+function formatUsdDelta(value: number) {
+  const sign = value > 0 ? '+' : '';
+  return `${sign}${formatUsd(value)}`;
+}
+
+function topRows(rows: SpendBreakdown[], limit = 5) {
   return rows.slice(0, limit).map((row) => {
     return `- ${row.key}: ${formatUsd(row.spendUsd)} (${formatPercent(row.observedShare)} observed)`;
   });
+}
+
+function renderTaxonomyRows(rows: FindingTaxonomyBucket[], emptyLabel: string, suffix?: string) {
+  if (rows.length === 0) {
+    return [`- ${emptyLabel}`];
+  }
+
+  return rows.map((row) => {
+    const countLabel = `${row.findingCount} finding${row.findingCount === 1 ? '' : 's'}`;
+    const detail = suffix ? ` ${suffix}` : '';
+    return `- ${row.label}: ${formatUsd(row.spendUsd)} across ${countLabel}${detail}`;
+  });
+}
+
+function renderTaxonomyBlock(summary: AuditSummary) {
+  return [
+    '## Waste taxonomy',
+    'Structural waste',
+    ...renderTaxonomyRows(summary.wasteByKind, 'No confirmed waste buckets detected.'),
+    'Savings opportunities',
+    ...renderTaxonomyRows(
+      summary.opportunityByKind,
+      'No opportunity buckets detected.',
+      '(directional)',
+    ),
+  ];
 }
 
 function topFinding(summary: AuditSummary, classification: 'waste' | 'opportunity') {
@@ -40,6 +85,89 @@ function topSavingsTest(summary: AuditSummary) {
         return right.costImpactUsd - left.costImpactUsd;
       })[0] ?? null
   );
+}
+
+function renderFindingList(findings: Finding[], emptyLabel: string) {
+  if (findings.length === 0) {
+    return [`- ${emptyLabel}`];
+  }
+
+  return findings.slice(0, 5).map((finding) => {
+    return `- ${finding.title}: ${formatUsd(finding.costImpactUsd)} (${finding.confidence})`;
+  });
+}
+
+function describeSpendDelta(delta: SpendDelta) {
+  return `${delta.key} (${formatUsdDelta(delta.deltaSpendUsd)})`;
+}
+
+function pickBiggestImprovement(deltas: SpendDelta[]) {
+  return deltas
+    .filter((delta) => delta.deltaSpendUsd < 0)
+    .sort((left, right) => left.deltaSpendUsd - right.deltaSpendUsd)[0];
+}
+
+function pickBiggestRegression(deltas: SpendDelta[]) {
+  return deltas
+    .filter((delta) => delta.deltaSpendUsd > 0)
+    .sort((left, right) => right.deltaSpendUsd - left.deltaSpendUsd)[0];
+}
+
+function renderFindingChange(change: FindingChange, state: 'new' | 'resolved' | 'worsened') {
+  if (state === 'resolved') {
+    return `- Resolved: ${change.title} (${formatUsd(change.baselineCostImpactUsd ?? 0)})`;
+  }
+
+  if (state === 'worsened') {
+    return `- Worsened: ${change.title} (${formatUsdDelta(change.deltaCostImpactUsd)})`;
+  }
+
+  return `- New: ${change.title} (${formatUsd(change.currentCostImpactUsd ?? 0)})`;
+}
+
+function renderCompareBlock(summary: AuditSummary) {
+  if (!summary.comparison) {
+    return [];
+  }
+
+  const comparison = summary.comparison;
+  const biggestImprovement = pickBiggestImprovement(comparison.workflowDeltas);
+  const biggestRegression = pickBiggestRegression(comparison.workflowDeltas);
+  const firstWorkflowToInspect = biggestRegression?.key ?? summary.spendByWorkflow[0]?.key ?? null;
+  const findingChanges = [
+    ...comparison.findingChanges.newHighConfidenceWaste.map((change) =>
+      renderFindingChange(change, 'new'),
+    ),
+    ...comparison.findingChanges.resolvedHighConfidenceWaste.map((change) =>
+      renderFindingChange(change, 'resolved'),
+    ),
+    ...comparison.findingChanges.worsenedHighConfidenceWaste.map((change) =>
+      renderFindingChange(change, 'worsened'),
+    ),
+  ].slice(0, 5);
+
+  return [
+    '## Before / after',
+    `Compared against ${comparison.baselineGeneratedAt}`,
+    `- Total spend: ${formatUsd(comparison.baselineTotalSpendUsd)} -> ${formatUsd(summary.totalSpendUsd)} (${formatUsdDelta(comparison.deltaTotalSpendUsd)})`,
+    `- Structural waste: ${formatUsd(comparison.baselineWasteSpendUsd)} -> ${formatUsd(summary.wasteSpendUsd)} (${formatUsdDelta(comparison.deltaWasteSpendUsd)})`,
+    `- Waste rate: ${formatPercent(comparison.baselineStructuralWasteRate)} -> ${formatPercent(summary.structuralWasteRate)} (${formatPercentDelta(comparison.deltaStructuralWasteRate)})`,
+    `- Runs analyzed: ${comparison.baselineRunCount} -> ${summary.runCount} (${comparison.deltaRunCount > 0 ? '+' : ''}${comparison.deltaRunCount})`,
+    `- Model calls: ${comparison.baselineCallCount} -> ${summary.callCount} (${comparison.deltaCallCount > 0 ? '+' : ''}${comparison.deltaCallCount})`,
+    biggestImprovement
+      ? `- Biggest improvement: ${describeSpendDelta(biggestImprovement)}`
+      : '- Biggest improvement: none detected',
+    biggestRegression
+      ? `- Biggest regression: ${describeSpendDelta(biggestRegression)}`
+      : '- Biggest regression: none detected',
+    firstWorkflowToInspect
+      ? `- First workflow to inspect now: ${firstWorkflowToInspect}`
+      : '- First workflow to inspect now: no workflow delta available',
+    ...(comparison.modelDeltas.length > 0
+      ? [`- Model swing to inspect: ${describeSpendDelta(comparison.modelDeltas[0])}`]
+      : ['- Model swing to inspect: none']),
+    ...(findingChanges.length > 0 ? findingChanges : ['- High-confidence waste changes: none']),
+  ];
 }
 
 export function renderDoctorReport(report: DoctorReport) {
@@ -69,8 +197,8 @@ export function renderTerminalSummary(summary: AuditSummary) {
   const opportunityFindings = summary.findings.filter(
     (finding) => finding.classification === 'opportunity',
   );
+  const topSavings = topSavingsTest(summary);
   const topWaste = topFinding(summary, 'waste');
-  const topOpportunity = topSavingsTest(summary);
 
   return [
     '# Xerg audit',
@@ -83,7 +211,7 @@ export function renderTerminalSummary(summary: AuditSummary) {
     `Structural waste identified: ${formatUsd(summary.wasteSpendUsd)} (${formatPercent(summary.structuralWasteRate)})`,
     `Potential impact surfaced: ${formatUsd(summary.opportunitySpendUsd)}`,
     '',
-    'Cost per outcome: N/A (enable outcome tracking in a future release)',
+    ...renderTaxonomyBlock(summary),
     '',
     '## Top workflows',
     ...topRows(summary.spendByWorkflow),
@@ -92,37 +220,34 @@ export function renderTerminalSummary(summary: AuditSummary) {
     ...topRows(summary.spendByModel),
     '',
     '## High-confidence waste',
-    ...(wasteFindings.length > 0
-      ? wasteFindings.slice(0, 5).map((finding) => {
-          return `- ${finding.title}: ${formatUsd(finding.costImpactUsd)} (${finding.confidence})`;
-        })
-      : ['- none detected']),
+    ...renderFindingList(wasteFindings, 'none detected'),
     '',
     '## Opportunities',
-    ...(opportunityFindings.length > 0
-      ? opportunityFindings.slice(0, 5).map((finding) => {
-          return `- ${finding.title}: ${formatUsd(finding.costImpactUsd)} (${finding.confidence})`;
-        })
-      : ['- none detected']),
+    ...renderFindingList(opportunityFindings, 'none detected'),
     '',
-    '## What Xerg adds beyond spend visibility',
+    '## First savings test',
+    ...(topSavings
+      ? [
+          `- Start with ${topSavings.title}: ${formatUsd(topSavings.costImpactUsd)} of potential impact`,
+          `- Why this test first: ${topSavings.summary}`,
+        ]
+      : ['- No savings test surfaced yet']),
     ...(topWaste
-      ? [`- Biggest confirmed leak: ${topWaste.title}`]
-      : ['- No confirmed leak detected']),
-    ...(topOpportunity
-      ? [`- First savings test: ${topOpportunity.title}`]
-      : ['- No optimization tests surfaced']),
+      ? [`- Confirmed leak to close first: ${topWaste.title}`]
+      : ['- Confirmed leak to close first: none']),
     ...(summary.spendByWorkflow[0]
       ? [`- Workflow to inspect first: ${summary.spendByWorkflow[0].key}`]
-      : ['- No workflow breakdown available']),
+      : ['- Workflow to inspect first: none']),
     '',
+    ...renderCompareBlock(summary),
+    ...(summary.comparison ? [''] : []),
     '## Notes',
     ...summary.notes.map((note) => `- ${note}`),
   ].join('\n');
 }
 
 export function renderMarkdownSummary(summary: AuditSummary) {
-  return [
+  const lines = [
     '# Xerg Audit Report',
     '',
     `- Generated: ${summary.generatedAt}`,
@@ -134,6 +259,8 @@ export function renderMarkdownSummary(summary: AuditSummary) {
     `- Runs analyzed: ${summary.runCount}`,
     `- Model calls: ${summary.callCount}`,
     '',
+    ...renderTaxonomyBlock(summary),
+    '',
     '## Top workflows',
     ...topRows(summary.spendByWorkflow),
     '',
@@ -141,5 +268,19 @@ export function renderMarkdownSummary(summary: AuditSummary) {
     ...summary.findings.slice(0, 10).map((finding) => {
       return `- **${finding.title}** (${finding.classification}, ${finding.confidence}) — ${finding.summary} Estimated impact: ${formatUsd(finding.costImpactUsd)}.`;
     }),
-  ].join('\n');
+  ];
+
+  if (summary.comparison) {
+    const comparison = summary.comparison;
+    lines.push(
+      '',
+      '## Before / after',
+      `- Compared against: ${comparison.baselineGeneratedAt}`,
+      `- Total spend: ${formatUsd(comparison.baselineTotalSpendUsd)} -> ${formatUsd(summary.totalSpendUsd)} (${formatUsdDelta(comparison.deltaTotalSpendUsd)})`,
+      `- Structural waste: ${formatUsd(comparison.baselineWasteSpendUsd)} -> ${formatUsd(summary.wasteSpendUsd)} (${formatUsdDelta(comparison.deltaWasteSpendUsd)})`,
+      `- Waste rate: ${formatPercent(comparison.baselineStructuralWasteRate)} -> ${formatPercent(summary.structuralWasteRate)} (${formatPercentDelta(comparison.deltaStructuralWasteRate)})`,
+    );
+  }
+
+  return lines.join('\n');
 }

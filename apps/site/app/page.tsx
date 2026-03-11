@@ -188,7 +188,7 @@ const gettingStartedSteps = [
     number: '01',
     title: 'Run the audit',
     body: 'Xerg auto-detects your OpenClaw logs and parses them. Works with OTel GenAI spans too.',
-    code: 'npx xerg audit',
+    code: 'npx @xerg/cli audit',
   },
   {
     number: '02',
@@ -200,7 +200,7 @@ const gettingStartedSteps = [
     number: '03',
     title: 'Fix and re-audit',
     body: 'Apply the fix. Re-run. Xerg shows the before/after so you can see exactly what changed and by how much.',
-    code: 'xerg audit --compare',
+    code: 'npx @xerg/cli audit --compare',
   },
 ];
 
@@ -235,11 +235,11 @@ function CliPreview() {
         <span className="size-2.5 rounded-full bg-[#f87171]" />
         <span className="size-2.5 rounded-full bg-[#fbbf24]" />
         <span className="size-2.5 rounded-full bg-[#34d399]" />
-        <span className="ml-2 text-xs text-[color:var(--text-dim)]">Terminal — xerg audit</span>
+        <span className="ml-2 text-xs text-[color:var(--text-dim)]">Terminal — @xerg/cli</span>
       </div>
       <div className="p-5 font-mono text-[13px] leading-7">
         <div className="mb-4 text-[color:var(--text-dim)]">
-          <span className="text-[color:var(--accent)]">$</span> npx xerg audit --week
+          <span className="text-[color:var(--accent)]">$</span> npx @xerg/cli audit --week
         </div>
 
         <div className="space-y-1 text-[color:var(--text-dim)]">
@@ -406,7 +406,7 @@ export default function HomePage() {
                   href="#start"
                   style={{ color: 'var(--accent-foreground)' }}
                 >
-                  npx xerg audit →
+                  npx @xerg/cli audit →
                 </a>
                 <a
                   className="inline-flex items-center gap-2 rounded-lg border border-[color:var(--border-bright)] bg-[color:var(--bg-card)] px-6 py-3 text-sm font-medium text-[color:var(--text)] transition hover:bg-[color:var(--bg-card-hover)] hover:border-[color:var(--text-dim)]"
@@ -417,6 +417,12 @@ export default function HomePage() {
               </div>
               <p className="mt-3 text-sm text-[color:var(--text-dim)]">
                 Runs locally. No config. No network. 30 seconds to first report.
+              </p>
+              <p className="mt-1 text-sm text-[color:var(--text-dim)]">
+                Prefer a global install?{' '}
+                <span className="font-mono text-[color:var(--text-bright)]">
+                  npm install -g @xerg/cli
+                </span>
               </p>
             </div>
             <div className="animate-[fade-up_0.6s_ease-out_0.15s_both]">
