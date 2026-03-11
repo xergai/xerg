@@ -32,6 +32,32 @@ After a global install, the command is still:
 xerg audit
 ```
 
+## Quick start
+
+Inspect your local OpenClaw sources first:
+
+```bash
+xerg doctor
+```
+
+Run the first audit:
+
+```bash
+xerg audit
+```
+
+Make one workflow or model fix, then compare against your newest compatible local snapshot:
+
+```bash
+xerg audit --compare
+```
+
+Export a shareable report:
+
+```bash
+xerg audit --markdown > xerg-audit.md
+```
+
 ## Requirements
 
 - Node `24.14.0`
@@ -75,6 +101,28 @@ Beta-facing docs:
 
 - sample report: `docs/v2/xerg-cli-sample-report.md`
 - beta checklist: `docs/v2/xerg-cli-beta-checklist.md`
+
+## Where Xerg looks for OpenClaw data
+
+By default, Xerg checks:
+
+- gateway logs: `/tmp/openclaw/openclaw-*.log`
+- session transcripts: `~/.openclaw/agents/*/sessions/*.jsonl`
+
+If your data lives elsewhere, point Xerg at it directly:
+
+```bash
+xerg audit --log-file /path/to/openclaw.log
+xerg audit --sessions-dir /path/to/sessions
+```
+
+## Pilot
+
+If you are using OpenClaw and want to try Xerg in the real world, the pilot page is here:
+
+- [xerg.ai/pilot](https://xerg.ai/pilot)
+
+It includes the exact install, audit, export, and compare commands, plus where to send results.
 
 Run the site locally:
 
