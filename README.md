@@ -12,6 +12,11 @@ This repository currently contains:
 - `docs/v1`: the archived original planning docs
 - `skills/xerg`: the skill package for ecosystem listings
 
+Package links:
+
+- npm: [@xerg/cli](https://www.npmjs.com/package/@xerg/cli)
+- pilot: [xerg.ai/pilot](https://xerg.ai/pilot)
+
 ## Install
 
 Run Xerg without a global install:
