@@ -12,6 +12,11 @@ This repository currently contains:
 - `docs/v1`: the archived original planning docs
 - `skills/xerg`: the skill package for ecosystem listings
 
+Package links:
+
+- npm: [@xerg/cli](https://www.npmjs.com/package/@xerg/cli)
+- pilot: [xerg.ai/pilot](https://xerg.ai/pilot)
+
 ## Install
 
 Run Xerg without a global install:
@@ -129,3 +134,11 @@ Run the site locally:
 ```bash
 pnpm --filter @xergai/site dev
 ```
+
+## Publishing
+
+`@xerg/cli` is published from GitHub Actions via the manual
+[`Publish CLI to npm`](/Users/jasoncurry/code/xerg/.github/workflows/publish-npm.yml)
+workflow.
+
+The intended long-term setup is npm Trusted Publishing, not long-lived npm tokens.

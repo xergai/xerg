@@ -1,5 +1,6 @@
 import { statSync } from 'node:fs';
-import fg from 'fast-glob';
+import { glob } from 'node:fs/promises';
+import { resolve } from 'node:path';
 
 import type { AuditOptions, DetectedSourceFile, DoctorReport } from '../types.js';
 import { getDefaultGatewayPattern, getDefaultSessionsPattern } from '../utils/paths.js';
@@ -33,10 +34,9 @@ export async function detectOpenClawSources(options: AuditOptions): Promise<Dete
   }
 
   if (options.sessionsDir) {
-    const matches = await fg('**/*.jsonl', {
-      absolute: true,
+    const matches = await collectGlobMatches('**/*.jsonl', {
       cwd: options.sessionsDir,
-      onlyFiles: true,
+      resolveWith: options.sessionsDir,
     });
 
     for (const match of matches) {
@@ -52,8 +52,8 @@ export async function detectOpenClawSources(options: AuditOptions): Promise<Dete
   }
 
   const [gatewayMatches, sessionMatches] = await Promise.all([
-    fg(getDefaultGatewayPattern(), { absolute: true, onlyFiles: true }),
-    fg(getDefaultSessionsPattern(), { absolute: true, onlyFiles: true }),
+    collectGlobMatches(getDefaultGatewayPattern()),
+    collectGlobMatches(getDefaultSessionsPattern()),
   ]);
 
   const detected = [
@@ -62,6 +62,24 @@ export async function detectOpenClawSources(options: AuditOptions): Promise<Dete
   ] as DetectedSourceFile[];
 
   return detected.sort((left, right) => right.mtimeMs - left.mtimeMs);
+}
+
+async function collectGlobMatches(
+  pattern: string,
+  options?: {
+    cwd?: string;
+    resolveWith?: string;
+  },
+) {
+  const matches: string[] = [];
+
+  for await (const match of glob(pattern, {
+    cwd: options?.cwd,
+  })) {
+    matches.push(options?.resolveWith ? resolve(options.resolveWith, match) : match);
+  }
+
+  return matches;
 }
 
 export async function inspectOpenClawSources(options: AuditOptions): Promise<DoctorReport> {
