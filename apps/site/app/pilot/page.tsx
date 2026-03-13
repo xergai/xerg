@@ -9,6 +9,7 @@ import {
   TerminalSquare,
 } from 'lucide-react';
 import type { Metadata } from 'next';
+import Image from 'next/image';
 
 import { CopyCommand } from '@/components/copy-command';
 
@@ -81,11 +82,15 @@ export default function PilotPage() {
     <main className="min-h-screen bg-[color:var(--bg)] text-[color:var(--text)]">
       <nav className="fixed inset-x-0 top-0 z-50 border-b border-[color:var(--border)] bg-[rgba(10,14,20,0.85)] backdrop-blur-xl">
         <div className={`${containerClass} flex items-center justify-between gap-6 py-4`}>
-          <a
-            href="/"
-            className="font-mono text-lg font-semibold tracking-[-0.03em] text-[color:var(--heading)]"
-          >
-            xerg<span className="text-[color:var(--accent)]">.</span>
+          <a href="/" className="inline-flex items-center" aria-label="Xerg home">
+            <Image
+              src="/xerg-wordmark.png"
+              alt="Xerg"
+              width={1048}
+              height={317}
+              priority
+              className="h-7 w-auto sm:h-8"
+            />
           </a>
           <div className="hidden items-center gap-8 md:flex">
             <a
