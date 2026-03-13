@@ -46,7 +46,7 @@ try {
     encoding: 'utf8',
   });
 
-  if (!helpOutput.includes('Usage: xerg')) {
+  if (!helpOutput.includes('xerg <command> [options]')) {
     throw new Error('Installed package did not expose the xerg CLI as expected.');
   }
 

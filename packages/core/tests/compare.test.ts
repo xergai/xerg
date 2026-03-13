@@ -7,7 +7,6 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { auditOpenClaw } from '../src/audit.js';
 import { createDb } from '../src/db/client.js';
 import { readLatestComparableAuditSummary } from '../src/db/read.js';
-import { auditSnapshots } from '../src/db/schema.js';
 import { buildComparisonKey } from '../src/report/comparison.js';
 import { renderMarkdownSummary, renderTerminalSummary } from '../src/report/render.js';
 import type { AuditSummary, DetectedSourceFile } from '../src/types.js';
@@ -156,7 +155,7 @@ describe('xerg audit compare', () => {
       dbPath,
     });
 
-    const { db, sqlite } = createDb(dbPath);
+    const { sqlite } = createDb(dbPath);
     const legacyCompatible = {
       ...stripDerivedFields(summary),
       auditId: 'legacy-compatible',
@@ -177,25 +176,30 @@ describe('xerg audit compare', () => {
       })),
     };
 
-    db.insert(auditSnapshots)
-      .values([
-        {
-          id: legacyCompatible.auditId,
-          createdAt: legacyCompatible.generatedAt,
-          summaryJson: JSON.stringify(legacyCompatible),
-        },
-        {
-          id: newestCompatible.auditId,
-          createdAt: newestCompatible.generatedAt,
-          summaryJson: JSON.stringify(newestCompatible),
-        },
-        {
-          id: incompatible.auditId,
-          createdAt: incompatible.generatedAt,
-          summaryJson: JSON.stringify(incompatible),
-        },
-      ])
-      .run();
+    const insertSnapshot = sqlite.prepare(
+      `
+        INSERT INTO audit_snapshots (
+          id,
+          created_at,
+          summary_json
+        ) VALUES (?, ?, ?)
+      `,
+    );
+    insertSnapshot.run(
+      legacyCompatible.auditId,
+      legacyCompatible.generatedAt,
+      JSON.stringify(legacyCompatible),
+    );
+    insertSnapshot.run(
+      newestCompatible.auditId,
+      newestCompatible.generatedAt,
+      JSON.stringify(newestCompatible),
+    );
+    insertSnapshot.run(
+      incompatible.auditId,
+      incompatible.generatedAt,
+      JSON.stringify(incompatible),
+    );
     sqlite.close();
 
     const baseline = readLatestComparableAuditSummary({

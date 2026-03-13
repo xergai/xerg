@@ -1,9 +1,6 @@
-import { desc } from 'drizzle-orm';
-
 import { hydrateAuditSummary } from '../report/comparison.js';
 import type { AuditSummary } from '../types.js';
 import { createDb } from './client.js';
-import { auditSnapshots } from './schema.js';
 
 function parseAuditSummary(summaryJson: string) {
   try {
@@ -14,16 +11,18 @@ function parseAuditSummary(summaryJson: string) {
 }
 
 export function listStoredAuditSummaries(dbPath: string): AuditSummary[] {
-  const { db, sqlite } = createDb(dbPath);
+  const { sqlite } = createDb(dbPath);
 
   try {
-    const rows = db
-      .select({
-        summaryJson: auditSnapshots.summaryJson,
-      })
-      .from(auditSnapshots)
-      .orderBy(desc(auditSnapshots.createdAt))
-      .all();
+    const rows = sqlite
+      .prepare(
+        `
+          SELECT summary_json AS summaryJson
+          FROM audit_snapshots
+          ORDER BY created_at DESC
+        `,
+      )
+      .all() as { summaryJson: string }[];
 
     return rows
       .map((row) => parseAuditSummary(row.summaryJson))

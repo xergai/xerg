@@ -86,11 +86,9 @@ The stack is intentionally boring and current.
 
 ### CLI and core engine
 
-- `commander`
-- `zod`
 - `better-sqlite3`
-- `drizzle-orm`
-- `drizzle-kit`
+- Node.js built-ins for CLI parsing, filesystem globbing, paths, and terminal styling
+- raw SQL persistence for the local audit store
 - `tsup`
 
 ### Site
