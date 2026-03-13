@@ -129,3 +129,11 @@ Run the site locally:
 ```bash
 pnpm --filter @xergai/site dev
 ```
+
+## Publishing
+
+`@xerg/cli` is published from GitHub Actions via the manual
+[`Publish CLI to npm`](/Users/jasoncurry/code/xerg/.github/workflows/publish-npm.yml)
+workflow.
+
+The intended long-term setup is npm Trusted Publishing, not long-lived npm tokens.
