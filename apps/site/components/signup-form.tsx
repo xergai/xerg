@@ -1,6 +1,7 @@
 'use client';
 
 import { LoaderCircle } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { startTransition, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -28,7 +29,7 @@ export function SignupForm({
   className?: string;
   compact?: boolean;
   inputClassName?: string;
-  note?: string;
+  note?: ReactNode;
   noteClassName?: string;
   source?: string;
   submitLabel?: string;

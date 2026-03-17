@@ -2,6 +2,9 @@ import { Analytics } from '@vercel/analytics/next';
 import { GeistMono, GeistSans } from 'geist/font';
 import type { Metadata } from 'next';
 
+import { SiteFooter } from '@/components/site-footer';
+import { SiteHeader } from '@/components/site-header';
+
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -19,8 +22,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html className="dark" lang="en">
-      <body className={`${GeistSans.variable} ${GeistMono.variable} antialiased`}>
+      <body
+        className={`${GeistSans.variable} ${GeistMono.variable} min-h-screen bg-[color:var(--bg)] text-[color:var(--text)] antialiased`}
+      >
+        <SiteHeader />
         {children}
+        <SiteFooter />
         <Analytics />
       </body>
     </html>
