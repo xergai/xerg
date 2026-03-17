@@ -1,10 +1,8 @@
 # xerg
 
-Xerg is a local-first CLI for OpenClaw waste intelligence.
+Xerg is the unit economics engine for AI agents — starting with local waste intelligence for OpenClaw workflows.
 
-It does not try to be generic LLM observability. It reads your agent logs, shows
-where money is leaking, and lets you re-run the same audit with `--compare` so
-you can see what changed after a fix.
+It reads your OpenClaw gateway logs and session transcripts, shows where money is leaking in dollars, classifies waste into five categories with distinct fixes, and lets you re-run the same audit with `--compare` so you can see what changed after a fix.
 
 ## Install
 
@@ -50,24 +48,14 @@ Audit a specific window:
 xerg audit --since 24h --compare
 ```
 
-## What Xerg reports today
+## What the audit shows
 
-- total spend
-- observed vs estimated spend
-- workflow and model breakdowns
-- high-confidence waste
-- directional savings opportunities
-- before/after re-audit deltas
+- Total spend by workflow and model, in dollars
+- Observed vs. estimated cost (always labeled)
+- Structural waste: retry, context bloat, loop, downgrade candidates, idle
+- Savings recommendations with suggested A/B tests
+- Before/after deltas on re-audit
 
 ## Privacy
 
-Xerg v0 stores economic metadata and audit summaries locally. It does not store
-prompt or response content.
-
-## Support
-
-For beta access and support, contact `query@xerg.ai`.
-
-## Website
-
-[xerg.ai](https://xerg.ai)
+Xerg v0 stores economic metadata and audit summaries locally. It does not store prompt or response content.
