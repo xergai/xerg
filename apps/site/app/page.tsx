@@ -208,7 +208,7 @@ function SectionIntro({
   description,
 }: {
   label: string;
-  title: string;
+  title: ReactNode;
   description: string;
 }) {
   return (
@@ -618,7 +618,13 @@ export default function HomePage() {
         <div className={`${containerClass} flex flex-col items-center space-y-8`}>
           <SectionIntro
             label="Early access"
-            title="The CLI is live. Team features are next."
+            title={
+              <>
+                The CLI is live.
+                <br />
+                Team features are next.
+              </>
+            }
             description="Join the waitlist for team access, design partner invites, and launch updates."
           />
           <SignupForm
@@ -626,7 +632,13 @@ export default function HomePage() {
             buttonClassName="rounded-lg px-6 font-mono text-sm"
             className="max-w-[28.75rem]"
             inputClassName="rounded-lg border-[color:var(--border-bright)] bg-[color:var(--bg-card)] px-4 text-[color:var(--text-bright)]"
-            note="We will send a confirmation email first. No spam, just launch updates and early invites."
+            note={
+              <>
+                We will send a confirmation email first.
+                <br />
+                No spam, just launch updates and early invites.
+              </>
+            }
             noteClassName="text-[13px] text-[color:var(--text-dim)]"
             source="website-homepage"
             submitLabel="Get launch updates →"
@@ -639,10 +651,10 @@ export default function HomePage() {
         <div
           className={`${containerClass} flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between`}
         >
-          <p className="text-sm text-[color:var(--text-dim)]">
+          <p className="text-sm text-[color:var(--text)]">
             Xerg — the unit economics engine for AI agents.
           </p>
-          <div className="flex flex-wrap items-center gap-6 text-sm text-[color:var(--text-dim)]">
+          <div className="flex flex-wrap items-center gap-6 text-sm text-[color:var(--text)]">
             <a
               className="transition hover:text-[color:var(--text)]"
               href="https://github.com/xergai/xerg"
