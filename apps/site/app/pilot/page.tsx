@@ -1,6 +1,5 @@
 import { ArrowUpRight, Mail } from 'lucide-react';
 import type { Metadata } from 'next';
-import Image from 'next/image';
 
 import { CopyCommand } from '@/components/copy-command';
 
@@ -46,50 +45,7 @@ const steps = [
 
 export default function PilotPage() {
   return (
-    <main className="min-h-screen bg-[color:var(--bg)] text-[color:var(--text)]">
-      <nav className="fixed inset-x-0 top-0 z-50 border-b border-[color:var(--border)] bg-[rgba(10,14,20,0.85)] backdrop-blur-xl">
-        <div className={`${containerClass} flex items-center justify-between gap-6 py-4`}>
-          <a href="/" className="inline-flex items-center" aria-label="Xerg home">
-            <Image
-              src="/xerg-wordmark.png"
-              alt="Xerg"
-              width={1048}
-              height={317}
-              priority
-              className="h-7 w-auto sm:h-8"
-            />
-          </a>
-          <div className="hidden items-center gap-8 md:flex">
-            <a
-              className="text-sm text-[color:var(--text-dim)] transition hover:text-[color:var(--text-bright)]"
-              href="#steps"
-            >
-              Steps
-            </a>
-            <a
-              className="text-sm text-[color:var(--text-dim)] transition hover:text-[color:var(--text-bright)]"
-              href="#share"
-            >
-              Share results
-            </a>
-            <a
-              className="text-sm text-[color:var(--text-dim)] transition hover:text-[color:var(--text-bright)]"
-              href="https://www.npmjs.com/package/@xerg/cli"
-              rel="noreferrer"
-              target="_blank"
-            >
-              npm
-            </a>
-            <a
-              className="rounded-lg border border-[color:var(--accent-dim)] px-4 py-2 text-sm text-[color:var(--accent)] transition hover:bg-[color:var(--accent-glow)]"
-              href="mailto:jason@xerg.ai?subject=Xerg%20pilot"
-            >
-              Email results →
-            </a>
-          </div>
-        </div>
-      </nav>
-
+    <main>
       <section className="relative overflow-hidden pt-40 pb-24 sm:pt-44 sm:pb-28">
         <div className="pointer-events-none absolute inset-x-0 top-0 mx-auto h-[38rem] w-[50rem] max-w-full rounded-full bg-[radial-gradient(ellipse,rgba(45,212,168,0.05)_0%,transparent_70%)]" />
         <div className={`${containerClass} relative`}>
@@ -200,29 +156,6 @@ export default function PilotPage() {
           </div>
         </div>
       </section>
-
-      <footer className="border-t border-[color:var(--border)] py-10">
-        <div
-          className={`${containerClass} flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between`}
-        >
-          <p className="text-sm text-[color:var(--text-dim)]">
-            Xerg — the unit economics engine for AI agents.
-          </p>
-          <div className="flex flex-wrap items-center gap-6 text-sm text-[color:var(--text-dim)]">
-            <a
-              className="transition hover:text-[color:var(--text)]"
-              href="https://github.com/xergai/xerg"
-              rel="noreferrer"
-              target="_blank"
-            >
-              GitHub
-            </a>
-            <a className="transition hover:text-[color:var(--text)]" href="mailto:jason@xerg.ai">
-              jason@xerg.ai
-            </a>
-          </div>
-        </div>
-      </footer>
     </main>
   );
 }
