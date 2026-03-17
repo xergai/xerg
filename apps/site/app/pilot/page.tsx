@@ -1,47 +1,15 @@
-import { ArrowUpRight, Mail } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import type { Metadata } from 'next';
 
 import { CopyCommand } from '@/components/copy-command';
+import { PilotForm } from '@/components/pilot-form';
 
 export const metadata: Metadata = {
   title: 'Xerg Pilot',
-  description: "Pilot invitation for OpenClaw users to test Xerg's local waste audit.",
+  description: 'Pilot invitation for OpenClaw users to test Xerg waste intelligence.',
 };
 
 const containerClass = 'mx-auto w-full max-w-7xl px-5 sm:px-6 lg:px-8';
-
-const steps = [
-  {
-    number: '01',
-    title: 'Install',
-    body: "Global install is easiest if you'll run it more than once.",
-    command: 'npm install -g @xerg/cli',
-  },
-  {
-    number: '02',
-    title: 'Check your data',
-    body: 'Confirms Xerg can find your OpenClaw logs. Works on your local machine or over SSH on a VPS.',
-    command: 'xerg doctor',
-  },
-  {
-    number: '03',
-    title: 'Run the audit',
-    body: 'Shows spend, structural waste, top drivers, and first recommended fix.',
-    command: 'xerg audit',
-  },
-  {
-    number: '04',
-    title: 'Export a report',
-    body: 'Markdown is easiest to share. A terminal screenshot also works.',
-    command: 'xerg audit --markdown > xerg-audit.md',
-  },
-  {
-    number: '05',
-    title: 'Fix one thing and compare',
-    body: 'Try one change — trim context, fix a retry, swap a model — then re-run.',
-    command: 'xerg audit --compare',
-  },
-];
 
 export default function PilotPage() {
   return (
@@ -54,7 +22,7 @@ export default function PilotPage() {
               Xerg Pilot — OpenClaw waste audit
             </h1>
             <p className="mt-6 text-lg leading-8 text-[color:var(--text)]">
-              Install, run one audit, try one fix, share the result. That&apos;s it.
+              Install, run one audit, submit the results below. That&apos;s it.
             </p>
             <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
               <a
@@ -84,65 +52,86 @@ export default function PilotPage() {
         <div className={`${containerClass} space-y-14`}>
           <div className="space-y-4">
             <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-[color:var(--accent)]">
-              The five steps
+              The three steps
             </p>
             <h2 className="max-w-3xl text-4xl font-semibold leading-[1.1] tracking-[-0.04em] text-[color:var(--heading)] sm:text-5xl">
-              Install, audit, compare, send.
+              Install, audit, submit.
             </h2>
           </div>
 
           <div className="mx-auto max-w-2xl space-y-4">
-            {steps.map((step) => (
-              <article
-                key={step.number}
-                className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-card)] px-7 py-6 transition hover:border-[color:var(--border-bright)]"
-              >
-                <div className="flex items-baseline gap-4">
-                  <span className="font-mono text-lg font-semibold text-[color:var(--border-bright)]">
-                    {step.number}
-                  </span>
-                  <h3 className="text-lg font-semibold text-[color:var(--heading)]">
-                    {step.title}
-                  </h3>
-                </div>
-                <p className="mt-2 text-sm leading-6 text-[color:var(--text-dim)]">{step.body}</p>
-                <div className="mt-4">
-                  <CopyCommand command={step.command} />
-                </div>
-              </article>
-            ))}
+            <article className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-card)] px-7 py-6 transition hover:border-[color:var(--border-bright)]">
+              <div className="flex items-baseline gap-4">
+                <span className="font-mono text-lg font-semibold text-[color:var(--border-bright)]">
+                  01
+                </span>
+                <h3 className="text-lg font-semibold text-[color:var(--heading)]">
+                  Install and check
+                </h3>
+              </div>
+              <p className="mt-2 text-sm leading-6 text-[color:var(--text-dim)]">
+                Install globally, then confirm Xerg can see your OpenClaw logs.
+              </p>
+              <div className="mt-4 space-y-2">
+                <CopyCommand command="npm install -g @xerg/cli" />
+                <CopyCommand command="xerg doctor" />
+              </div>
+            </article>
+
+            <article className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-card)] px-7 py-6 transition hover:border-[color:var(--border-bright)]">
+              <div className="flex items-baseline gap-4">
+                <span className="font-mono text-lg font-semibold text-[color:var(--border-bright)]">
+                  02
+                </span>
+                <h3 className="text-lg font-semibold text-[color:var(--heading)]">Run the audit</h3>
+              </div>
+              <p className="mt-2 text-sm leading-6 text-[color:var(--text-dim)]">
+                Shows spend, structural waste, top drivers, and first recommended fix.
+              </p>
+              <div className="mt-4">
+                <CopyCommand command="xerg audit" />
+              </div>
+            </article>
+
+            <article className="rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-card)] px-7 py-6 transition hover:border-[color:var(--border-bright)]">
+              <div className="flex items-baseline gap-4">
+                <span className="font-mono text-lg font-semibold text-[color:var(--border-bright)]">
+                  03
+                </span>
+                <h3 className="text-lg font-semibold text-[color:var(--heading)]">
+                  Submit your results
+                </h3>
+              </div>
+              <p className="mt-2 text-sm leading-6 text-[color:var(--text-dim)]">
+                Export the report and upload it in the form below.
+              </p>
+              <div className="mt-4">
+                <CopyCommand command="xerg audit --markdown > xerg-audit.md" />
+              </div>
+              <p className="mt-2 text-xs text-[color:var(--text-dim)]">
+                JSON works too:{' '}
+                <code className="font-mono text-[color:var(--text)]">
+                  xerg audit --json &gt; xerg-audit.json
+                </code>
+              </p>
+            </article>
+
+            <p className="text-sm text-[color:var(--text-dim)]">
+              Bonus: try one fix and run{' '}
+              <code className="font-mono text-[color:var(--text)]">xerg audit --compare</code> to
+              see the before/after. Submit that report too if you have it.
+            </p>
           </div>
         </div>
       </section>
 
-      <section id="share" className="border-t border-[color:var(--border)] py-24">
+      <section id="submit" className="border-t border-[color:var(--border)] py-24">
         <div className={`${containerClass} mx-auto max-w-2xl`}>
           <h2 className="text-3xl font-semibold leading-[1.08] tracking-[-0.04em] text-[color:var(--heading)]">
-            Send me the results
+            Send your results
           </h2>
-          <ul className="mt-6 space-y-3 text-sm leading-6 text-[color:var(--text)]">
-            <li className="flex gap-3">
-              <span className="mt-1 text-[color:var(--accent)]">•</span>
-              The markdown report, a screenshot, or both
-            </li>
-            <li className="flex gap-3">
-              <span className="mt-1 text-[color:var(--accent)]">•</span>
-              Which workflow you tested and what felt right or off
-            </li>
-            <li className="flex gap-3">
-              <span className="mt-1 text-[color:var(--accent)]">•</span>
-              If Xerg missed something obvious, that&apos;s especially useful
-            </li>
-          </ul>
-          <div className="mt-6">
-            <a
-              className="inline-flex items-center gap-2 rounded-lg bg-[color:var(--accent)] px-5 py-3 text-sm font-medium text-[color:var(--accent-foreground)] transition hover:-translate-y-0.5 hover:bg-[#3be0b6]"
-              href="mailto:jason@xerg.ai?subject=Xerg%20pilot%20results"
-              style={{ color: 'var(--accent-foreground)' }}
-            >
-              <Mail className="size-4" />
-              Email jason@xerg.ai
-            </a>
+          <div className="mt-8">
+            <PilotForm />
           </div>
         </div>
       </section>
