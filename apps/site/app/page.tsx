@@ -44,9 +44,9 @@ const problemCards: {
   },
   {
     title: 'Observability stops at traces',
-    body: 'Langfuse, Arize, and LangSmith show you what happened. Xerg shows you what it was worth. Different question, different altitude.',
+    body: 'Observability tools show you what happened. Xerg shows you where money leaked and what to fix. Different question, different altitude.',
     exampleLabel: 'Their layer → our layer',
-    exampleLines: ['traces, evals, latency →', 'CPO, waste rate, outcome yield'],
+    exampleLines: ['traces, evals, latency →', 'waste taxonomy, dollar impact, savings tests'],
     icon: ScanSearch,
     iconClassName: 'bg-[rgba(96,165,250,0.12)] text-[color:var(--blue)]',
   },
@@ -117,15 +117,16 @@ const differentiators: {
     icon: ShieldAlert,
   },
   {
-    title: 'Cost per outcome path',
+    title: 'Built for agent loops',
     body: (
       <>
-        Start with waste intelligence. Add one line of code and reports evolve from what you wasted
-        to what each successful ticket, PR, or query costs. That is unit economics.
+        Agent workflows produce closed loops — goal, plan, call, retry, result. That structure makes
+        waste measurable with precision that open-ended copilots can&apos;t match. Xerg starts where
+        the economics are legible: agent execution loops on OpenClaw.
       </>
     ),
-    contrast: 'Show cost per request. Never connect spend to business outcomes.',
-    icon: ChartColumnIncreasing,
+    contrast: 'Generic cost dashboards for any AI workload. No opinion on where the signal is.',
+    icon: Waypoints,
   },
   {
     title: 'Local-first, zero friction',
@@ -143,42 +144,38 @@ const differentiators: {
 
 const pricingLadder = [
   {
-    level: 'Level 1',
+    level: 'Today',
     title: 'Waste Intelligence',
-    price: 'Free, forever — CLI + local',
-    body: 'Know what your agents waste. No outcome data needed, no account, no cloud. Just cost logs and an honest audit.',
+    price: 'Free — CLI + local',
+    body: 'Know what your agents waste. No outcome data needed, no account, no cloud. Just your OpenClaw logs and an honest audit — on your local machine or over SSH on a VPS.',
     items: [
-      'WR-Structural across all five waste categories',
-      'Dollar-denominated reports by workflow',
+      'Structural waste across all five categories, in dollars',
+      'Reports by workflow and model with observed vs. estimated cost',
       'Savings recommendations with A/B test guidance',
       'Before/after comparisons on re-audit',
-      'Observed vs. estimated cost labeling',
     ],
   },
   {
-    level: 'Level 2',
+    level: 'Next',
     title: 'Unit Economics',
-    price: 'Team $199/mo · Business $499/mo',
-    body: 'Know what your agents are worth. Connect spend to outcomes and track cost per ticket, per PR, per resolved query — over time, across teams.',
+    price: 'Coming — team waitlist open',
+    body: 'Connect spend to outcomes. Track cost per ticket, per PR, per resolved query. See which agents produce the most value per dollar — over time, across teams.',
     items: [
       'Cost per Outcome (CPO) by workflow and agent',
-      'Outcome Yield — ROI per dollar of inference',
-      'WR-Outcome — spend on failed vs. successful work',
-      'Cost regression detection on deploys',
-      'Team dashboard with historical trends',
+      'Outcome Yield — value produced per dollar of inference',
+      'Team dashboard with shared visibility and historical trends',
+      'One SDK call to tag outcomes: xerg.track(outcome="success")',
     ],
-    featured: true,
   },
   {
-    level: 'Level 3',
+    level: 'Later',
     title: 'Economic Governance',
-    price: 'Enterprise — custom',
-    body: 'Enforce economic discipline. Policy-as-code rules that block wasteful deploys, cap spend per task, and route expensive calls to human review.',
+    price: 'Future — enterprise',
+    body: 'Enforce economic discipline. Policy-as-code rules that block wasteful deploys, cap spend per work unit, and escalate expensive calls to human review.',
     items: [
-      'Policy-as-code with CI/CD and runtime gates',
-      'Jira, GitHub, Linear auto-outcome connectors',
+      'Policy-as-code with CI/CD and runtime enforcement',
+      'Systems-of-record connectors for auto-outcome tagging',
       'Chargeback reporting by team and business unit',
-      'Spend forecasting and volatility simulation',
       'Compliance audit trail with engine versioning',
     ],
   },
@@ -188,7 +185,7 @@ const gettingStartedSteps = [
   {
     number: '01',
     title: 'Run the audit',
-    body: 'Xerg auto-detects your OpenClaw logs and parses them. Works with OTel GenAI spans too.',
+    body: 'Xerg auto-detects your OpenClaw gateway logs and session transcripts.',
     code: 'npx @xerg/cli audit',
   },
   {
@@ -361,11 +358,11 @@ export default function HomePage() {
               className="text-sm text-[color:var(--text-dim)] transition hover:text-[color:var(--text-bright)]"
               href="#pricing"
             >
-              Pricing
+              Where it goes
             </a>
             <a
               className="text-sm text-[color:var(--text-dim)] transition hover:text-[color:var(--text-bright)]"
-              href="https://github.com/xergai"
+              href="https://github.com/xergai/xerg"
               rel="noreferrer"
               target="_blank"
             >
@@ -388,14 +385,14 @@ export default function HomePage() {
             <div className="animate-[fade-up_0.6s_ease-out_both]">
               <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-[rgba(45,212,168,0.15)] bg-[color:var(--accent-glow)] px-4 py-1.5 font-mono text-xs uppercase tracking-[0.14em] text-[color:var(--accent)]">
                 <span className="size-1.5 rounded-full bg-[color:var(--accent)]" />
-                Economic audit for AI agents
+                Unit economics engine for AI agents
               </div>
               <h1 className="max-w-3xl text-5xl font-semibold leading-[1.03] tracking-[-0.06em] text-[color:var(--heading)] sm:text-6xl lg:text-[4.25rem]">
                 Your agents spent $148 this week.{' '}
                 <span className="text-[color:var(--accent)]">$43 was waste.</span>
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-[color:var(--text)]">
-                Xerg reads your agent logs and tells you{' '}
+                Xerg reads your OpenClaw logs and tells you{' '}
                 <strong className="font-semibold text-[color:var(--text-bright)]">
                   exactly where money is leaking
                 </strong>{' '}
@@ -417,11 +414,12 @@ export default function HomePage() {
                   className="inline-flex items-center gap-2 rounded-lg border border-[color:var(--border-bright)] bg-[color:var(--bg-card)] px-6 py-3 text-sm font-medium text-[color:var(--text)] transition hover:bg-[color:var(--bg-card-hover)] hover:border-[color:var(--text-dim)]"
                   href="#waitlist"
                 >
-                  Join the team waitlist
+                  Join the waitlist
                 </a>
               </div>
               <p className="mt-3 text-sm text-[color:var(--text-dim)]">
-                Runs locally. No config. No network. 30 seconds to first report.
+                Works wherever your OpenClaw logs live. No config. No network after install. 30
+                seconds to first report.
               </p>
               <p className="mt-1 text-sm text-[color:var(--text-dim)]">
                 Prefer a global install?{' '}
@@ -442,7 +440,7 @@ export default function HomePage() {
           <SectionIntro
             label="The problem"
             title="You can see what you spent. You cannot see what you wasted."
-            description="Every tool in the market shows you a spend total. None of them tell you which dollars produced outcomes and which ones burned in retries, bloated prompts, or wrong-model calls."
+            description="Every tool in the market shows you a spend total. None of them classify where dollars are leaking or tell you which fix to try first."
           />
           <div className="grid gap-5 lg:grid-cols-3">
             {problemCards.map((card) => {
@@ -514,7 +512,7 @@ export default function HomePage() {
           <SectionIntro
             label="What makes Xerg different"
             title="Not a dashboard. Not a router. An economic audit."
-            description="Four things no other tool in the market does today."
+            description="Four things no other tool does today."
           />
           <div className="grid gap-5 lg:grid-cols-2">
             {differentiators.map((item) => {
@@ -546,18 +544,14 @@ export default function HomePage() {
         <div className={`${containerClass} space-y-14`}>
           <SectionIntro
             label="Where it goes"
-            title="Start with waste. Graduate to unit economics. Scale to governance."
-            description="Every level delivers value on its own. The product gets dramatically more powerful as you climb."
+            title="Start with waste intelligence. The rest earns its way in."
+            description="Xerg is built in layers. Each one delivers value on its own. You're starting with the first — the rest comes when the product earns it."
           />
           <div className="grid gap-5 lg:grid-cols-3">
             {pricingLadder.map((plan) => (
               <article
                 key={plan.title}
-                className={cn(
-                  'overflow-hidden rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-card)] px-7 py-9 transition hover:border-[color:var(--border-bright)]',
-                  plan.featured &&
-                    'border-[rgba(45,212,168,0.25)] bg-[linear-gradient(180deg,rgba(45,212,168,0.04)_0%,var(--bg-card)_40%)]',
-                )}
+                className="overflow-hidden rounded-2xl border border-[color:var(--border)] bg-[color:var(--bg-card)] px-7 py-9 transition hover:border-[color:var(--border-bright)]"
               >
                 <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-[color:var(--accent)]">
                   {plan.level}
@@ -589,7 +583,7 @@ export default function HomePage() {
           <SectionIntro
             label="Getting started"
             title="30 seconds to your first waste report."
-            description="No signup. No config file. No API key. If you have agent logs, you have everything you need."
+            description="No signup. No config file. No API key. If you have OpenClaw logs, you have everything you need."
           />
           <div className="grid gap-5 lg:grid-cols-3">
             {gettingStartedSteps.map((step, index) => {
@@ -624,8 +618,8 @@ export default function HomePage() {
         <div className={`${containerClass} flex flex-col items-center space-y-8`}>
           <SectionIntro
             label="Early access"
-            title="The CLI ships first. The dashboard follows."
-            description="Join the waitlist for CLI launch news, early team access, and design partner invites where the economic signal is clean."
+            title="The CLI is live. Team features are next."
+            description="Join the waitlist for team access, design partner invites, and launch updates."
           />
           <SignupForm
             align="center"
@@ -646,12 +640,12 @@ export default function HomePage() {
           className={`${containerClass} flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between`}
         >
           <p className="text-sm text-[color:var(--text-dim)]">
-            Xerg — local-first waste intelligence for AI agent workflows.
+            Xerg — the unit economics engine for AI agents.
           </p>
           <div className="flex flex-wrap items-center gap-6 text-sm text-[color:var(--text-dim)]">
             <a
               className="transition hover:text-[color:var(--text)]"
-              href="https://github.com/xergai"
+              href="https://github.com/xergai/xerg"
               rel="noreferrer"
               target="_blank"
             >
