@@ -1,6 +1,11 @@
-# Xerg skill
+# Xerg
 
-This folder contains the Xerg skill package for OpenClaw Hub and `skills.sh`.
+Audit your OpenClaw agent spend in dollars, not tokens. One command, no account, no network — Xerg reads your local gateway logs and session transcripts, classifies structural waste into five categories with dollar amounts, and tells you exactly what to fix first.
 
-The skill is intentionally thin: it points users to the local CLI and keeps the trust boundary obvious.
+```bash
+npx @xerg/cli doctor
+npx @xerg/cli audit
+npx @xerg/cli audit --compare
+```
 
+Docs: [xerg.ai](https://xerg.ai) · npm: [@xerg/cli](https://www.npmjs.com/package/@xerg/cli) · Support: query@xerg.ai
