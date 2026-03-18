@@ -1,6 +1,6 @@
 # Xerg
 
-Audit your OpenClaw agent spend in dollars, not tokens. One command, no account, no network — Xerg reads your local gateway logs and session transcripts, classifies structural waste into five categories with dollar amounts, and tells you exactly what to fix first.
+Audit your OpenClaw agent spend in dollars, not tokens. One command, no account — Xerg reads your local gateway logs and session transcripts, classifies structural waste into five categories with dollar amounts, and tells you exactly what to fix first.
 
 ```bash
 npx @xerg/cli doctor
