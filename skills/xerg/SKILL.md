@@ -2,7 +2,7 @@
 
 Use this skill to audit the economics of OpenClaw agent workflows in dollars, not tokens.
 
-Xerg reads your local OpenClaw gateway logs and session transcripts, classifies structural waste into five categories with dollar amounts, and surfaces actionable savings tests. Everything runs locally — no account, no network, no data leaves your machine.
+Xerg reads your local OpenClaw gateway logs and session transcripts, classifies structural waste into five categories with dollar amounts, and surfaces actionable savings tests. The audit runs locally — no account, no data leaves your machine. The initial npx invocation fetches the CLI from npm; after that, all analysis is offline against your local files. Install globally with `npm install -g @xerg/cli` to skip the fetch entirely.
 
 ## Commands
 
