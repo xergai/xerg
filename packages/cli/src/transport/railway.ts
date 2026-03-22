@@ -75,20 +75,22 @@ function tarRailwayPull(opts: {
 }): boolean {
   mkdirSync(opts.localDir, { recursive: true });
 
+  // Railway SSH allocates a PTY that corrupts binary data (LF → CRLF).
+  // Base64-encoding the tar stream on the remote side avoids this.
   let tarCmd: string;
   if (opts.since) {
     const findArgs = buildSinceFind(opts.since);
     if (findArgs) {
-      tarCmd = `find ${opts.remotePath} -type f ${findArgs} -print0 2>/dev/null | tar -czf - --null -T - 2>/dev/null`;
+      tarCmd = `find ${opts.remotePath} -type f ${findArgs} -print0 2>/dev/null | tar -czf - --null -T - 2>/dev/null | base64`;
     } else {
-      tarCmd = `tar -czf - -C ${opts.remotePath} . 2>/dev/null`;
+      tarCmd = `tar -czf - -C ${opts.remotePath} . 2>/dev/null | base64`;
     }
   } else {
-    tarCmd = `tar -czf - -C ${opts.remotePath} . 2>/dev/null`;
+    tarCmd = `tar -czf - -C ${opts.remotePath} . 2>/dev/null | base64`;
   }
 
   const sshArgs = railwaySshArgs(opts.target).join(' ');
-  const fullCmd = `railway ${sshArgs} '${tarCmd}' | tar -xzf - -C ${opts.localDir}`;
+  const fullCmd = `railway ${sshArgs} '${tarCmd}' | base64 -d | tar -xzf - -C ${opts.localDir}`;
 
   try {
     execSync(fullCmd, { stdio: 'pipe', timeout: 120_000 });
@@ -266,8 +268,8 @@ export async function runRailwayDoctor(opts: {
   const target = source.railway;
   const notes: string[] = [];
 
-  const cliCheck = spawnSync('railway', ['version'], { stdio: 'pipe', timeout: 10_000 });
-  const railwayCliInstalled = cliCheck.status === 0;
+  const whichCheck = spawnSync('which', ['railway'], { stdio: 'pipe', timeout: 5_000 });
+  const railwayCliInstalled = whichCheck.status === 0;
 
   if (!railwayCliInstalled) {
     return {
@@ -282,7 +284,11 @@ export async function runRailwayDoctor(opts: {
     };
   }
 
-  notes.push(`Railway CLI: installed (${cliCheck.stdout?.toString().trim()})`);
+  const railwayPath = whichCheck.stdout?.toString().trim() ?? 'railway';
+  const versionCheck = spawnSync('railway', ['version'], { stdio: 'pipe', timeout: 10_000 });
+  const versionStr =
+    versionCheck.status === 0 ? versionCheck.stdout?.toString().trim() : railwayPath;
+  notes.push(`Railway CLI: installed (${versionStr})`);
 
   const whoami = spawnSync('railway', ['whoami'], { stdio: 'pipe', timeout: 10_000 });
   const railwayAuthenticated = whoami.status === 0;
