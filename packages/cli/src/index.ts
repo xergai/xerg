@@ -15,11 +15,27 @@ type AuditCliOptions = {
   markdown?: boolean;
   db?: string;
   noDb?: boolean;
+  remote?: string;
+  remoteLogFile?: string;
+  remoteSessionsDir?: string;
+  remoteConfig?: string;
+  keepRemoteFiles?: boolean;
+  railway?: boolean;
+  railwayProject?: string;
+  railwayEnvironment?: string;
+  railwayService?: string;
 };
 
 type DoctorCliOptions = {
   logFile?: string;
   sessionsDir?: string;
+  remote?: string;
+  remoteLogFile?: string;
+  remoteSessionsDir?: string;
+  railway?: boolean;
+  railwayProject?: string;
+  railwayEnvironment?: string;
+  railwayService?: string;
 };
 
 const VERSION = readVersion();
@@ -63,7 +79,8 @@ async function run() {
   throw new Error(`Unknown command "${command}". Run \`xerg --help\` to see available commands.`);
 }
 
-function parseAuditOptions(argv: string[]) {
+function parseAuditOptions(raw: string[]) {
+  const argv = expandEqualsArgs(raw);
   const options: AuditCliOptions = {};
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -103,6 +120,40 @@ function parseAuditOptions(argv: string[]) {
       case '--no-db':
         options.noDb = true;
         break;
+      case '--remote':
+        options.remote = readValue(arg, argv[index + 1]);
+        index += 1;
+        break;
+      case '--remote-log-file':
+        options.remoteLogFile = readValue(arg, argv[index + 1]);
+        index += 1;
+        break;
+      case '--remote-sessions-dir':
+        options.remoteSessionsDir = readValue(arg, argv[index + 1]);
+        index += 1;
+        break;
+      case '--remote-config':
+        options.remoteConfig = readValue(arg, argv[index + 1]);
+        index += 1;
+        break;
+      case '--keep-remote-files':
+        options.keepRemoteFiles = true;
+        break;
+      case '--railway':
+        options.railway = true;
+        break;
+      case '--project':
+        options.railwayProject = readValue(arg, argv[index + 1]);
+        index += 1;
+        break;
+      case '--environment':
+        options.railwayEnvironment = readValue(arg, argv[index + 1]);
+        index += 1;
+        break;
+      case '--service':
+        options.railwayService = readValue(arg, argv[index + 1]);
+        index += 1;
+        break;
       default:
         throw new Error(`Unknown audit option "${arg}". Run \`xerg audit --help\` for usage.`);
     }
@@ -111,7 +162,8 @@ function parseAuditOptions(argv: string[]) {
   return options;
 }
 
-function parseDoctorOptions(argv: string[]) {
+function parseDoctorOptions(raw: string[]) {
+  const argv = expandEqualsArgs(raw);
   const options: DoctorCliOptions = {};
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -131,12 +183,52 @@ function parseDoctorOptions(argv: string[]) {
         options.sessionsDir = readValue(arg, argv[index + 1]);
         index += 1;
         break;
+      case '--remote':
+        options.remote = readValue(arg, argv[index + 1]);
+        index += 1;
+        break;
+      case '--remote-log-file':
+        options.remoteLogFile = readValue(arg, argv[index + 1]);
+        index += 1;
+        break;
+      case '--remote-sessions-dir':
+        options.remoteSessionsDir = readValue(arg, argv[index + 1]);
+        index += 1;
+        break;
+      case '--railway':
+        options.railway = true;
+        break;
+      case '--project':
+        options.railwayProject = readValue(arg, argv[index + 1]);
+        index += 1;
+        break;
+      case '--environment':
+        options.railwayEnvironment = readValue(arg, argv[index + 1]);
+        index += 1;
+        break;
+      case '--service':
+        options.railwayService = readValue(arg, argv[index + 1]);
+        index += 1;
+        break;
       default:
         throw new Error(`Unknown doctor option "${arg}". Run \`xerg doctor --help\` for usage.`);
     }
   }
 
   return options;
+}
+
+function expandEqualsArgs(argv: string[]): string[] {
+  const result: string[] = [];
+  for (const arg of argv) {
+    const eqIndex = arg.indexOf('=');
+    if (eqIndex > 0 && arg.startsWith('--')) {
+      result.push(arg.slice(0, eqIndex), arg.slice(eqIndex + 1));
+    } else {
+      result.push(arg);
+    }
+  }
+  return result;
 }
 
 function readValue(flag: string, value: string | undefined) {
@@ -174,15 +266,29 @@ Usage:
   xerg audit [options]
 
 Options:
-  --log-file <path>      Explicit OpenClaw gateway log file to analyze
-  --sessions-dir <path>  Explicit OpenClaw sessions directory to analyze
-  --since <duration>     Look back window such as 24h, 7d, or 30m
-  --compare              Compare this audit to the newest compatible prior local snapshot
-  --json                 Render the report as JSON
-  --markdown             Render the report as Markdown
-  --db <path>            Custom SQLite database path
-  --no-db                Skip local persistence
-  -h, --help             Show help
+  --log-file <path>           Explicit OpenClaw gateway log file to analyze
+  --sessions-dir <path>       Explicit OpenClaw sessions directory to analyze
+  --since <duration>          Look back window such as 24h, 7d, or 30m
+  --compare                   Compare this audit to the newest compatible prior local snapshot
+  --json                      Render the report as JSON
+  --markdown                  Render the report as Markdown
+  --db <path>                 Custom SQLite database path
+  --no-db                     Skip local persistence
+
+Remote options (SSH):
+  --remote <user@host>        SSH target in user@host or user@host:port format
+  --remote-log-file <path>    Override the default gateway log path on the remote host
+  --remote-sessions-dir <path>  Override the default sessions directory on the remote host
+  --remote-config <path>      Path to a JSON file defining multiple remote sources
+  --keep-remote-files         Retain pulled files in ~/.xerg/remote-cache/ instead of using a temp directory
+
+Railway options:
+  --railway                   Audit a Railway service (uses linked project by default)
+  --project <id>              Railway project ID
+  --environment <id>          Railway environment ID
+  --service <id>              Railway service ID
+
+  -h, --help                  Show help
 `;
 }
 
@@ -195,9 +301,21 @@ Usage:
   xerg doctor [options]
 
 Options:
-  --log-file <path>      Explicit OpenClaw gateway log file to inspect
-  --sessions-dir <path>  Explicit OpenClaw sessions directory to inspect
-  -h, --help             Show help
+  --log-file <path>           Explicit OpenClaw gateway log file to inspect
+  --sessions-dir <path>       Explicit OpenClaw sessions directory to inspect
+
+Remote options (SSH):
+  --remote <user@host>        SSH target in user@host or user@host:port format
+  --remote-log-file <path>    Override the default gateway log path on the remote host
+  --remote-sessions-dir <path>  Override the default sessions directory on the remote host
+
+Railway options:
+  --railway                   Check a Railway service (uses linked project by default)
+  --project <id>              Railway project ID
+  --environment <id>          Railway environment ID
+  --service <id>              Railway service ID
+
+  -h, --help                  Show help
 `;
 }
 

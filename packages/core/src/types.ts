@@ -13,6 +13,7 @@ export interface AuditOptions {
   dbPath?: string;
   noDb?: boolean;
   compare?: boolean;
+  comparisonKeyOverride?: string;
 }
 
 export interface DetectedSourceFile {

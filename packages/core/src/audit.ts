@@ -36,6 +36,7 @@ export async function auditOpenClaw(options: AuditOptions) {
     sources,
     since: options.since,
     dbPath,
+    comparisonKeyOverride: options.comparisonKeyOverride,
   });
 
   if (options.compare && dbPath) {

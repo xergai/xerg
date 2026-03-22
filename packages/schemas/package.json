@@ -1,0 +1,32 @@
+{
+  "name": "@xerg/schemas",
+  "version": "0.1.0",
+  "description": "Public wire types for Xerg audit payloads, findings, comparisons, and recommendations.",
+  "keywords": ["xerg", "schemas", "audit", "wire-types", "openclaw"],
+  "homepage": "https://xerg.ai",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xergai/xerg.git",
+    "directory": "packages/schemas"
+  },
+  "author": "Xerg <query@xerg.ai>",
+  "license": "MIT",
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {}
+}

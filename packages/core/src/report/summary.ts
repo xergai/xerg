@@ -44,6 +44,7 @@ export function buildAuditSummary(input: {
   sources: DetectedSourceFile[];
   since?: string;
   dbPath?: string;
+  comparisonKeyOverride?: string;
 }): AuditSummary {
   const callCount = input.runs.reduce((sum, run) => sum + run.calls.length, 0);
   const totalSpendUsd = input.runs.reduce((sum, run) => sum + run.totalCostUsd, 0);
@@ -62,10 +63,12 @@ export function buildAuditSummary(input: {
       `${generatedAt}:${input.runs.length}:${input.sources.map((source) => source.path).join('|')}`,
     ),
     generatedAt,
-    comparisonKey: buildComparisonKey({
-      sources: input.sources,
-      since: input.since,
-    }),
+    comparisonKey:
+      input.comparisonKeyOverride ??
+      buildComparisonKey({
+        sources: input.sources,
+        since: input.since,
+      }),
     comparison: null,
     since: input.since,
     runCount: input.runs.length,
