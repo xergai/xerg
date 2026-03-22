@@ -91,12 +91,18 @@ importers:
         specifier: ^11.10.0
         version: 11.10.0
     devDependencies:
+      '@xerg/schemas':
+        specifier: workspace:*
+        version: link:../schemas
       '@xergai/core':
         specifier: workspace:*
         version: link:../core
 
   packages/core:
     dependencies:
+      '@xerg/schemas':
+        specifier: workspace:*
+        version: link:../schemas
       better-sqlite3:
         specifier: ^11.10.0
         version: 11.10.0

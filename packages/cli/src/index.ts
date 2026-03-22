@@ -24,6 +24,8 @@ type AuditCliOptions = {
   railwayProject?: string;
   railwayEnvironment?: string;
   railwayService?: string;
+  push?: boolean;
+  dryRun?: boolean;
 };
 
 type DoctorCliOptions = {
@@ -153,6 +155,12 @@ function parseAuditOptions(raw: string[]) {
       case '--service':
         options.railwayService = readValue(arg, argv[index + 1]);
         index += 1;
+        break;
+      case '--push':
+        options.push = true;
+        break;
+      case '--dry-run':
+        options.dryRun = true;
         break;
       default:
         throw new Error(`Unknown audit option "${arg}". Run \`xerg audit --help\` for usage.`);
@@ -287,6 +295,10 @@ Railway options:
   --project <id>              Railway project ID
   --environment <id>          Railway environment ID
   --service <id>              Railway service ID
+
+Push options:
+  --push                      Push the audit summary to the Xerg API after computing it
+  --dry-run                   With --push: print the payload to stdout without sending it
 
   -h, --help                  Show help
 `;

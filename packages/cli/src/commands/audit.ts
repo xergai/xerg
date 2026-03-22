@@ -1,6 +1,15 @@
+import { readFileSync } from 'node:fs';
 import { rmSync } from 'node:fs';
-import { auditOpenClaw, renderMarkdownSummary, renderTerminalSummary } from '@xergai/core';
+import { hostname } from 'node:os';
+import {
+  auditOpenClaw,
+  renderMarkdownSummary,
+  renderTerminalSummary,
+  toWirePayload,
+} from '@xergai/core';
+import type { AuditSummary, WirePayloadMeta } from '@xergai/core';
 
+import { loadPushConfig, pushAudit } from '../push/index.js';
 import {
   buildComparisonKeyForRailway,
   buildComparisonKeyForRemote,
@@ -30,9 +39,15 @@ export interface AuditCommandOptions {
   railwayProject?: string;
   railwayEnvironment?: string;
   railwayService?: string;
+  push?: boolean;
+  dryRun?: boolean;
 }
 
 export async function runAuditCommand(options: AuditCommandOptions) {
+  if (options.dryRun && !options.push) {
+    throw new Error('--dry-run requires --push.');
+  }
+
   const remoteFlags = [options.remote, options.remoteConfig, options.railway].filter(
     Boolean,
   ).length;
@@ -93,6 +108,11 @@ async function runLocalAudit(options: AuditCommandOptions) {
   });
 
   renderOutput(summary, options);
+
+  if (options.push) {
+    const meta = buildMeta({ environment: 'local', sourceId: hostname(), sourceHost: hostname() });
+    await handlePush(summary, meta, options);
+  }
 }
 
 function getComparisonKey(source: RemoteSource): string {
@@ -118,6 +138,10 @@ function describeSource(source: RemoteSource): string {
   return source.host;
 }
 
+function sourceEnvironment(source: RemoteSource): string {
+  return source.transport === 'railway' ? 'railway' : 'remote';
+}
+
 async function runSingleRemoteAudit(source: RemoteSource, options: AuditCommandOptions) {
   process.stderr.write(`Pulling files from ${describeSource(source)}...\n`);
 
@@ -136,6 +160,15 @@ async function runSingleRemoteAudit(source: RemoteSource, options: AuditCommandO
     });
 
     renderOutput(summary, options);
+
+    if (options.push) {
+      const meta = buildMeta({
+        environment: sourceEnvironment(source),
+        sourceId: source.name,
+        sourceHost: source.host,
+      });
+      await handlePush(summary, meta, options);
+    }
   } finally {
     cleanupPullResult(pullResult, options.keepRemoteFiles);
   }
@@ -163,7 +196,7 @@ async function runMultiRemoteAudit(sources: RemoteSource[], options: AuditComman
   }
 
   try {
-    const summaries = [];
+    const summaries: { name: string; source: RemoteSource; summary: AuditSummary }[] = [];
     for (const { source, pullResult } of results) {
       const comparisonKeyOverride = getComparisonKey(source);
       const summary = await auditOpenClaw({
@@ -175,7 +208,7 @@ async function runMultiRemoteAudit(sources: RemoteSource[], options: AuditComman
         noDb: options.noDb,
         comparisonKeyOverride,
       });
-      summaries.push({ name: source.name, summary });
+      summaries.push({ name: source.name, source, summary });
     }
 
     if (options.json) {
@@ -184,18 +217,17 @@ async function runMultiRemoteAudit(sources: RemoteSource[], options: AuditComman
           ? summaries[0].summary
           : { sources: summaries.map((s) => ({ name: s.name, ...s.summary })) };
       process.stdout.write(`${JSON.stringify(output, null, 2)}\n`);
-      return;
-    }
+    } else {
+      for (const { name, summary } of summaries) {
+        if (summaries.length > 1) {
+          process.stdout.write(`\n${'═'.repeat(60)}\n  Source: ${name}\n${'═'.repeat(60)}\n\n`);
+        }
 
-    for (const { name, summary } of summaries) {
-      if (summaries.length > 1) {
-        process.stdout.write(`\n${'═'.repeat(60)}\n  Source: ${name}\n${'═'.repeat(60)}\n\n`);
-      }
-
-      if (options.markdown) {
-        process.stdout.write(`${renderMarkdownSummary(summary)}\n`);
-      } else {
-        process.stdout.write(`${renderTerminalSummary(summary)}\n`);
+        if (options.markdown) {
+          process.stdout.write(`${renderMarkdownSummary(summary)}\n`);
+        } else {
+          process.stdout.write(`${renderTerminalSummary(summary)}\n`);
+        }
       }
     }
 
@@ -205,6 +237,17 @@ async function runMultiRemoteAudit(sources: RemoteSource[], options: AuditComman
         process.stderr.write(`  ${source.name}: ${error}\n`);
       }
     }
+
+    if (options.push) {
+      for (const { source, summary } of summaries) {
+        const meta = buildMeta({
+          environment: sourceEnvironment(source),
+          sourceId: source.name,
+          sourceHost: source.host,
+        });
+        await handlePush(summary, meta, options);
+      }
+    }
   } finally {
     for (const { pullResult } of results) {
       cleanupPullResult(pullResult, options.keepRemoteFiles);
@@ -212,10 +255,59 @@ async function runMultiRemoteAudit(sources: RemoteSource[], options: AuditComman
   }
 }
 
-function renderOutput(
-  summary: Awaited<ReturnType<typeof auditOpenClaw>>,
+function readCliVersion(): string {
+  try {
+    const packageJsonPath = new URL('../../package.json', import.meta.url);
+    const pkg = JSON.parse(readFileSync(packageJsonPath, 'utf8')) as { version?: string };
+    return pkg.version ?? '0.0.0';
+  } catch {
+    return '0.0.0';
+  }
+}
+
+function buildMeta(input: {
+  environment: string;
+  sourceId: string;
+  sourceHost: string;
+}): WirePayloadMeta {
+  return {
+    cliVersion: readCliVersion(),
+    sourceId: input.sourceId,
+    sourceHost: input.sourceHost,
+    environment: input.environment,
+  };
+}
+
+async function handlePush(
+  summary: AuditSummary,
+  meta: WirePayloadMeta,
   options: AuditCommandOptions,
 ) {
+  const payload = toWirePayload(summary, meta);
+
+  if (options.dryRun) {
+    process.stdout.write(`${JSON.stringify(payload, null, 2)}\n`);
+    return;
+  }
+
+  const config = loadPushConfig();
+  process.stderr.write(`Pushing audit ${summary.auditId} to ${config.apiUrl}...\n`);
+
+  const result = await pushAudit(payload, config);
+
+  if (result.ok) {
+    process.stderr.write(`Pushed successfully (audit: ${result.auditId}).\n`);
+  } else {
+    const statusInfo = result.status > 0 ? ` (HTTP ${result.status})` : '';
+    throw new Error(`Push failed${statusInfo}: ${result.message}`);
+  }
+}
+
+function renderOutput(summary: AuditSummary, options: AuditCommandOptions) {
+  if (options.push && options.dryRun) {
+    return;
+  }
+
   if (options.json) {
     process.stdout.write(`${JSON.stringify(summary, null, 2)}\n`);
     return;

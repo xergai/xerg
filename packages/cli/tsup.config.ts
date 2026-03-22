@@ -7,5 +7,5 @@ export default defineConfig({
   platform: 'node',
   minify: true,
   clean: true,
-  noExternal: ['@xergai/core'],
+  noExternal: ['@xergai/core', '@xerg/schemas'],
 });

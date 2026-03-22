@@ -16,9 +16,7 @@
     "baseUrl": ".",
     "paths": {
       "@xergai/core": ["packages/core/src/index.ts"],
-      "@xergai/core/*": ["packages/core/src/*"],
-      "@xerg/schemas": ["packages/schemas/src/index.ts"],
-      "@xerg/schemas/*": ["packages/schemas/src/*"]
+      "@xergai/core/*": ["packages/core/src/*"]
     }
   }
 }

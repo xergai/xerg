@@ -184,3 +184,10 @@ export interface PersistedAudit {
   runs: NormalizedRun[];
   pricingCatalog: PricingEntry[];
 }
+
+export interface WirePayloadMeta {
+  cliVersion: string;
+  sourceId: string;
+  sourceHost: string;
+  environment: string;
+}
