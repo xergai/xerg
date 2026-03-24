@@ -2,6 +2,8 @@ import { readFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 
+import { loadStoredCredentials } from '../auth/credentials.js';
+
 export interface PushConfig {
   apiKey: string;
   apiUrl: string;
@@ -35,7 +37,15 @@ export function loadPushConfig(): PushConfig {
     // config file doesn't exist or isn't valid JSON — fall through
   }
 
+  const storedToken = loadStoredCredentials();
+  if (storedToken) {
+    return {
+      apiKey: storedToken,
+      apiUrl: envUrl || DEFAULT_API_URL,
+    };
+  }
+
   throw new Error(
-    `No API key configured. Set XERG_API_KEY or add "apiKey" to ${CONFIG_PATH}.\nGet your key at https://xerg.ai/dashboard/settings`,
+    `No API key configured. Set XERG_API_KEY, add "apiKey" to ${CONFIG_PATH}, or run \`xerg login\`.\nGet your key at https://xerg.ai/dashboard/settings`,
   );
 }

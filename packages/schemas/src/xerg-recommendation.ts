@@ -1,14 +1,11 @@
 export interface XergRecommendation {
   id: string;
-  action: 'downgrade_model' | 'reduce_retries' | 'trim_context' | 'collapse_loop' | 'review_idle';
-  severity: 'high' | 'medium' | 'low';
-  target: {
-    workflow: string;
-    model?: string;
-    taskClass?: string;
-  };
-  currentCostUsd: number;
+  findingId: string;
+  kind: string;
+  title: string;
+  description: string;
   estimatedSavingsUsd: number;
-  suggestion: string;
-  testCommand?: string;
+  confidence: 'high' | 'medium' | 'low';
+  actionType: 'model-switch' | 'cache-config' | 'prompt-trim' | 'dedup' | 'other';
+  suggestedChange?: Record<string, unknown>;
 }
