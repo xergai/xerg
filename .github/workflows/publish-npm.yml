@@ -1,4 +1,4 @@
-name: Publish CLI to npm
+name: Publish to npm
 
 on:
   workflow_dispatch:
@@ -30,6 +30,9 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Build schemas
+        run: pnpm --filter @xerg/schemas build
+
       - name: Typecheck
         run: pnpm typecheck
 
@@ -42,6 +45,14 @@ jobs:
       - name: CLI package smoke test
         run: pnpm cli:smoke
 
+      - name: Publish @xerg/schemas
+        working-directory: packages/schemas
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: Publish @xerg/cli
         working-directory: packages/cli
         run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
