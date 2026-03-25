@@ -10,6 +10,7 @@ import {
 } from '@xergai/core';
 import type { AuditSummary, WirePayloadMeta } from '@xergai/core';
 
+import { NoDataError } from '../errors.js';
 import { loadPushConfig, pushAudit } from '../push/index.js';
 import {
   buildComparisonKeyForRailway,
@@ -44,6 +45,21 @@ export interface AuditCommandOptions {
   dryRun?: boolean;
   failAboveWasteRate?: number;
   failAboveWasteUsd?: number;
+}
+
+const NO_DATA_PATTERN = /no openclaw sources were detected/i;
+
+async function auditOrNoData(
+  ...args: Parameters<typeof auditOpenClaw>
+): ReturnType<typeof auditOpenClaw> {
+  try {
+    return await auditOpenClaw(...args);
+  } catch (err) {
+    if (err instanceof Error && NO_DATA_PATTERN.test(err.message)) {
+      throw new NoDataError(err.message);
+    }
+    throw err;
+  }
 }
 
 export async function runAuditCommand(options: AuditCommandOptions) {
@@ -101,7 +117,7 @@ function buildRailwayTarget(options: AuditCommandOptions): RailwayTarget | undef
 }
 
 async function runLocalAudit(options: AuditCommandOptions) {
-  const summary = await auditOpenClaw({
+  const summary = await auditOrNoData({
     logFile: options.logFile,
     sessionsDir: options.sessionsDir,
     since: options.since,
@@ -154,7 +170,7 @@ async function runSingleRemoteAudit(source: RemoteSource, options: AuditCommandO
 
   try {
     const comparisonKeyOverride = getComparisonKey(source);
-    const summary = await auditOpenClaw({
+    const summary = await auditOrNoData({
       logFile: pullResult.logFile,
       sessionsDir: pullResult.sessionsDir,
       since: options.since,
@@ -206,7 +222,7 @@ async function runMultiRemoteAudit(sources: RemoteSource[], options: AuditComman
     const summaries: { name: string; source: RemoteSource; summary: AuditSummary }[] = [];
     for (const { source, pullResult } of results) {
       const comparisonKeyOverride = getComparisonKey(source);
-      const summary = await auditOpenClaw({
+      const summary = await auditOrNoData({
         logFile: pullResult.logFile,
         sessionsDir: pullResult.sessionsDir,
         since: options.since,

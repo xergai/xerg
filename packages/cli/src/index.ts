@@ -8,6 +8,7 @@ import { runDoctorCommand } from './commands/doctor.js';
 import { runLoginCommand } from './commands/login.js';
 import { runLogoutCommand } from './commands/logout.js';
 import { runPushCommand } from './commands/push.js';
+import { NoDataError } from './errors.js';
 
 type AuditCliOptions = {
   logFile?: string;
@@ -68,7 +69,7 @@ if (command === '--version' || command === '-v' || command === 'version') {
 run().catch((error: unknown) => {
   const message = error instanceof Error ? error.message : 'Unknown error';
   process.stderr.write(`${colorError(`xerg failed: ${message}`)}\n`);
-  process.exitCode = 1;
+  process.exitCode = error instanceof NoDataError ? 2 : 1;
 });
 
 async function run() {
