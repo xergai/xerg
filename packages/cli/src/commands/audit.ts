@@ -3,6 +3,7 @@ import { rmSync } from 'node:fs';
 import { hostname } from 'node:os';
 import {
   auditOpenClaw,
+  buildRecommendations,
   renderMarkdownSummary,
   renderTerminalSummary,
   toWirePayload,
@@ -41,6 +42,8 @@ export interface AuditCommandOptions {
   railwayService?: string;
   push?: boolean;
   dryRun?: boolean;
+  failAboveWasteRate?: number;
+  failAboveWasteUsd?: number;
 }
 
 export async function runAuditCommand(options: AuditCommandOptions) {
@@ -113,6 +116,8 @@ async function runLocalAudit(options: AuditCommandOptions) {
     const meta = buildMeta({ environment: 'local', sourceId: hostname(), sourceHost: hostname() });
     await handlePush(summary, meta, options);
   }
+
+  checkThresholds(summary, options);
 }
 
 function getComparisonKey(source: RemoteSource): string {
@@ -169,6 +174,8 @@ async function runSingleRemoteAudit(source: RemoteSource, options: AuditCommandO
       });
       await handlePush(summary, meta, options);
     }
+
+    checkThresholds(summary, options);
   } finally {
     cleanupPullResult(pullResult, options.keepRemoteFiles);
   }
@@ -214,8 +221,14 @@ async function runMultiRemoteAudit(sources: RemoteSource[], options: AuditComman
     if (options.json) {
       const output =
         summaries.length === 1
-          ? summaries[0].summary
-          : { sources: summaries.map((s) => ({ name: s.name, ...s.summary })) };
+          ? { ...summaries[0].summary, recommendations: buildRecommendations(summaries[0].summary) }
+          : {
+              sources: summaries.map((s) => ({
+                name: s.name,
+                ...s.summary,
+                recommendations: buildRecommendations(s.summary),
+              })),
+            };
       process.stdout.write(`${JSON.stringify(output, null, 2)}\n`);
     } else {
       for (const { name, summary } of summaries) {
@@ -247,6 +260,10 @@ async function runMultiRemoteAudit(sources: RemoteSource[], options: AuditComman
         });
         await handlePush(summary, meta, options);
       }
+    }
+
+    for (const { summary } of summaries) {
+      checkThresholds(summary, options);
     }
   } finally {
     for (const { pullResult } of results) {
@@ -309,7 +326,9 @@ function renderOutput(summary: AuditSummary, options: AuditCommandOptions) {
   }
 
   if (options.json) {
-    process.stdout.write(`${JSON.stringify(summary, null, 2)}\n`);
+    const recommendations = buildRecommendations(summary);
+    const output = { ...summary, recommendations };
+    process.stdout.write(`${JSON.stringify(output, null, 2)}\n`);
     return;
   }
 
@@ -319,6 +338,33 @@ function renderOutput(summary: AuditSummary, options: AuditCommandOptions) {
   }
 
   process.stdout.write(`${renderTerminalSummary(summary)}\n`);
+}
+
+function checkThresholds(summary: AuditSummary, options: AuditCommandOptions) {
+  const breaches: string[] = [];
+
+  if (
+    options.failAboveWasteRate !== undefined &&
+    summary.structuralWasteRate > options.failAboveWasteRate
+  ) {
+    breaches.push(
+      `Structural waste rate ${(summary.structuralWasteRate * 100).toFixed(1)}% exceeds threshold ${(options.failAboveWasteRate * 100).toFixed(1)}%`,
+    );
+  }
+
+  if (
+    options.failAboveWasteUsd !== undefined &&
+    summary.wasteSpendUsd > options.failAboveWasteUsd
+  ) {
+    breaches.push(
+      `Waste spend $${summary.wasteSpendUsd.toFixed(2)} exceeds threshold $${options.failAboveWasteUsd.toFixed(2)}`,
+    );
+  }
+
+  if (breaches.length > 0) {
+    process.stderr.write(`\nThreshold exceeded:\n${breaches.map((b) => `  ${b}`).join('\n')}\n`);
+    process.exitCode = 3;
+  }
 }
 
 function cleanupPullResult(pullResult: PullResult, keepFiles?: boolean) {

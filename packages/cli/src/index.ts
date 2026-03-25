@@ -5,6 +5,9 @@ import { styleText } from 'node:util';
 
 import { runAuditCommand } from './commands/audit.js';
 import { runDoctorCommand } from './commands/doctor.js';
+import { runLoginCommand } from './commands/login.js';
+import { runLogoutCommand } from './commands/logout.js';
+import { runPushCommand } from './commands/push.js';
 
 type AuditCliOptions = {
   logFile?: string;
@@ -25,6 +28,13 @@ type AuditCliOptions = {
   railwayEnvironment?: string;
   railwayService?: string;
   push?: boolean;
+  dryRun?: boolean;
+  failAboveWasteRate?: number;
+  failAboveWasteUsd?: number;
+};
+
+type PushCliOptions = {
+  file?: string;
   dryRun?: boolean;
 };
 
@@ -75,6 +85,22 @@ async function run() {
   if (command === 'doctor') {
     const options = parseDoctorOptions(argv.slice(1));
     await runDoctorCommand(options);
+    return;
+  }
+
+  if (command === 'push') {
+    const options = parsePushOptions(argv.slice(1));
+    await runPushCommand(options);
+    return;
+  }
+
+  if (command === 'login') {
+    await runLoginCommand();
+    return;
+  }
+
+  if (command === 'logout') {
+    runLogoutCommand();
     return;
   }
 
@@ -162,8 +188,44 @@ function parseAuditOptions(raw: string[]) {
       case '--dry-run':
         options.dryRun = true;
         break;
+      case '--fail-above-waste-rate':
+        options.failAboveWasteRate = readFloat(arg, argv[index + 1]);
+        index += 1;
+        break;
+      case '--fail-above-waste-usd':
+        options.failAboveWasteUsd = readFloat(arg, argv[index + 1]);
+        index += 1;
+        break;
       default:
         throw new Error(`Unknown audit option "${arg}". Run \`xerg audit --help\` for usage.`);
+    }
+  }
+
+  return options;
+}
+
+function parsePushOptions(raw: string[]) {
+  const argv = expandEqualsArgs(raw);
+  const options: PushCliOptions = {};
+
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+
+    switch (arg) {
+      case '--help':
+      case '-h':
+        process.stdout.write(renderPushHelp());
+        process.exit(0);
+        break;
+      case '--file':
+        options.file = readValue(arg, argv[index + 1]);
+        index += 1;
+        break;
+      case '--dry-run':
+        options.dryRun = true;
+        break;
+      default:
+        throw new Error(`Unknown push option "${arg}". Run \`xerg push --help\` for usage.`);
     }
   }
 
@@ -247,6 +309,15 @@ function readValue(flag: string, value: string | undefined) {
   return value;
 }
 
+function readFloat(flag: string, value: string | undefined): number {
+  const raw = readValue(flag, value);
+  const num = Number.parseFloat(raw);
+  if (Number.isNaN(num)) {
+    throw new Error(`The ${flag} flag requires a numeric value, got "${raw}".`);
+  }
+  return num;
+}
+
 function renderRootHelp() {
   return `xerg ${VERSION}
 
@@ -256,8 +327,11 @@ Usage:
   xerg <command> [options]
 
 Commands:
-  audit   Analyze OpenClaw logs and produce a waste intelligence report.
-  doctor  Inspect your machine for OpenClaw sources and audit readiness.
+  audit    Analyze OpenClaw logs and produce a waste intelligence report.
+  doctor   Inspect your machine for OpenClaw sources and audit readiness.
+  push     Push a cached audit snapshot to the Xerg API.
+  login    Authenticate with the Xerg API via browser.
+  logout   Remove stored Xerg API credentials.
 
 Global options:
   -h, --help     Show help
@@ -300,7 +374,31 @@ Push options:
   --push                      Push the audit summary to the Xerg API after computing it
   --dry-run                   With --push: print the payload to stdout without sending it
 
+Threshold options:
+  --fail-above-waste-rate <n> Exit with code 3 if structural waste rate exceeds threshold (e.g. 0.30)
+  --fail-above-waste-usd <n>  Exit with code 3 if waste spend exceeds threshold in USD (e.g. 50)
+
   -h, --help                  Show help
+`;
+}
+
+function renderPushHelp() {
+  return `xerg push
+
+Push a cached audit snapshot to the Xerg API.
+
+Usage:
+  xerg push [options]
+
+Options:
+  --file <path>               Push a specific snapshot file instead of the most recent cached audit
+  --dry-run                   Print the payload to stdout without sending it
+
+  -h, --help                  Show help
+
+Authentication:
+  Set XERG_API_KEY in your environment, add "apiKey" to ~/.xerg/config.json,
+  or run \`xerg login\` to authenticate via browser.
 `;
 }
 
