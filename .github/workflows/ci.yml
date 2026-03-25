@@ -29,6 +29,9 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Build schemas
+        run: pnpm --filter @xerg/schemas build
+
       - name: Typecheck
         run: pnpm typecheck
 
