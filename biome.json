@@ -7,7 +7,6 @@
       "**/dist/**",
       "**/node_modules/**",
       "**/.vercel/**",
-      "apps/site/next-env.d.ts",
       "docs/v1/xerg-npm-placeholder/**"
     ]
   },
