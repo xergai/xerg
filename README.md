@@ -5,16 +5,17 @@ intelligence for OpenClaw workflows.
 
 This repository currently contains:
 
+- `packages/schemas`: public wire types for push payloads, findings, comparisons, and recommendations
 - `packages/cli`: the `xerg` CLI, published as `@xerg/cli`
 - `packages/core`: the local economics engine, parsers, storage, and reporting logic
-- `apps/site`: the Vercel-hosted marketing site and waitlist form
-- `docs/v2`: the current product, build, and pricing docs
-- `docs/v1`: the archived original planning docs
+- `apps/site`: the legacy Next.js marketing site kept here for transitional maintenance/reference while new hosted site work moves elsewhere
+- `docs`: current repo docs and status notes
 - `skills/xerg`: the skill package for ecosystem listings
 
 Package links:
 
 - npm: [@xerg/cli](https://www.npmjs.com/package/@xerg/cli)
+- repo package: [`packages/schemas`](packages/schemas)
 - pilot: [xerg.ai/pilot](https://xerg.ai/pilot)
 
 ## Install
@@ -57,10 +58,28 @@ Make one workflow or model fix, then compare against your newest compatible loca
 xerg audit --compare
 ```
 
+Run a remote audit over SSH:
+
+```bash
+xerg audit --remote deploy@prod.example.com --since 24h
+```
+
 Export a shareable report:
 
 ```bash
 xerg audit --markdown > xerg-audit.md
+```
+
+Export JSON with machine-readable recommendations:
+
+```bash
+xerg audit --json
+```
+
+Push an audit summary to the Xerg API:
+
+```bash
+xerg audit --push
 ```
 
 ## Requirements
@@ -100,12 +119,30 @@ pnpm --filter @xerg/cli dev -- audit --compare
 
 # Optional: limit the audit window
 pnpm --filter @xerg/cli dev -- audit --since 24h --compare
+
+# Remote audit over SSH
+pnpm --filter @xerg/cli dev -- audit --remote deploy@prod.example.com --since 24h
+
+# Push the computed audit to the API
+pnpm --filter @xerg/cli dev -- audit --push
+
+# Print the push payload without sending it
+pnpm --filter @xerg/cli dev -- audit --push --dry-run
+
+# Authenticate via browser and store local credentials
+pnpm --filter @xerg/cli dev -- login
+
+# Push the most recent cached audit snapshot without re-running the audit
+pnpm --filter @xerg/cli dev -- push
+
+# Fail CI if waste is too high
+pnpm --filter @xerg/cli dev -- audit --fail-above-waste-rate 0.30
 ```
 
-Beta-facing docs:
+Current docs:
 
-- sample report: `docs/v2/xerg-cli-sample-report.md`
-- beta checklist: `docs/v2/xerg-cli-beta-checklist.md`
+- status audit: `docs/xerg-status-audit-v2.md`
+- remote audit + dashboard PRD: `docs/xerg-remote-audit-and-team-dashboard-prd6-cloudflare.md`
 
 ## Where Xerg looks for OpenClaw data
 
@@ -137,8 +174,10 @@ pnpm --filter @xergai/site dev
 
 ## Publishing
 
-`@xerg/cli` is published from GitHub Actions via the manual
-[`Publish CLI to npm`](/Users/jasoncurry/code/xerg/.github/workflows/publish-npm.yml)
-workflow.
+`@xerg/cli` is currently published on npm. `@xerg/schemas` exists in this repo but is not yet published on npm.
+
+Publishing is handled by the manual
+[`Publish to npm`](.github/workflows/publish-npm.yml)
+workflow, which currently publishes both packages and expects an `NPM_TOKEN` GitHub Actions secret.
 
 The intended long-term setup is npm Trusted Publishing, not long-lived npm tokens.
