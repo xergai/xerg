@@ -1,4 +1,4 @@
-import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -28,19 +28,19 @@ function captureOutput() {
   let stdout = '';
   let stderr = '';
 
-  const stdoutSpy = vi
-    .spyOn(process.stdout, 'write')
-    .mockImplementation(((chunk: string | Uint8Array) => {
-      stdout += chunk.toString();
-      return true;
-    }) as typeof process.stdout.write);
+  const stdoutSpy = vi.spyOn(process.stdout, 'write').mockImplementation(((
+    chunk: string | Uint8Array,
+  ) => {
+    stdout += chunk.toString();
+    return true;
+  }) as typeof process.stdout.write);
 
-  const stderrSpy = vi
-    .spyOn(process.stderr, 'write')
-    .mockImplementation(((chunk: string | Uint8Array) => {
-      stderr += chunk.toString();
-      return true;
-    }) as typeof process.stderr.write);
+  const stderrSpy = vi.spyOn(process.stderr, 'write').mockImplementation(((
+    chunk: string | Uint8Array,
+  ) => {
+    stderr += chunk.toString();
+    return true;
+  }) as typeof process.stderr.write);
 
   return {
     getStdout: () => stdout,
@@ -66,8 +66,8 @@ describe('Phase 2b CLI commands', () => {
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
     vi.useRealTimers();
-    delete process.env.XERG_API_KEY;
-    delete process.env.XERG_API_URL;
+    Reflect.deleteProperty(process.env, 'XERG_API_KEY');
+    Reflect.deleteProperty(process.env, 'XERG_API_URL');
   });
 
   afterEach(() => {
@@ -80,19 +80,19 @@ describe('Phase 2b CLI commands', () => {
     if (originalEnv.XDG_CONFIG_HOME !== undefined) {
       process.env.XDG_CONFIG_HOME = originalEnv.XDG_CONFIG_HOME;
     } else {
-      delete process.env.XDG_CONFIG_HOME;
+      Reflect.deleteProperty(process.env, 'XDG_CONFIG_HOME');
     }
 
     if (originalEnv.XERG_API_KEY !== undefined) {
       process.env.XERG_API_KEY = originalEnv.XERG_API_KEY;
     } else {
-      delete process.env.XERG_API_KEY;
+      Reflect.deleteProperty(process.env, 'XERG_API_KEY');
     }
 
     if (originalEnv.XERG_API_URL !== undefined) {
       process.env.XERG_API_URL = originalEnv.XERG_API_URL;
     } else {
-      delete process.env.XERG_API_URL;
+      Reflect.deleteProperty(process.env, 'XERG_API_URL');
     }
 
     for (const dir of tempDirs.splice(0)) {
@@ -146,11 +146,9 @@ describe('Phase 2b CLI commands', () => {
     expect(JSON.parse(readFileSync(credentialsPath, 'utf8'))).toMatchObject({
       token: 'sk_test_login',
     });
-    expect(fetchMock).toHaveBeenNthCalledWith(
-      1,
-      'https://api.xerg.ai/v1/auth/device-code',
-      { method: 'POST' },
-    );
+    expect(fetchMock).toHaveBeenNthCalledWith(1, 'https://api.xerg.ai/v1/auth/device-code', {
+      method: 'POST',
+    });
     expect(fetchMock).toHaveBeenNthCalledWith(
       2,
       'https://api.xerg.ai/v1/auth/device-token',
