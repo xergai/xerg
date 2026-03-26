@@ -24,6 +24,21 @@ function buildPayload(auditId = 'audit_test_123') {
   };
 }
 
+function mockCoreForPushImports() {
+  vi.doMock('@xergai/core', () => ({
+    getDefaultDbPath: () => '/tmp/xerg-test.db',
+    listStoredAuditSummaries: () => [],
+    toWirePayload: (summary: { auditId: string }, meta: Record<string, unknown>) => ({
+      version: 1,
+      summary: {
+        auditId: summary.auditId,
+        generatedAt: '2026-03-25T12:00:00.000Z',
+      },
+      meta,
+    }),
+  }));
+}
+
 function captureOutput() {
   let stdout = '';
   let stderr = '';
@@ -179,6 +194,7 @@ describe('Phase 2b CLI commands', () => {
   it('prints a file payload in dry-run mode', async () => {
     const workDir = createTempDir('xerg-push-file-');
     tempDirs.push(workDir);
+    mockCoreForPushImports();
 
     const payloadPath = join(workDir, 'payload.json');
     writeFileSync(payloadPath, JSON.stringify(buildPayload(), null, 2));
@@ -194,6 +210,7 @@ describe('Phase 2b CLI commands', () => {
   it('pushes a file payload to the configured API', async () => {
     const workDir = createTempDir('xerg-push-live-');
     tempDirs.push(workDir);
+    mockCoreForPushImports();
 
     process.env.XERG_API_KEY = 'sk_test_push';
     process.env.XERG_API_URL = 'https://api-staging.xerg.ai';
