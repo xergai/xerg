@@ -72,14 +72,27 @@ async function collectGlobMatches(
   },
 ) {
   const matches: string[] = [];
-
-  for await (const match of glob(pattern, {
+  const result = glob(pattern, {
     cwd: options?.cwd,
-  })) {
+  }) as AsyncIterable<string> | Promise<string[]>;
+
+  if (isAsyncIterable(result)) {
+    for await (const match of result) {
+      matches.push(options?.resolveWith ? resolve(options.resolveWith, match) : match);
+    }
+
+    return matches;
+  }
+
+  for (const match of await result) {
     matches.push(options?.resolveWith ? resolve(options.resolveWith, match) : match);
   }
 
   return matches;
+}
+
+function isAsyncIterable(value: unknown): value is AsyncIterable<string> {
+  return typeof value === 'object' && value !== null && Symbol.asyncIterator in value;
 }
 
 export async function inspectOpenClawSources(options: AuditOptions): Promise<DoctorReport> {
