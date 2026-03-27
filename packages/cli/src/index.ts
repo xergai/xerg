@@ -365,11 +365,16 @@ Remote options (SSH):
   --remote-config <path>      Path to a JSON file defining multiple remote sources
   --keep-remote-files         Retain pulled files in ~/.xerg/remote-cache/ instead of using a temp directory
 
+Prerequisites:
+  SSH remote audits require ssh and rsync on your PATH.
+
 Railway options:
   --railway                   Audit a Railway service (uses linked project by default)
   --project <id>              Railway project ID
   --environment <id>          Railway environment ID
   --service <id>              Railway service ID
+
+  Railway audits require the railway CLI on your PATH.
 
 Push options:
   --push                      Push the audit summary to the Xerg API after computing it
@@ -400,6 +405,7 @@ Options:
 Authentication:
   Set XERG_API_KEY in your environment, add "apiKey" to ~/.xerg/config.json,
   or run \`xerg login\` to authenticate via browser.
+  Browser login stores a token at ~/.config/xerg/credentials.json by default.
 `;
 }
 
@@ -420,11 +426,15 @@ Remote options (SSH):
   --remote-log-file <path>    Override the default gateway log path on the remote host
   --remote-sessions-dir <path>  Override the default sessions directory on the remote host
 
+  SSH checks require ssh and rsync on your PATH.
+
 Railway options:
   --railway                   Check a Railway service (uses linked project by default)
   --project <id>              Railway project ID
   --environment <id>          Railway environment ID
   --service <id>              Railway service ID
+
+  Railway checks require the railway CLI on your PATH.
 
   -h, --help                  Show help
 `;

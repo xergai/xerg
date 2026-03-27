@@ -20,6 +20,12 @@ xerg doctor
 xerg audit
 ```
 
+## Supported runtime
+
+`@xerg/cli` supports Node `20`, `22`, and `24`.
+
+If you are developing in this repo, `.nvmrc` still pins the default local toolchain to Node `24.14.0`.
+
 ## Sample output
 
 ```text
@@ -71,6 +77,11 @@ xerg audit --since 24h --compare
 - If OpenClaw runs remotely, SSH into the machine where the logs live and run Xerg there
 - Or point Xerg at exported files directly with flags
 
+Remote prerequisites:
+
+- SSH audits require `ssh` and `rsync` on your `PATH`
+- Railway audits require the `railway` CLI on your `PATH`
+
 ## Default paths
 
 By default, Xerg checks:
@@ -85,6 +96,30 @@ xerg audit --log-file /path/to/openclaw.log
 xerg audit --sessions-dir /path/to/sessions
 ```
 
+## Authentication and config
+
+Push commands resolve credentials in this order:
+
+1. `XERG_API_KEY`
+2. `~/.xerg/config.json`
+3. `xerg login` browser credentials stored at `~/.config/xerg/credentials.json`
+
+Optional API URL overrides:
+
+- `XERG_API_URL`
+- `apiUrl` in `~/.xerg/config.json`
+
+Example `~/.xerg/config.json`:
+
+```json
+{
+  "apiKey": "sk_live_or_test_key",
+  "apiUrl": "https://api.xerg.ai"
+}
+```
+
+`xerg login` stores a browser-issued token in `~/.config/xerg/credentials.json`. That token store is separate from `~/.xerg/config.json`.
+
 ## What the audit shows
 
 - Total spend by workflow and model, in dollars
@@ -96,6 +131,19 @@ xerg audit --sessions-dir /path/to/sessions
 ## Privacy
 
 Xerg v0 stores economic metadata and audit summaries locally. It does not store prompt or response content.
+
+## Exit codes
+
+- `0`: success
+- `1`: general failure
+- `2`: no OpenClaw data was found
+- `3`: a `--fail-above-waste-rate` or `--fail-above-waste-usd` threshold was exceeded
+
+## Troubleshooting
+
+- `better-sqlite3` is a native dependency. If install fails, retry on a supported Node version and make sure standard native build tooling is available for your platform.
+- If `xerg audit --remote ...` fails before pulling files, verify that both `ssh` and `rsync` are installed and reachable on your `PATH`.
+- If `xerg audit --railway` fails immediately, verify that the `railway` CLI is installed, authenticated, and can access the target project.
 
 ## Pilot and support
 

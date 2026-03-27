@@ -1,3 +1,5 @@
+export const SCHEMA_VERSION = 1;
+
 export const SCHEMA_SQL = `
 CREATE TABLE IF NOT EXISTS source_files (
   id TEXT PRIMARY KEY,

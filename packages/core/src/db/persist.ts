@@ -1,7 +1,5 @@
-import { readFileSync } from 'node:fs';
-
 import type { PersistedAudit } from '../types.js';
-import { sha1 } from '../utils/hash.js';
+import { sha1, sha1File } from '../utils/hash.js';
 import { isoNow } from '../utils/time.js';
 import { createDb } from './client.js';
 
@@ -16,7 +14,7 @@ export function persistAudit(audit: PersistedAudit, dbPath: string) {
     id: sha1(`${file.path}:${file.mtimeMs}:${file.sizeBytes}`),
     path: file.path,
     kind: file.kind,
-    fileHash: sha1(readFileSync(file.path, 'utf8')),
+    fileHash: sha1File(file.path),
     mtimeMs: Math.trunc(file.mtimeMs),
     sizeBytes: file.sizeBytes,
     importedAt,

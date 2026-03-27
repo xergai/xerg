@@ -6,6 +6,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@xergai/core': fileURLToPath(new URL('./packages/core/src/index.ts', import.meta.url)),
+      '@xerg/schemas': fileURLToPath(new URL('./packages/schemas/src/index.ts', import.meta.url)),
     },
   },
   test: {

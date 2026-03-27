@@ -2,10 +2,12 @@ import { hydrateAuditSummary } from '../report/comparison.js';
 import type { AuditSummary } from '../types.js';
 import { createDb } from './client.js';
 
-function parseAuditSummary(summaryJson: string) {
+function parseAuditSummary(row: { id: string; summaryJson: string }) {
   try {
-    return hydrateAuditSummary(JSON.parse(summaryJson) as AuditSummary);
-  } catch {
+    return hydrateAuditSummary(JSON.parse(row.summaryJson) as AuditSummary);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    process.stderr.write(`Warning: skipping unreadable audit snapshot ${row.id}: ${message}\n`);
     return null;
   }
 }
@@ -17,15 +19,15 @@ export function listStoredAuditSummaries(dbPath: string): AuditSummary[] {
     const rows = sqlite
       .prepare(
         `
-          SELECT summary_json AS summaryJson
+          SELECT id, summary_json AS summaryJson
           FROM audit_snapshots
           ORDER BY created_at DESC
         `,
       )
-      .all() as { summaryJson: string }[];
+      .all() as { id: string; summaryJson: string }[];
 
     return rows
-      .map((row) => parseAuditSummary(row.summaryJson))
+      .map((row) => parseAuditSummary(row))
       .filter((summary): summary is AuditSummary => summary !== null);
   } finally {
     sqlite.close();

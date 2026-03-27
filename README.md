@@ -82,8 +82,10 @@ xerg audit --push
 
 ## Requirements
 
-- Node `24.14.0`
+- Node `20`, `22`, or `24`
 - `pnpm` `10.x`
+
+Local development in this repo still defaults to Node `24.14.0` via `.nvmrc`.
 
 ## Local development
 
@@ -161,8 +163,8 @@ It includes the exact install, audit, export, and compare commands, plus where t
 
 ## Publishing
 
-`@xerg/cli` is currently published on npm. `@xerg/schemas` exists in this repo but is not yet published on npm.
-
-Publishing is handled by the manual
+The manual
 [`Publish to npm`](.github/workflows/publish-npm.yml)
-workflow, which publishes both packages via npm Trusted Publishing.
+workflow is configured to publish both `@xerg/cli` and `@xerg/schemas`.
+
+Publishing uses npm Trusted Publishing.
