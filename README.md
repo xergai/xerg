@@ -8,8 +8,6 @@ This repository currently contains:
 - `packages/schemas`: public wire types for push payloads, findings, comparisons, and recommendations
 - `packages/cli`: the `xerg` CLI, published as `@xerg/cli`
 - `packages/core`: the local economics engine, parsers, storage, and reporting logic
-- `apps/site`: the legacy Next.js marketing site kept here for transitional maintenance/reference while new hosted site work moves elsewhere
-- `docs`: current repo docs and status notes
 - `skills/xerg`: the skill package for ecosystem listings
 
 Package links:
@@ -139,11 +137,6 @@ pnpm --filter @xerg/cli dev -- push
 pnpm --filter @xerg/cli dev -- audit --fail-above-waste-rate 0.30
 ```
 
-Current docs:
-
-- status audit: `docs/xerg-status-audit-v2.md`
-- remote audit + dashboard PRD: `docs/xerg-remote-audit-and-team-dashboard-prd6-cloudflare.md`
-
 ## Where Xerg looks for OpenClaw data
 
 By default, Xerg checks:
@@ -166,18 +159,10 @@ If you are using OpenClaw and want to try Xerg in the real world, the pilot page
 
 It includes the exact install, audit, export, and compare commands, plus where to send results.
 
-Run the site locally:
-
-```bash
-pnpm --filter @xergai/site dev
-```
-
 ## Publishing
 
 `@xerg/cli` is currently published on npm. `@xerg/schemas` exists in this repo but is not yet published on npm.
 
 Publishing is handled by the manual
 [`Publish to npm`](.github/workflows/publish-npm.yml)
-workflow, which currently publishes both packages and expects an `NPM_TOKEN` GitHub Actions secret.
-
-The intended long-term setup is npm Trusted Publishing, not long-lived npm tokens.
+workflow, which publishes both packages via npm Trusted Publishing.
