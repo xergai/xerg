@@ -1,6 +1,11 @@
 import type { WireComparison } from './wire-comparison.js';
 import type { WireFinding } from './wire-finding.js';
 
+export const AUDIT_PUSH_PAYLOAD_VERSION = 1 as const;
+
+export type AuditPushPayloadVersion = typeof AUDIT_PUSH_PAYLOAD_VERSION;
+export type PushEnvironment = 'local' | 'remote' | 'railway';
+
 export interface FindingTaxonomyBucket {
   kind: string;
   label: string;
@@ -17,7 +22,7 @@ export interface SpendBreakdown {
 }
 
 export interface AuditPushPayload {
-  version: 1;
+  version: AuditPushPayloadVersion;
   summary: {
     auditId: string;
     generatedAt: string;
@@ -42,7 +47,7 @@ export interface AuditPushPayload {
     cliVersion: string;
     sourceId: string;
     sourceHost: string;
-    environment: string;
+    environment: PushEnvironment;
     pushedAt: string;
   };
 }

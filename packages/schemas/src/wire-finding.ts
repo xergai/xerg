@@ -1,3 +1,5 @@
+export type WireFindingScope = 'global' | 'workflow' | 'run';
+
 export interface WireFinding {
   id: string;
   classification: 'waste' | 'opportunity';
@@ -5,7 +7,7 @@ export interface WireFinding {
   kind: string;
   title: string;
   summary: string;
-  scope: string;
+  scope: WireFindingScope;
   scopeId: string;
   costImpactUsd: number;
 }

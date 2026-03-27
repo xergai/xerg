@@ -1,3 +1,5 @@
+import type { PushEnvironment } from '@xerg/schemas';
+
 export type SourceKind = 'gateway' | 'sessions';
 
 export type CostSource = 'observed' | 'estimated';
@@ -189,5 +191,5 @@ export interface WirePayloadMeta {
   cliVersion: string;
   sourceId: string;
   sourceHost: string;
-  environment: string;
+  environment: PushEnvironment;
 }

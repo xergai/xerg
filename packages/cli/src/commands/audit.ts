@@ -159,7 +159,7 @@ function describeSource(source: RemoteSource): string {
   return source.host;
 }
 
-function sourceEnvironment(source: RemoteSource): string {
+function sourceEnvironment(source: RemoteSource): WirePayloadMeta['environment'] {
   return source.transport === 'railway' ? 'railway' : 'remote';
 }
 
@@ -299,7 +299,7 @@ function readCliVersion(): string {
 }
 
 function buildMeta(input: {
-  environment: string;
+  environment: WirePayloadMeta['environment'];
   sourceId: string;
   sourceHost: string;
 }): WirePayloadMeta {

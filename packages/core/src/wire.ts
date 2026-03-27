@@ -1,4 +1,9 @@
-import type { AuditPushPayload, WireComparison, WireFinding } from '@xerg/schemas';
+import {
+  AUDIT_PUSH_PAYLOAD_VERSION,
+  type AuditPushPayload,
+  type WireComparison,
+  type WireFinding,
+} from '@xerg/schemas';
 
 import type { AuditComparison, AuditSummary, Finding, WirePayloadMeta } from './types.js';
 import { isoNow } from './utils/time.js';
@@ -34,7 +39,7 @@ function toWireComparison(comparison: AuditComparison): WireComparison {
 
 export function toWirePayload(summary: AuditSummary, meta: WirePayloadMeta): AuditPushPayload {
   return {
-    version: 1,
+    version: AUDIT_PUSH_PAYLOAD_VERSION,
     summary: {
       auditId: summary.auditId,
       generatedAt: summary.generatedAt,

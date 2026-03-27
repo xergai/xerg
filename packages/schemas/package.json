@@ -12,6 +12,7 @@
   "author": "Xerg <query@xerg.ai>",
   "license": "MIT",
   "type": "module",
+  "sideEffects": false,
   "publishConfig": {
     "access": "public"
   },

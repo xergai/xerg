@@ -45,9 +45,17 @@ try {
     cwd: installDir,
     encoding: 'utf8',
   });
+  const versionOutput = execFileSync('corepack', ['pnpm', 'exec', 'xerg', '--version'], {
+    cwd: installDir,
+    encoding: 'utf8',
+  }).trim();
 
   if (!helpOutput.includes('xerg <command> [options]')) {
     throw new Error('Installed package did not expose the xerg CLI as expected.');
+  }
+
+  if (!/^\d+\.\d+\.\d+/.test(versionOutput)) {
+    throw new Error('Installed package did not report a valid semantic version.');
   }
 
   process.stdout.write('CLI package smoke test passed.\n');
