@@ -1,16 +1,43 @@
 # @xerg/schemas
 
-Public wire types for Xerg audit payloads, findings, comparisons, and recommendations.
+Versioned TypeScript wire types for Xerg audit payloads, findings, comparisons, and recommendations.
 
-## What this package is for
+## What it is
 
 `@xerg/schemas` defines the JSON contract shared between the Xerg CLI, the local audit engine, and any service that consumes pushed audit summaries.
 
-It is intentionally small:
+It is intentionally small and stable:
 
-- TypeScript-first type definitions for the wire payload
-- A runtime `AUDIT_PUSH_PAYLOAD_VERSION` constant for versioned payload checks
-- No runtime validation layer yet
+- TypeScript-first types for Xerg wire payloads
+- A runtime `AUDIT_PUSH_PAYLOAD_VERSION` constant for compatibility checks
+- A dependency-light package surface for backends, ingestion services, and internal tooling
+
+## What it is not
+
+This package does not perform runtime validation by itself. It provides compile-time guarantees for TypeScript consumers. If you accept untrusted JSON, add runtime validation in the consuming service and keep it aligned with these exported types.
+
+## Install
+
+```bash
+npm install @xerg/schemas
+```
+
+## Example
+
+```ts
+import {
+  AUDIT_PUSH_PAYLOAD_VERSION,
+  type AuditPushPayload,
+} from '@xerg/schemas';
+
+export function acceptAuditPayload(payload: AuditPushPayload) {
+  if (payload.version !== AUDIT_PUSH_PAYLOAD_VERSION) {
+    throw new Error(`Unsupported payload version: ${payload.version}`);
+  }
+
+  return payload.summary.auditId;
+}
+```
 
 ## Compatibility contract
 
@@ -28,6 +55,18 @@ import { AUDIT_PUSH_PAYLOAD_VERSION } from '@xerg/schemas';
 AUDIT_PUSH_PAYLOAD_VERSION; // 1
 ```
 
-## Runtime validation
+## Exports
 
-This package provides compile-time guarantees only. If you need to validate untrusted JSON at runtime, add a validator in the consuming service and keep it aligned with these exported types.
+Primary exports include:
+
+- `AuditPushPayload`
+- `WireFinding`
+- `WireComparison`
+- `XergRecommendation`
+- `AUDIT_PUSH_PAYLOAD_VERSION`
+
+## Use cases
+
+- Share a single payload contract between the Xerg CLI and backend services
+- Type audit ingestion pipelines without copying interface definitions
+- Gate processing logic on an explicit payload version
