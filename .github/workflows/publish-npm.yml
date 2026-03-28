@@ -4,11 +4,10 @@ on:
   workflow_dispatch:
 
 jobs:
-  publish:
+  verify:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write
 
     steps:
       - uses: actions/checkout@v4
@@ -45,9 +44,63 @@ jobs:
       - name: CLI package smoke test
         run: pnpm cli:smoke
 
+  publish-schemas:
+    runs-on: ubuntu-latest
+    needs: verify
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.6.2
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build schemas
+        run: pnpm --filter @xerg/schemas build
+
       - name: Publish @xerg/schemas
         working-directory: packages/schemas
         run: npm publish --provenance --access public
+
+  publish-cli:
+    runs-on: ubuntu-latest
+    needs: verify
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.6.2
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
 
       - name: Publish @xerg/cli
         working-directory: packages/cli
