@@ -73,7 +73,7 @@ jobs:
 
       - name: Publish @xerg/schemas
         working-directory: packages/schemas
-        run: npm publish --provenance --access public
+        run: npm publish --access public
 
   publish-cli:
     runs-on: ubuntu-latest
@@ -104,4 +104,4 @@ jobs:
 
       - name: Publish @xerg/cli
         working-directory: packages/cli
-        run: npm publish --provenance --access public
+        run: npm publish --access public
