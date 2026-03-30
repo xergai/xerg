@@ -2,15 +2,7 @@
   "name": "@xerg/cli",
   "version": "0.1.6",
   "description": "Audit OpenClaw agent spend, waste, and before/after improvements.",
-  "keywords": [
-    "ai",
-    "agents",
-    "finops",
-    "llm",
-    "openclaw",
-    "cost",
-    "cli"
-  ],
+  "keywords": ["ai", "agents", "finops", "llm", "openclaw", "cost", "cli"],
   "homepage": "https://xerg.ai",
   "repository": {
     "type": "git",
@@ -30,12 +22,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE",
-    "skills"
-  ],
+  "files": ["dist", "README.md", "LICENSE", "skills"],
   "main": "./dist/index.js",
   "exports": {
     ".": {
