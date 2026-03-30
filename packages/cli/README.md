@@ -22,13 +22,19 @@ xerg audit
 
 ## Bundled skill
 
-The published `@xerg/cli` package includes the portable Xerg skill bundle at:
+The published `@xerg/cli` package includes the portable Xerg skill bundle inside the installed package at:
+
+```text
+skills/xerg/SKILL.md
+```
+
+For a local project install, that usually resolves to:
 
 ```text
 node_modules/@xerg/cli/skills/xerg/SKILL.md
 ```
 
-That file is a packaged copy of the canonical repo skill at [`skills/xerg/SKILL.md`](../../skills/xerg/SKILL.md). Use it if your agent platform imports skills from disk; installing the npm package does not automatically register the skill with every agent product.
+For a global install, the same file lives inside the global npm package directory instead. That file is a packaged copy of the canonical repo skill at [`skills/xerg/SKILL.md`](../../skills/xerg/SKILL.md). Use it if your agent platform imports skills from disk; installing the npm package does not automatically register the skill with every agent product.
 
 ## Supported runtime
 
@@ -84,7 +90,7 @@ xerg audit --since 24h --compare
 
 - Local machine: yes
 - VPS or remote server: yes
-- If OpenClaw runs remotely, SSH into the machine where the logs live and run Xerg there
+- If OpenClaw runs remotely, you can audit it from your local machine with `xerg audit --remote user@host`
 - Or point Xerg at exported files directly with flags
 
 Remote prerequisites:

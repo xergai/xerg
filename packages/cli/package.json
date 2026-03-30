@@ -1,6 +1,6 @@
 {
   "name": "@xerg/cli",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Audit OpenClaw agent spend, waste, and before/after improvements.",
   "keywords": ["ai", "agents", "finops", "llm", "openclaw", "cost", "cli"],
   "homepage": "https://xerg.ai",
