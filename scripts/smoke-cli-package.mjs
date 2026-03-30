@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -56,6 +56,25 @@ try {
 
   if (!/^\d+\.\d+\.\d+/.test(versionOutput)) {
     throw new Error('Installed package did not report a valid semantic version.');
+  }
+
+  const bundledSkillPath = join(
+    installDir,
+    'node_modules',
+    '@xerg',
+    'cli',
+    'skills',
+    'xerg',
+    'SKILL.md',
+  );
+
+  if (!existsSync(bundledSkillPath)) {
+    throw new Error('Installed package did not include the bundled Xerg skill.');
+  }
+
+  const bundledSkill = readFileSync(bundledSkillPath, 'utf8');
+  if (!bundledSkill.includes('name: xerg')) {
+    throw new Error('Bundled Xerg skill did not contain expected frontmatter.');
   }
 
   process.stdout.write('CLI package smoke test passed.\n');

@@ -20,6 +20,16 @@ xerg doctor
 xerg audit
 ```
 
+## Bundled skill
+
+The published `@xerg/cli` package includes the portable Xerg skill bundle at:
+
+```text
+node_modules/@xerg/cli/skills/xerg/SKILL.md
+```
+
+That file is a packaged copy of the canonical repo skill at [`skills/xerg/SKILL.md`](../../skills/xerg/SKILL.md). Use it if your agent platform imports skills from disk; installing the npm package does not automatically register the skill with every agent product.
+
 ## Supported runtime
 
 `@xerg/cli` supports Node `20`, `22`, and `24`.
