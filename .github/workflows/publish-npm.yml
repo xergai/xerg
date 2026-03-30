@@ -2,6 +2,16 @@ name: Publish to npm
 
 on:
   workflow_dispatch:
+    inputs:
+      publish_target:
+        description: Package(s) to publish
+        required: true
+        default: cli
+        type: choice
+        options:
+          - cli
+          - schemas
+          - all
 
 jobs:
   verify:
@@ -45,6 +55,7 @@ jobs:
         run: pnpm cli:smoke
 
   publish-schemas:
+    if: ${{ github.event.inputs.publish_target == 'schemas' || github.event.inputs.publish_target == 'all' }}
     runs-on: ubuntu-latest
     needs: verify
     permissions:
@@ -76,6 +87,7 @@ jobs:
         run: npm publish --access public
 
   publish-cli:
+    if: ${{ github.event.inputs.publish_target == 'cli' || github.event.inputs.publish_target == 'all' }}
     runs-on: ubuntu-latest
     needs: verify
     permissions:
