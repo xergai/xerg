@@ -1,215 +1,191 @@
+---
+name: xerg
+description: Audit OpenClaw agent spend in dollars. Use for local or remote audits, before/after comparisons, CI threshold gates, and machine-readable recommendations.
+---
+
 # Xerg
 
-Use this skill to audit the economics of OpenClaw agent workflows in dollars, not tokens.
+Use `xerg` if it is already installed. If not, use `npx @xerg/cli` with the same arguments.
 
-Xerg reads your local OpenClaw gateway logs and session transcripts, classifies structural waste into five categories with dollar amounts, and surfaces actionable recommendations with estimated savings. Audits run locally by default — no data leaves your machine unless you explicitly push results to the Xerg API. Install globally with `npm install -g @xerg/cli` to skip the npx fetch.
+Xerg audits OpenClaw spend in dollars and surfaces both confirmed waste and savings opportunities. It can analyze local files, pull remote sources over SSH or Railway, compare against prior local snapshots, and optionally push audit summaries to the Xerg API.
 
-## Commands
+## Inputs
 
-Check that Xerg can find your OpenClaw data:
+Xerg needs one of these source inputs:
+
+- Local OpenClaw data at the default paths:
+  - `/tmp/openclaw/openclaw-*.log`
+  - `~/.openclaw/agents/*/sessions/*.jsonl`
+- Explicit paths via `--log-file` and/or `--sessions-dir`
+- An SSH target via `--remote`
+- A Railway target via `--railway`
+- A multi-source config via `--remote-config`
+
+Additional requirements:
+
+- `--compare` needs at least one previously stored compatible local snapshot
+- Pushing needs auth via `XERG_API_KEY`, `~/.xerg/config.json`, or `xerg login`
+- SSH audits require `ssh` and `rsync` on your local `PATH`
+- Railway audits require the `railway` CLI on your local `PATH`
+
+## Default Flow
+
+1. Detect sources first when paths or connectivity are uncertain:
 
 ```bash
 xerg doctor
+xerg doctor --remote user@host
+xerg doctor --railway
 ```
 
-Run a waste intelligence audit:
+2. Run a baseline audit:
 
 ```bash
 xerg audit
 ```
 
-Scope the audit to a recent time window:
+3. Choose the right output mode for the task:
 
 ```bash
-xerg audit --since 24h
+xerg audit
+xerg audit --json
+xerg audit --markdown
 ```
 
-Compare the current audit against the most recent compatible prior snapshot:
+- Plain `xerg audit` is best for a human-readable summary
+- `xerg audit --json` is best for automation and agents
+- `xerg audit --markdown` is best for a shareable report
+
+4. After a workflow or model change, measure the delta:
 
 ```bash
 xerg audit --compare
+xerg audit --compare --json
 ```
 
-Export the report as shareable Markdown:
+5. Export or push only when needed:
 
 ```bash
 xerg audit --markdown > xerg-audit.md
+xerg audit --push
+xerg push
 ```
 
-Export as JSON for programmatic use (includes recommendations):
+## Source Selection
+
+Local defaults:
 
 ```bash
-xerg audit --json
+xerg audit
 ```
 
-Point Xerg at specific files when data lives outside the defaults:
+Explicit local paths:
 
 ```bash
 xerg audit --log-file /path/to/openclaw.log
 xerg audit --sessions-dir /path/to/sessions
 ```
 
-### Authentication
-
-Authenticate via browser (stores credentials locally):
+SSH remote:
 
 ```bash
-xerg login
+xerg audit --remote user@vps.example.com
+xerg audit --remote user@vps.example.com \
+  --remote-log-file /opt/openclaw/logs/openclaw.log \
+  --remote-sessions-dir /opt/openclaw/sessions
 ```
 
-Remove stored credentials:
+Railway:
 
 ```bash
-xerg logout
+xerg audit --railway
+xerg audit --railway --project <id> --environment <id> --service <id>
 ```
 
-You can also set `XERG_API_KEY` as an environment variable — this takes precedence over stored credentials and is recommended for CI.
-
-### Pushing audit results
-
-Push the audit to the Xerg API as part of the audit:
+Multiple remote sources:
 
 ```bash
-xerg audit --push
+xerg audit --remote-config ~/.xerg/remotes.json
 ```
 
-Preview the push payload without sending:
+Remote config files use this shape:
 
-```bash
-xerg audit --push --dry-run
+```json
+{
+  "remotes": [
+    {
+      "name": "prod",
+      "transport": "ssh",
+      "host": "deploy@prod.example.com"
+    },
+    {
+      "name": "railway-prod",
+      "transport": "railway",
+      "railway": {
+        "projectId": "...",
+        "environmentId": "...",
+        "serviceId": "..."
+      }
+    }
+  ]
+}
 ```
 
-Push the most recent cached audit snapshot without re-running the audit:
+## CI And Automation
 
-```bash
-xerg push
-```
-
-Push a specific snapshot file:
-
-```bash
-xerg push --file /path/to/snapshot.json
-```
-
-Preview what would be sent:
-
-```bash
-xerg push --dry-run
-```
-
-### Threshold flags for CI gating
-
-Exit with code 3 if structural waste rate exceeds a threshold:
-
-```bash
-xerg audit --fail-above-waste-rate 0.30
-```
-
-Exit with code 3 if waste spend exceeds a USD threshold:
-
-```bash
-xerg audit --fail-above-waste-usd 50
-```
-
-Composable with other flags:
-
-```bash
-xerg audit --remote user@host --push --fail-above-waste-rate 0.25
-```
-
-## Suggested agent workflow
-
-1. Run `xerg doctor` to confirm sources are detected.
-2. Run `xerg audit --json` to get a structured baseline with recommendations.
-3. Parse the `recommendations` array and apply the highest-impact fix.
-4. Run `xerg audit --compare` to measure the before/after delta.
-5. Run `xerg audit --markdown > xerg-audit.md` to export the result.
-
-Steps 3–5 can repeat. Each `--compare` run measures against the newest compatible prior snapshot, so the improvement loop compounds.
-
-### Agent-driven optimization loop
-
-For automated optimization, an agent can run Xerg in a loop:
-
-```bash
-# 1. Audit and capture structured output
-AUDIT=$(xerg audit --json)
-
-# 2. Parse recommendations (the JSON includes a 'recommendations' array)
-# Each recommendation has: id, findingId, kind, title, description,
-# estimatedSavingsUsd, confidence, actionType, suggestedChange
-
-# 3. Apply the fix (agent decides whether/how to act)
-
-# 4. Re-audit with comparison to verify improvement
-xerg audit --compare --json
-
-# 5. Push results to the team dashboard
-xerg audit --push
-```
-
-In CI, use threshold flags so the pipeline fails if waste is too high:
+For CI gates, prefer a single command so the audit can still be pushed before threshold failure:
 
 ```bash
 xerg audit --push --fail-above-waste-rate 0.25 --fail-above-waste-usd 100
 ```
 
-## JSON output with recommendations
+Common variants:
 
-When using `--json`, the output includes a `recommendations` array alongside the audit summary. Each recommendation has this structure:
-
-```json
-{
-  "id": "string",
-  "findingId": "string",
-  "kind": "retry-waste | loop-waste | context-outlier | candidate-downgrade | idle-spend",
-  "title": "string",
-  "description": "string",
-  "estimatedSavingsUsd": 0.0,
-  "confidence": "high | medium | low",
-  "actionType": "model-switch | cache-config | prompt-trim | dedup | other",
-  "suggestedChange": {}
-}
+```bash
+xerg audit --fail-above-waste-rate 0.30
+xerg audit --fail-above-waste-usd 50
+xerg audit --since 24h --fail-above-waste-rate 0.30
 ```
 
-Recommendations are suggestions, not commands. Xerg tells the agent what to change and estimates savings — the agent decides whether to act.
+Documented exit codes:
 
-## What the audit reports
+- `0` success
+- `1` runtime error
+- `2` no OpenClaw data found
+- `3` threshold exceeded
 
-- Total spend by workflow and model, in USD (observed vs. estimated, always labeled)
-- Structural waste taxonomy with five categories:
-  - **Retry waste** — failed calls that burned spend before a successful retry (high confidence)
-  - **Loop waste** — runs that exceeded efficient iteration bounds (high confidence)
-  - **Context bloat** — input token volume far above the workflow baseline (directional)
-  - **Downgrade candidates** — expensive models on operationally simple tasks (directional, flagged as A/B test)
-  - **Idle waste** — recurring heartbeat or monitoring loops worth reviewing (directional)
-- A prioritized first savings test with estimated dollar impact
-- Machine-readable recommendations with estimated savings per finding
-- Before/after deltas when `--compare` is used: spend, waste rate, biggest improvement, biggest regression, and high-confidence finding changes
+Automation can branch on those codes instead of scraping terminal output.
 
-## Exit codes
+## Recommendations
 
-| Code | Meaning |
-|------|---------|
-| 0 | Success |
-| 1 | Runtime error |
-| 2 | No data found |
-| 3 | Threshold exceeded (`--fail-above-waste-rate` or `--fail-above-waste-usd`) |
+When using `--json`, expect a `recommendations` array alongside the audit summary. Recommendation items include:
 
-Exit codes are stable API — agents can branch on them without parsing output.
+- `id`, `findingId`, `kind`, `title`, `description`
+- `estimatedSavingsUsd`, `confidence`, `actionType`
+- optional `suggestedChange`
 
-## Default data paths
+Current recommendation kinds fall into two buckets:
 
-Xerg auto-detects OpenClaw data at:
+- Confirmed waste: `retry-waste`, `loop-waste`
+- Savings opportunities or directional findings: `context-outlier`, `idle-spend`, `candidate-downgrade`
 
-- Gateway logs: `/tmp/openclaw/openclaw-*.log`
-- Session transcripts: `~/.openclaw/agents/*/sessions/*.jsonl`
+Prefer reversible or high-confidence fixes first. Treat model downgrades and context reductions as A/B-test candidates, not guaranteed savings.
+
+## Checks
+
+Before finalizing work that used Xerg:
+
+- Say whether the audit was local, SSH, Railway, or multi-source
+- Say whether the output was plain terminal text, JSON, or Markdown
+- If `--compare` was used, confirm that it compared against a compatible stored snapshot
+- If no data was found, run `xerg doctor` or use explicit source flags rather than guessing
+- Say whether results were pushed to the Xerg API
 
 ## Notes
 
-- Xerg is local-first. It stores economic metadata and audit snapshots in a local SQLite database. It does not store prompt or response content.
-- `--compare` requires local snapshot history. Using `--compare --no-db` together will fail by design.
-- `XERG_API_KEY` env var takes precedence over stored credentials and `~/.xerg/config.json`.
-- `xerg login` and `xerg logout` are the only interactive commands. Everything else works non-interactively.
-- Pilot page: [xerg.ai/pilot](https://xerg.ai/pilot)
-- Support: query@xerg.ai
+- `--compare` and `--no-db` cannot be used together
+- Xerg is local-first: it stores economic metadata and audit snapshots locally, not prompt or response content
+- `XERG_API_KEY` is recommended for CI and non-interactive automation
+- If browser auth is needed locally, use `xerg login`; remove stored credentials with `xerg logout`
+- Pilot: [xerg.ai/pilot](https://xerg.ai/pilot)
+- Support: `query@xerg.ai`
