@@ -1,0 +1,61 @@
+---
+title: Findings and recommendations
+description: Understand Xerg's five spend categories, what is confirmed waste, and what recommendation objects mean.
+---
+
+Xerg surfaces five finding kinds. Two are confirmed waste. Three are savings opportunities that should be tested rather than treated as proven waste.
+
+For the conceptual view of how these categories are meant to be interpreted, see [waste taxonomy](/waste-taxonomy).
+
+## Finding taxonomy
+
+| Kind | Terminal label | Classification | Confidence | Meaning |
+| --- | --- | --- | --- | --- |
+| `retry-waste` | Retry waste | `waste` | high | Failed calls were followed by more work, so that spend is pure retry overhead. |
+| `loop-waste` | Loop waste | `waste` | high | A run reached at least 7 iterations, and spend after iteration 5 is treated as likely loop waste. |
+| `context-outlier` | Context bloat | `opportunity` | medium | A workflow with at least 3 runs had one or more runs whose input token volume was far above its own baseline. |
+| `idle-spend` | Idle waste | `opportunity` | medium | A workflow name looks like a recurring heartbeat, cron, monitor, or poll loop. |
+| `candidate-downgrade` | Downgrade candidates | `opportunity` | low | An expensive model appears to be used on a simple operational workflow. Treat this as an A/B test candidate. |
+
+## What counts as confirmed waste
+
+Only `retry-waste` and `loop-waste` count toward:
+
+- `wasteSpendUsd`
+- `structuralWasteRate`
+- `--fail-above-waste-rate`
+- `--fail-above-waste-usd`
+
+The opportunity classes roll up into `opportunitySpendUsd` and are shown as directional savings opportunities.
+
+## Recommendation objects
+
+When you run `xerg audit --json`, Xerg adds a `recommendations` array derived from the findings. Each recommendation uses the `@xerg/schemas` shape:
+
+| Field | Meaning |
+| --- | --- |
+| `id` | Stable recommendation id |
+| `findingId` | The finding this recommendation came from |
+| `kind` | The source finding kind |
+| `title` | Human-readable next step |
+| `description` | Why this recommendation exists |
+| `estimatedSavingsUsd` | Expected dollar impact |
+| `confidence` | `high`, `medium`, or `low` |
+| `actionType` | One of `model-switch`, `cache-config`, `prompt-trim`, `dedup`, or `other` |
+| `suggestedChange` | Optional structured hint for automation |
+
+## Current recommendation patterns
+
+| Finding kind | Typical action |
+| --- | --- |
+| `retry-waste` | add retry backoff or lower retry count |
+| `loop-waste` | cap iteration depth or add an early exit |
+| `context-outlier` | trim prompt or context size |
+| `idle-spend` | reduce cadence or switch to event-driven work |
+| `candidate-downgrade` | A/B test a cheaper model |
+
+## What not to overread
+
+- Opportunity findings are directional recommendations, not proven waste.
+- A `candidate-downgrade` finding is intentionally low-confidence and should be treated as an experiment, not an automatic downgrade order.
+- Cost per outcome is intentionally unavailable in v0.

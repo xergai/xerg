@@ -1,0 +1,143 @@
+---
+title: JSON output
+description: Use Xerg's machine-readable summary and push payload formats for automation.
+---
+
+Xerg has two related JSON outputs:
+
+- `xerg audit --json` returns the local audit summary plus recommendations
+- `xerg audit --push --dry-run` and `xerg push --dry-run` return the push payload that would be sent to the Xerg API
+
+The shared wire types are published in `@xerg/schemas`.
+
+## Audit summary JSON
+
+```bash
+npx @xerg/cli audit --json
+```
+
+Shape:
+
+```json
+{
+  "auditId": "...",
+  "generatedAt": "...",
+  "comparisonKey": "...",
+  "comparison": null,
+  "since": "24h",
+  "runCount": 12,
+  "callCount": 83,
+  "totalSpendUsd": 148.0,
+  "observedSpendUsd": 105.0,
+  "estimatedSpendUsd": 43.0,
+  "wasteSpendUsd": 19.5,
+  "opportunitySpendUsd": 28.2,
+  "structuralWasteRate": 0.1318,
+  "wasteByKind": [],
+  "opportunityByKind": [],
+  "spendByWorkflow": [],
+  "spendByModel": [],
+  "findings": [],
+  "notes": [],
+  "sourceFiles": [],
+  "dbPath": "...",
+  "recommendations": []
+}
+```
+
+Key details:
+
+- `recommendations` are added by the CLI on top of the audit summary
+- `sourceFiles` and `dbPath` are present here because this is the local summary format
+- `comparison` is `null` unless a compatible baseline was found
+
+## Multi-source JSON
+
+```bash
+npx @xerg/cli audit --remote-config ./remotes.json --json
+```
+
+If more than one source succeeds, the JSON output becomes:
+
+```json
+{
+  "sources": [
+    {
+      "name": "prod",
+      "auditId": "...",
+      "recommendations": []
+    },
+    {
+      "name": "railway-api",
+      "auditId": "...",
+      "recommendations": []
+    }
+  ]
+}
+```
+
+If exactly one configured source succeeds, Xerg returns a single summary object rather than a top-level `sources` wrapper.
+
+## Push payload JSON
+
+Preview the push payload without sending it:
+
+```bash
+npx @xerg/cli audit --push --dry-run
+npx @xerg/cli push --dry-run
+```
+
+Shape:
+
+```json
+{
+  "version": "...",
+  "summary": {
+    "auditId": "...",
+    "generatedAt": "...",
+    "comparisonKey": "...",
+    "runCount": 12,
+    "callCount": 83,
+    "totalSpendUsd": 148.0,
+    "observedSpendUsd": 105.0,
+    "estimatedSpendUsd": 43.0,
+    "wasteSpendUsd": 19.5,
+    "opportunitySpendUsd": 28.2,
+    "structuralWasteRate": 0.1318,
+    "wasteByKind": [],
+    "opportunityByKind": [],
+    "spendByWorkflow": [],
+    "spendByModel": [],
+    "findings": [],
+    "notes": [],
+    "comparison": null
+  },
+  "meta": {
+    "cliVersion": "...",
+    "sourceId": "...",
+    "sourceHost": "...",
+    "environment": "local",
+    "pushedAt": "..."
+  }
+}
+```
+
+Key details:
+
+- the push payload does not include `sourceFiles`, `dbPath`, or `recommendations`
+- `audit --push --dry-run` prints only the payload, not the normal audit report
+- `meta.environment` is `local`, `remote`, or `railway` depending on how the audit was run
+
+## Wire schema notes
+
+The push payload is a mapped wire contract, not a raw dump of the internal local summary.
+
+- `AuditPushPayload` is the top-level type sent by the CLI
+- `WireFinding` intentionally excludes internal `details`
+- `WireComparison` includes the top-line delta fields only
+- per-workflow deltas, per-model deltas, and recommendation arrays are not part of the push payload
+
+## When to use which JSON
+
+- use `audit --json` for local automation that needs recommendations or source metadata
+- use `--push --dry-run` when you want the exact wire payload that would be sent to the API

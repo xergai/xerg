@@ -1,0 +1,67 @@
+---
+title: Compare
+description: Understand how Xerg chooses a baseline and how to make before and after comparisons meaningful.
+---
+
+## Basic usage
+
+```bash
+npx @xerg/cli audit --compare
+```
+
+Xerg compares the current audit against the newest compatible prior snapshot stored in the local SQLite database.
+
+## What makes a snapshot compatible?
+
+For local audits, Xerg matches on:
+
+- the same source roots for gateway logs and session files
+- the same normalized `--since` window
+
+For SSH and Railway audits, Xerg uses a stable comparison key derived from the target plus the effective remote log and session paths.
+
+That means these usually compare cleanly:
+
+- rerunning the same local audit
+- rerunning the same SSH target with the same remote paths
+- rerunning the same Railway service with the same remote paths
+
+These usually do not compare cleanly:
+
+- changing from default paths to different explicit paths
+- changing the `--since` window from `24h` to `7d`
+- switching to a different SSH host or Railway service
+
+## First run behavior
+
+If you use `--compare` before a compatible baseline exists, Xerg still completes the audit. It adds this note to the summary:
+
+```text
+No prior comparable audit was found. Run the same audit again after a fix to unlock before/after deltas.
+```
+
+## Database requirements
+
+`--compare` needs local snapshot history.
+
+This works:
+
+```bash
+npx @xerg/cli audit --compare
+npx @xerg/cli audit --db /path/to/xerg.sqlite --compare
+```
+
+This does not:
+
+```bash
+npx @xerg/cli audit --no-db --compare
+```
+
+That combination fails because there is no local snapshot store to compare against.
+
+## Recommended workflow
+
+1. Run an initial audit.
+2. Make one workflow or model change.
+3. Re-run the same audit with the same effective inputs and `--compare`.
+4. Use the delta section to confirm whether total spend, structural waste, and high-confidence waste improved.

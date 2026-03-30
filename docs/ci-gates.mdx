@@ -1,0 +1,75 @@
+---
+title: CI gates
+description: Fail CI when confirmed waste exceeds a threshold and optionally push the audit to the Xerg API.
+---
+
+Use CI gates when you want the build to fail if confirmed structural waste crosses a limit.
+
+## Threshold flags
+
+- `--fail-above-waste-rate <n>` fails with exit code `3` when `structuralWasteRate` is above the threshold
+- `--fail-above-waste-usd <n>` fails with exit code `3` when confirmed `wasteSpendUsd` is above the threshold
+
+These thresholds only use confirmed waste, not directional opportunity findings.
+
+## Recommended pattern
+
+If you also want the audit recorded remotely, use one command:
+
+```bash
+npx @xerg/cli audit --push --fail-above-waste-rate 0.30
+```
+
+`xerg audit` pushes before threshold checks run, so the audit still gets sent even if the command ultimately exits with code `3`.
+
+## Examples
+
+Waste rate gate:
+
+```bash
+npx @xerg/cli audit --fail-above-waste-rate 0.30
+```
+
+Absolute USD gate:
+
+```bash
+npx @xerg/cli audit --fail-above-waste-usd 50
+```
+
+Remote gate:
+
+```bash
+npx @xerg/cli audit --remote deploy@prod.example.com --fail-above-waste-rate 0.20
+```
+
+## Exit codes
+
+| Exit code | Meaning |
+| --- | --- |
+| `0` | Success |
+| `1` | General failure |
+| `2` | No OpenClaw data was found |
+| `3` | A waste threshold was exceeded |
+
+## GitHub Actions example
+
+```yaml
+name: xerg
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npx @xerg/cli audit --push --fail-above-waste-rate 0.30
+        env:
+          XERG_API_KEY: ${{ secrets.XERG_API_KEY }}
+```
+
+Adjust the command if your audit needs explicit paths, SSH access, or a Railway target.

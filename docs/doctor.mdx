@@ -1,0 +1,81 @@
+---
+title: Doctor
+description: Check local, SSH, or Railway audit readiness before you run a full Xerg audit.
+---
+
+`xerg doctor` is the fastest way to confirm that Xerg can see OpenClaw data before you run an audit.
+
+## Local checks
+
+```bash
+npx @xerg/cli doctor
+```
+
+Xerg reports:
+
+- the default gateway pattern
+- the default sessions pattern
+- detected source files
+- notes about what is missing
+
+Use explicit local paths when your data is not in the defaults:
+
+```bash
+npx @xerg/cli doctor --log-file /path/to/openclaw.log
+npx @xerg/cli doctor --sessions-dir /path/to/sessions
+```
+
+## SSH checks
+
+```bash
+npx @xerg/cli doctor --remote deploy@prod.example.com
+```
+
+SSH doctor checks:
+
+- SSH connectivity
+- whether `rsync` exists locally and remotely
+- default remote paths
+- optional custom remote paths when you pass `--remote-log-file` or `--remote-sessions-dir`
+
+Custom remote paths:
+
+```bash
+npx @xerg/cli doctor \
+  --remote deploy@prod.example.com \
+  --remote-log-file /var/log/openclaw \
+  --remote-sessions-dir /srv/openclaw/sessions
+```
+
+## Railway checks
+
+```bash
+npx @xerg/cli doctor --railway
+```
+
+By default, Railway doctor uses the linked project from your local `railway` CLI context.
+
+You can also target a specific service:
+
+```bash
+npx @xerg/cli doctor \
+  --railway \
+  --project <project-id> \
+  --environment <environment-id> \
+  --service <service-id>
+```
+
+Railway doctor checks:
+
+- whether the `railway` CLI is installed
+- whether the `railway` CLI is authenticated
+- whether the target service is reachable
+- default and alternate session paths
+
+## When doctor says no data
+
+If doctor cannot find any OpenClaw data:
+
+- verify that OpenClaw is writing gateway logs and session files
+- pass explicit paths with `--log-file` and `--sessions-dir`
+- use [remote audits](/remote-audits) if the data lives on another machine or service

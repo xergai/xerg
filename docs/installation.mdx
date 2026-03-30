@@ -1,0 +1,46 @@
+---
+title: Installation
+description: Install and run the Xerg CLI, understand supported runtimes, and know what local dependencies it needs.
+---
+
+## Supported runtime
+
+`@xerg/cli` supports Node `22` and `24`.
+
+## Run without a global install
+
+```bash
+npx @xerg/cli doctor
+npx @xerg/cli audit
+```
+
+## Install globally
+
+```bash
+npm install -g @xerg/cli
+xerg doctor
+xerg audit
+```
+
+## Native dependency note
+
+`@xerg/cli` depends on `better-sqlite3` for local snapshot storage. If install fails:
+
+- make sure you are on Node 22 or 24
+- retry after installing normal native build tooling for your platform
+- run `npx @xerg/cli doctor` once the install succeeds to confirm the package is working
+
+## Develop from this repo
+
+If you are working from the Xerg repo itself:
+
+```bash
+nvm use
+corepack prepare pnpm@10.6.2 --activate
+pnpm install
+pnpm lint
+pnpm test
+pnpm build
+```
+
+This repo pins the default development and release toolchain to Node `24.14.0` in `.nvmrc`.

@@ -1,0 +1,67 @@
+---
+title: Quickstart
+description: Run your first local Xerg audit, make one change, and compare before and after results.
+---
+
+If you install `@xerg/cli` globally, replace `npx @xerg/cli` with `xerg`.
+
+## 1. Check that Xerg can see OpenClaw data
+
+```bash
+npx @xerg/cli doctor
+```
+
+Doctor reports whether Xerg can see gateway logs and session transcripts from the default OpenClaw paths.
+
+## 2. Run the first audit
+
+```bash
+npx @xerg/cli audit
+```
+
+This prints a terminal summary with total spend, structural waste, opportunities, top workflows, and top models.
+
+By default, Xerg also stores a local snapshot so later runs can use `--compare`.
+
+## 3. Make one workflow or model change, then compare
+
+```bash
+npx @xerg/cli audit --compare
+```
+
+`--compare` looks for the newest compatible cached snapshot on your machine and adds before and after deltas.
+
+If no compatible baseline exists yet, Xerg does not fail. It adds a note telling you to run the same audit again after a fix.
+
+## 4. Export or automate
+
+Shareable Markdown:
+
+```bash
+npx @xerg/cli audit --markdown > xerg-audit.md
+```
+
+Machine-readable JSON:
+
+```bash
+npx @xerg/cli audit --json
+```
+
+Fail CI if confirmed waste is too high:
+
+```bash
+npx @xerg/cli audit --fail-above-waste-rate 0.30
+```
+
+Push an audit summary to the Xerg API:
+
+```bash
+npx @xerg/cli audit --push
+```
+
+## Common next steps
+
+- Use [audit](/audit) to learn the full command surface.
+- Use [remote audits](/remote-audits) if OpenClaw is running on SSH or Railway.
+- Use [compare](/compare) if you want to understand how snapshot compatibility works.
+- Use [waste taxonomy](/waste-taxonomy) and [metrics](/metrics) if you want the concepts behind the report.

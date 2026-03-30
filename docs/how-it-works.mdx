@@ -1,0 +1,73 @@
+---
+title: How it works
+description: Understand Xerg's local-first audit flow, local snapshot storage, remote pull model, and privacy boundaries.
+---
+
+## Local-first design
+
+Xerg runs its analysis locally. The CLI detects OpenClaw source files, normalizes them into runs and calls, computes spend, generates findings, and renders the report on your machine.
+
+## Local audit flow
+
+```text
+OpenClaw gateway logs + session transcripts
+  -> xerg audit
+  -> terminal, JSON, or Markdown report
+  -> optional local SQLite snapshot for compare and push
+```
+
+At a high level, Xerg does this:
+
+1. Detect OpenClaw source files from defaults or explicit paths.
+2. Normalize raw data into runs and model calls.
+3. Use observed cost where available and estimate missing cost from the pricing catalog when possible.
+4. Build findings and recommendation candidates.
+5. Render the chosen output format.
+6. Persist a local snapshot unless `--no-db` was used.
+
+## Compare flow
+
+When you run `--compare`, Xerg computes a comparison key for the current audit and looks up the newest compatible local snapshot.
+
+Compatibility is based on the effective source roots and normalized time window, not just “latest run wins.”
+
+## Remote audit flow
+
+Remote audits still analyze locally. Xerg first pulls telemetry files from the target, then runs the same local audit engine on the pulled files.
+
+Supported transports:
+
+- SSH
+- Railway
+- multi-source config via `--remote-config`
+
+For SSH, Xerg prefers `rsync` and falls back to `tar` over SSH if needed. For Railway, it uses the `railway` CLI and handles PTY-safe transfer internally.
+
+## Push flow
+
+When you use `--push`, the CLI maps the local summary into a versioned wire payload and sends it to the Xerg API.
+
+```text
+xerg audit --push
+  -> AuditPushPayload
+  -> POST /v1/audits
+```
+
+This wire payload is intentionally narrower than the local summary:
+
+- it omits local file paths
+- it omits local database path details
+- it omits internal finding `details`
+- it does not include the recommendation array
+
+## Privacy boundaries
+
+Xerg is designed to work on economic metadata rather than prompt content.
+
+The docs and codebase currently support these claims:
+
+- Xerg stores local economic metadata and audit summaries
+- the push payload excludes local file paths and internal debug-style fields
+- prompt and response content are not part of the push wire schema
+
+For the exact local summary and wire payload shapes, see [json output](/json-output).

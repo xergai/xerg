@@ -1,0 +1,103 @@
+---
+title: Authentication and push
+description: Authenticate to the Xerg API, push audit summaries, and understand what data is sent.
+---
+
+Use `--push` when you want the audit summary sent as part of the same command that computed it. Use `xerg push` when you want to send the most recent cached snapshot later.
+
+## Recommended flow
+
+Push immediately after computing an audit:
+
+```bash
+npx @xerg/cli audit --push
+```
+
+Preview the exact payload without sending it:
+
+```bash
+npx @xerg/cli audit --push --dry-run
+```
+
+`audit --push --dry-run` prints the push payload to stdout and suppresses the normal audit report.
+
+## Re-push a cached audit later
+
+Push the most recent cached local snapshot:
+
+```bash
+npx @xerg/cli push
+```
+
+Preview it:
+
+```bash
+npx @xerg/cli push --dry-run
+```
+
+Push a specific saved payload file:
+
+```bash
+npx @xerg/cli push --file ./audit-payload.json
+```
+
+`xerg push --file` expects a JSON file that already matches the `AuditPushPayload` wire shape. It does not read an arbitrary local audit summary.
+
+## Authentication precedence
+
+Xerg resolves API credentials in this order:
+
+1. `XERG_API_KEY`
+2. `~/.xerg/config.json`
+3. stored browser credentials from `xerg login`
+
+Optional API URL overrides:
+
+- `XERG_API_URL`
+- `apiUrl` in `~/.xerg/config.json`
+
+Example config:
+
+```json
+{
+  "apiKey": "sk_live_or_test_key",
+  "apiUrl": "https://api.xerg.ai"
+}
+```
+
+## Browser login
+
+Start the device flow:
+
+```bash
+npx @xerg/cli login
+```
+
+By default:
+
+- Xerg starts device authentication against `https://api.xerg.ai`
+- it opens the verification URL in your browser when possible
+- it stores the resulting token at `~/.config/xerg/credentials.json`
+
+To clear stored browser credentials:
+
+```bash
+npx @xerg/cli logout
+```
+
+## What gets pushed
+
+The push payload contains:
+
+- a versioned audit summary
+- top-level findings and taxonomy buckets
+- optional comparison deltas
+- metadata such as CLI version, source ID, source host, environment, and push timestamp
+
+The push payload does not include raw prompt or response content. It also omits local-only `sourceFiles` and `dbPath` fields from the audit summary.
+
+## Important gotchas
+
+- `xerg push` reads from the default local database path. It does not accept `--db`.
+- If you used `xerg audit --db /custom/path`, push immediately with `xerg audit --push`, or export the payload and use `xerg push --file`.
+- `--dry-run` on `xerg audit` requires `--push`.

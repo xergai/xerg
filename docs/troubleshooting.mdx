@@ -1,0 +1,29 @@
+---
+title: Troubleshooting
+description: Solve the most common Xerg install, audit, compare, remote, and push issues.
+---
+
+## Common problems
+
+| Symptom | What it means | What to do |
+| --- | --- | --- |
+| `No OpenClaw sources were detected...` or exit code `2` | Xerg could not find any local or pulled OpenClaw data. | Run `xerg doctor`, then pass `--log-file` and `--sessions-dir` as needed, or use a remote audit. |
+| `The --compare flag needs local snapshot history...` | You used `--compare` with `--no-db`. | Remove `--no-db` or use `--db <path>` so Xerg has a local snapshot store. |
+| `No prior comparable audit was found...` in notes | Xerg completed, but no compatible baseline exists yet. | Re-run the same audit after your next change. |
+| Install fails around `better-sqlite3` | The native dependency could not build for the current environment. | Use Node 22 or 24 and install standard native build tooling for your platform. |
+| SSH audit cannot connect or pull files | SSH access, key access, or `rsync` is missing. | Verify `ssh` connectivity, remote key access, and that `rsync` is installed locally and remotely. |
+| Railway audit says it cannot reach the service | The `railway` CLI is missing, unauthenticated, or pointed at the wrong service. | Run `railway login`, confirm your linked project or explicit IDs, and re-run `xerg doctor --railway`. |
+| Push says `No API key configured` | Xerg could not find credentials. | Set `XERG_API_KEY`, add `apiKey` to `~/.xerg/config.json`, or run `xerg login`. |
+| `xerg push` says no cached audit snapshots found | There is no audit in the default local database. | Run `xerg audit` first, or use `xerg push --file <path>`. |
+
+## Debug in the right order
+
+1. Run `xerg doctor`.
+2. Run the plain audit without extra flags.
+3. Add `--compare`, `--json`, or `--push` once the base audit works.
+4. If the data is remote, validate SSH or Railway access separately before debugging Xerg flags.
+
+## Get help
+
+- Pilot: [xerg.ai/pilot](https://xerg.ai/pilot)
+- Support: `query@xerg.ai`

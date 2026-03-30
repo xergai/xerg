@@ -1,0 +1,43 @@
+---
+title: Skill bundle
+description: Find the bundled Xerg agent skill in the npm package and understand what it is for.
+---
+
+The published `@xerg/cli` package includes a portable skill bundle for agent tools that can import skills from disk.
+
+## Canonical source
+
+In the repo, the source of truth lives at:
+
+```text
+skills/xerg/SKILL.md
+```
+
+## Bundled package path
+
+Inside the installed npm package, the bundled copy lives at:
+
+```text
+skills/xerg/SKILL.md
+```
+
+For a local project install, that usually resolves to:
+
+```text
+node_modules/@xerg/cli/skills/xerg/SKILL.md
+```
+
+For a global install, the same file lives inside the global npm package directory instead.
+
+## What this file is for
+
+The skill describes how an agent should use Xerg well:
+
+- when to reach for `doctor`, `audit`, `--compare`, and `--push`
+- how to choose local, SSH, Railway, or multi-source audits
+- how to interpret confirmed waste versus directional opportunities
+- what to verify before finishing an audit task
+
+## Important caveat
+
+Installing `@xerg/cli` does not automatically register the bundled skill with every agent product. Some tools can import skills from disk directly. Others need you to copy or link the skill into that product's own skill directory or use its import flow.

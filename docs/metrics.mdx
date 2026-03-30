@@ -1,0 +1,83 @@
+---
+title: Metrics
+description: Learn what Xerg's top-level dollar metrics mean and how before and after deltas are computed.
+---
+
+Xerg reports economics in USD. Every audit summarizes current spend, confirmed waste, opportunity impact, and optional before and after deltas.
+
+## Core audit metrics
+
+### Total spend
+
+The sum of all normalized call costs in the audit window.
+
+### Observed spend
+
+Spend taken directly from the telemetry source when a call already includes cost data.
+
+### Estimated spend
+
+Spend computed from token counts and Xerg's pricing catalog when observed cost is missing.
+
+### Waste spend
+
+The dollar impact of findings classified as confirmed `waste`.
+
+Today that means:
+
+- retry waste
+- loop waste
+
+### Opportunity spend
+
+The dollar impact of findings classified as `opportunity`.
+
+Today that means:
+
+- context outliers
+- idle spend
+- downgrade candidates
+
+### Structural waste rate
+
+```text
+wasteSpendUsd / totalSpendUsd
+```
+
+This is the conservative waste percentage used by `--fail-above-waste-rate`.
+
+## Breakdowns
+
+Every audit includes spend breakdowns:
+
+- by workflow
+- by model
+
+Each row includes:
+
+- `spendUsd`
+- `callCount`
+- `observedShare`
+
+`observedShare` tells you what fraction of that row's spend came from directly observed cost rather than estimation.
+
+## Compare metrics
+
+When a compatible baseline exists and you run `xerg audit --compare`, Xerg adds:
+
+- delta total spend
+- delta structural waste
+- delta waste rate
+- delta run count
+- delta call count
+- top workflow swings
+- top model swings
+- high-confidence waste changes
+
+The push wire schema includes only the top-line comparison fields. The richer workflow, model, and finding-change details stay in the local summary.
+
+## Notes that always matter
+
+- Cost per outcome is intentionally unavailable in v0.
+- Opportunity metrics are directional. They are worth testing, but they are not proven waste.
+- Threshold gates only use confirmed structural waste, not opportunity impact.

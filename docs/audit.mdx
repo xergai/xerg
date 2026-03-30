@@ -1,0 +1,93 @@
+---
+title: Audit
+description: Run a local Xerg audit, choose output formats, control snapshot persistence, and understand the core report.
+---
+
+## Run a local audit
+
+```bash
+npx @xerg/cli audit
+```
+
+By default, Xerg looks at:
+
+- `/tmp/openclaw/openclaw-*.log`
+- `~/.openclaw/agents/*/sessions/*.jsonl`
+
+Override either input explicitly:
+
+```bash
+npx @xerg/cli audit --log-file /path/to/openclaw.log
+npx @xerg/cli audit --sessions-dir /path/to/sessions
+```
+
+You can pass one, the other, or both.
+
+## Limit the audit window
+
+```bash
+npx @xerg/cli audit --since 24h
+npx @xerg/cli audit --since 7d
+npx @xerg/cli audit --since 30m
+```
+
+The CLI help and transport code support minute (`m`), hour (`h`), day (`d`), and week (`w`) suffixes.
+
+## Output modes
+
+Default terminal report:
+
+```bash
+npx @xerg/cli audit
+```
+
+JSON summary plus recommendations:
+
+```bash
+npx @xerg/cli audit --json
+```
+
+Markdown report:
+
+```bash
+npx @xerg/cli audit --markdown > xerg-audit.md
+```
+
+You can use either `--json` or `--markdown`, but not both in the same command.
+
+## Local snapshot storage
+
+Unless you pass `--no-db`, Xerg stores each audit locally in SQLite so later runs can use `--compare` and `xerg push`.
+
+Default database path:
+
+| Platform | Default path |
+| --- | --- |
+| macOS | `~/Library/Application Support/xerg/xerg.db` |
+| Linux | `${XDG_DATA_HOME:-~/.local/share}/xerg/xerg.db` |
+| Windows | `%LOCALAPPDATA%\xerg\Data\xerg.db` |
+
+Use a custom database path:
+
+```bash
+npx @xerg/cli audit --db /path/to/xerg.sqlite
+```
+
+Skip local persistence entirely:
+
+```bash
+npx @xerg/cli audit --no-db
+```
+
+If you skip persistence, `--compare` will not work.
+
+## What the report contains
+
+- total spend, observed spend, and estimated spend
+- structural waste and structural waste rate
+- savings opportunities
+- top workflows and top models by spend
+- high-confidence waste findings
+- the first savings test to run next
+
+Use [findings and recommendations](/findings-and-recommendations) for the exact taxonomy and recommendation fields.

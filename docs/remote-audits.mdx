@@ -1,0 +1,135 @@
+---
+title: Remote audits
+description: Audit OpenClaw data on SSH hosts or Railway services from your local machine.
+---
+
+Use remote audits when OpenClaw is not running on the same machine where you invoke Xerg.
+
+Use only one of `--remote`, `--remote-config`, or `--railway` in a single command.
+
+## SSH audits
+
+Prerequisites:
+
+- `ssh` on your `PATH`
+- `rsync` on your `PATH` for the fastest transfer path
+- access to the target host
+
+Basic audit:
+
+```bash
+npx @xerg/cli audit --remote deploy@prod.example.com
+```
+
+Custom remote paths:
+
+```bash
+npx @xerg/cli audit \
+  --remote deploy@prod.example.com \
+  --remote-log-file /var/log/openclaw \
+  --remote-sessions-dir /srv/openclaw/sessions \
+  --since 24h
+```
+
+Doctor first:
+
+```bash
+npx @xerg/cli doctor --remote deploy@prod.example.com
+```
+
+Notes:
+
+- `--remote` accepts `user@host` or `user@host:port`
+- if `rsync` is unavailable or fails, Xerg falls back to `tar` over SSH
+- `--keep-remote-files` keeps pulled data in `~/.xerg/remote-cache/<source-name>/` instead of cleaning up a temporary directory
+
+## Railway audits
+
+Prerequisites:
+
+- the `railway` CLI on your `PATH`
+- a Railway login that can reach the target project or linked project
+
+Use the linked project:
+
+```bash
+npx @xerg/cli audit --railway
+```
+
+Target a specific service:
+
+```bash
+npx @xerg/cli audit \
+  --railway \
+  --project <project-id> \
+  --environment <environment-id> \
+  --service <service-id>
+```
+
+Custom remote paths:
+
+```bash
+npx @xerg/cli audit \
+  --railway \
+  --project <project-id> \
+  --environment <environment-id> \
+  --service <service-id> \
+  --remote-log-file /tmp/openclaw \
+  --remote-sessions-dir /data/.clawdbot/agents/main/sessions
+```
+
+By default, Railway audits check `/tmp/openclaw` for gateway logs and `~/.openclaw/agents` for session files. Railway also checks `/data/.clawdbot/agents/main/sessions` as an alternate session location when the default session directory is empty.
+
+## Multi-source audits with `--remote-config`
+
+Use `--remote-config` when you want one command to pull several SSH or Railway sources.
+
+Example config:
+
+```json
+{
+  "remotes": [
+    {
+      "name": "prod",
+      "host": "deploy@prod.example.com",
+      "identityFile": "~/.ssh/prod_ed25519",
+      "logFile": "/tmp/openclaw",
+      "sessionsDir": "~/.openclaw/agents"
+    },
+    {
+      "name": "worker",
+      "transport": "ssh",
+      "host": "deploy@worker.example.com:2222"
+    },
+    {
+      "name": "railway-api",
+      "transport": "railway",
+      "railway": {
+        "projectId": "prj_123",
+        "environmentId": "env_123",
+        "serviceId": "svc_123"
+      },
+      "sessionsDir": "/data/.clawdbot/agents/main/sessions"
+    }
+  ]
+}
+```
+
+Run it:
+
+```bash
+npx @xerg/cli audit --remote-config ./remotes.json
+```
+
+Behavior to know:
+
+- `transport` defaults to `ssh`
+- each entry needs a `name`
+- Railway entries require `projectId`, `environmentId`, and `serviceId`
+- plain terminal or Markdown output prints one section per source
+- `--json` returns a top-level `{ "sources": [...] }` object when more than one source succeeds
+- if some sources fail, Xerg continues with the sources it could pull and prints warnings for the ones it could not reach
+
+## Remote comparisons
+
+Remote and Railway audits can still use `--compare`, but the baseline lives in the local SQLite database on the machine running Xerg. Re-run the same target with the same effective remote paths if you want clean before and after deltas.

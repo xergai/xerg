@@ -1,0 +1,42 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Xerg",
+  "colors": {
+    "primary": "#0F766E"
+  },
+  "navigation": {
+    "global": {
+      "anchors": [
+        {
+          "anchor": "npm",
+          "href": "https://www.npmjs.com/package/@xerg/cli"
+        },
+        {
+          "anchor": "Pilot",
+          "href": "https://xerg.ai/pilot"
+        }
+      ]
+    },
+    "groups": [
+      {
+        "group": "Get started",
+        "root": "index",
+        "pages": ["quickstart", "installation", "doctor"]
+      },
+      {
+        "group": "Concepts",
+        "pages": ["waste-taxonomy", "metrics", "how-it-works"]
+      },
+      {
+        "group": "Audit spend",
+        "root": "audit",
+        "pages": ["compare", "remote-audits", "findings-and-recommendations", "json-output"]
+      },
+      {
+        "group": "Automate and share",
+        "pages": ["ci-gates", "auth-and-push", "skill-bundle", "troubleshooting"]
+      }
+    ]
+  }
+}

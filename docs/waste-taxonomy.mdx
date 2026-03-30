@@ -1,0 +1,93 @@
+---
+title: Waste taxonomy
+description: Understand Xerg's five spend categories, confidence levels, and the difference between confirmed waste and directional opportunities.
+---
+
+Xerg classifies spend into two groups:
+
+- confirmed waste
+- savings opportunities
+
+This distinction is important because only confirmed waste contributes to `wasteSpendUsd`, `structuralWasteRate`, and CI threshold checks.
+
+## The five finding kinds
+
+### Retry waste
+
+Classification: `waste`  
+Confidence: `high`
+
+Xerg treats failed calls that were followed by more work as pure retry overhead. The cost of those failed calls is counted as confirmed waste.
+
+Typical fix:
+
+- add exponential backoff
+- reduce retry count
+- avoid retrying known non-recoverable failures
+
+### Context bloat
+
+Classification: `opportunity`  
+Confidence: `medium`
+
+For workflows with at least three runs, Xerg looks for runs whose input token volume is far above that workflow's own baseline. This is a directional context-trimming signal, not proven waste.
+
+Typical fix:
+
+- trim prompt scaffolding
+- send less repeated context
+- split broad tasks into smaller scoped calls
+
+### Loop waste
+
+Classification: `waste`  
+Confidence: `high`
+
+When a run reaches at least seven iterations, Xerg treats spend after iteration five as likely loop waste.
+
+Typical fix:
+
+- add an iteration cap
+- add an early exit condition
+- tighten workflow guardrails
+
+### Downgrade candidates
+
+Classification: `opportunity`  
+Confidence: `low`
+
+Xerg flags expensive models on workflows that look operationally simple, such as heartbeat, triage, summary, tagging, or monitoring style tasks. This is intentionally an A/B test candidate rather than a claim of proven waste.
+
+Typical fix:
+
+- test a cheaper model on the same workflow
+- compare quality and cost before changing defaults
+
+### Idle waste
+
+Classification: `opportunity`  
+Confidence: `medium`
+
+Xerg looks for workflow names that resemble recurring heartbeat, cron, poll, or monitoring loops. The spend may still be justified, but the cadence and model tier are worth reviewing.
+
+Typical fix:
+
+- reduce cadence
+- move to event-driven triggering
+- use a cheaper model for routine checks
+
+## Confidence levels
+
+| Level | Meaning |
+| --- | --- |
+| `high` | Strong waste signal that is usually safe to act on immediately |
+| `medium` | Directional signal that should be investigated |
+| `low` | Experiment candidate rather than a direct recommendation to roll out |
+
+## Why this matters in the product
+
+- `retry-waste` and `loop-waste` roll up into confirmed structural waste
+- `context-outlier`, `idle-spend`, and `candidate-downgrade` roll up into opportunity impact
+- the first savings test in the terminal report may prioritize an opportunity even when it is not confirmed waste
+
+For the recommendation object shape returned in JSON mode, see [findings and recommendations](/findings-and-recommendations).
