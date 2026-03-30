@@ -32,9 +32,9 @@ That file is a packaged copy of the canonical repo skill at [`skills/xerg/SKILL.
 
 ## Supported runtime
 
-`@xerg/cli` supports Node `20`, `22`, and `24`.
+`@xerg/cli` supports Node `22` and `24`.
 
-If you are developing in this repo, `.nvmrc` still pins the default local toolchain to Node `24.14.0`.
+If you are developing or releasing from this repo, `.nvmrc` pins the default toolchain to Node `24.14.0`.
 
 ## Sample output
 

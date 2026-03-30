@@ -82,10 +82,10 @@ xerg audit --push
 
 ## Requirements
 
-- Node `20`, `22`, or `24`
+- Node `22` or `24`
 - `pnpm` `10.x`
 
-Local development in this repo still defaults to Node `24.14.0` via `.nvmrc`.
+Local development and releases in this repo pin Node `24.14.0` via `.nvmrc`.
 
 ## Local development
 

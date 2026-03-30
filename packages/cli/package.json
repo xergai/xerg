@@ -30,7 +30,7 @@
     }
   },
   "engines": {
-    "node": ">=20 <25"
+    "node": ">=22 <25"
   },
   "scripts": {
     "prebuild": "node ../../scripts/sync-cli-skill.mjs",
