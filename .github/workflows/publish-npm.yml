@@ -1,4 +1,4 @@
-name: Publish to npm
+name: Publish to npm and ClawHub
 
 on:
   workflow_dispatch:
@@ -12,6 +12,16 @@ on:
           - cli
           - schemas
           - all
+      clawhub_changelog:
+        description: ClawHub changelog text for the Xerg skill
+        required: false
+        default: ''
+        type: string
+      clawhub_tags:
+        description: ClawHub tags for the Xerg skill
+        required: true
+        default: latest,audit,cli,cost,efficiency,finops,openclaw,waste
+        type: string
 
 jobs:
   verify:
@@ -113,6 +123,56 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+      - name: Prepare ClawHub publish metadata
+        id: clawhub_meta
+        env:
+          INPUT_CHANGELOG: ${{ github.event.inputs.clawhub_changelog }}
+        run: |
+          VERSION="$(node -p "require('./packages/cli/package.json').version")"
+          CHANGELOG="$INPUT_CHANGELOG"
+
+          if [ -z "$CHANGELOG" ]; then
+            CHANGELOG="Aligned with @xerg/cli $VERSION."
+          fi
+
+          {
+            echo "version=$VERSION"
+            echo "changelog<<EOF"
+            echo "$CHANGELOG"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Verify ClawHub token is configured
+        env:
+          CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
+        run: |
+          if [ -z "$CLAWHUB_TOKEN" ]; then
+            echo "Missing CLAWHUB_TOKEN GitHub Actions secret." >&2
+            echo "Add it before publishing @xerg/cli so npm and ClawHub stay in sync." >&2
+            exit 1
+          fi
+
+      - name: Install ClawHub CLI
+        run: npm install --global clawhub@0.9.0
+
+      - name: Log in to ClawHub
+        env:
+          CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
+        run: clawhub login --token "$CLAWHUB_TOKEN" --no-browser
+
+      - name: Publish Xerg skill to ClawHub
+        env:
+          XERG_SKILL_VERSION: ${{ steps.clawhub_meta.outputs.version }}
+          XERG_SKILL_CHANGELOG: ${{ steps.clawhub_meta.outputs.changelog }}
+          XERG_SKILL_TAGS: ${{ github.event.inputs.clawhub_tags }}
+        run: |
+          clawhub --no-input publish ./skills/xerg \
+            --slug xerg \
+            --name "Xerg" \
+            --version "$XERG_SKILL_VERSION" \
+            --changelog "$XERG_SKILL_CHANGELOG" \
+            --tags "$XERG_SKILL_TAGS"
 
       - name: Publish @xerg/cli
         working-directory: packages/cli

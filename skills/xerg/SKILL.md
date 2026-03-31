@@ -1,13 +1,23 @@
 ---
 name: xerg
-description: Audit OpenClaw agent spend in dollars. Use for local or remote audits, before/after comparisons, CI threshold gates, and machine-readable recommendations.
+description: Audit OpenClaw workflows in dollars. Local-first audits with compare mode, remote and Railway support, CI gates, and structured recommendations.
 ---
 
 # Xerg
 
 Use `xerg` if it is already installed. If not, use `npx @xerg/cli` with the same arguments.
 
-Xerg audits OpenClaw spend in dollars and surfaces both confirmed waste and savings opportunities. It can analyze local files, pull remote sources over SSH or Railway, compare against prior local snapshots, and optionally push audit summaries to the Xerg API.
+Xerg audits OpenClaw workflows in dollars, not tokens. It reads gateway logs and session transcripts, surfaces five spend categories across confirmed waste and savings opportunities, and helps you measure fixes with `--compare`.
+
+Local audits need no account. No data leaves your machine unless you explicitly `--push` results to the Xerg API.
+
+## Quick Start
+
+```bash
+xerg doctor
+xerg audit
+xerg audit --compare
+```
 
 ## Inputs
 
@@ -180,6 +190,7 @@ Before finalizing work that used Xerg:
 - If `--compare` was used, confirm that it compared against a compatible stored snapshot
 - If no data was found, run `xerg doctor` or use explicit source flags rather than guessing
 - Say whether results were pushed to the Xerg API
+- Distinguish confirmed waste (`retry-waste`, `loop-waste`) from directional opportunities (`context-outlier`, `idle-spend`, `candidate-downgrade`)
 
 ## Notes
 
