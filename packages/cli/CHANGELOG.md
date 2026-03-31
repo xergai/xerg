@@ -1,5 +1,11 @@
 # @xerg/cli
 
+## 0.1.8
+
+### Patch Changes
+
+- Refresh the bundled Xerg skill content, align the npm package README with the current local-first workflow and waste taxonomy wording, and publish the skill to ClawHub as part of future CLI releases.
+
 ## 0.1.7
 
 ### Patch Changes
