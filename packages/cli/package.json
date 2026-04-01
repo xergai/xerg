@@ -1,6 +1,6 @@
 {
   "name": "@xerg/cli",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Audit OpenClaw workflows in dollars, compare fixes, and surface savings opportunities.",
   "keywords": ["ai", "agents", "finops", "llm", "openclaw", "cost", "cli"],
   "homepage": "https://xerg.ai",

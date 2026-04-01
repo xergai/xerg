@@ -1,5 +1,11 @@
 # @xerg/cli
 
+## 0.1.9
+
+### Patch Changes
+
+- Add `--verbose` progress output for `doctor` and `audit`, and make no-data doctor guidance point users toward explicit local paths plus SSH and Railway inspection flows.
+
 ## 0.1.8
 
 ### Patch Changes

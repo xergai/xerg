@@ -186,16 +186,19 @@ export async function pullRemoteFilesRailway(opts: {
   source: RemoteSource;
   since?: string;
   keepFiles?: boolean;
+  onProgress?: (message: string) => void;
 }): Promise<PullResult> {
-  const { source, since, keepFiles = false } = opts;
+  const { source, since, keepFiles = false, onProgress } = opts;
   const target = source.railway;
 
+  onProgress?.('Testing Railway service connectivity...');
   const { status } = railwayExec('echo ok', target);
   if (status !== 0) {
     throw new Error(
       `Cannot reach Railway service${target ? ` (project: ${target.projectId})` : ' (linked project)'}. Check railway CLI auth and service configuration.`,
     );
   }
+  onProgress?.('Railway service reachable.');
 
   const localBase = resolveLocalPath(source, keepFiles);
   const gatewayDir = join(localBase, 'gateway');
@@ -203,6 +206,7 @@ export async function pullRemoteFilesRailway(opts: {
 
   const remoteLogPath = source.logFile ?? DEFAULT_GATEWAY_DIR;
 
+  onProgress?.('Checking Railway default paths for gateway logs and sessions...');
   const logCheck = checkRemotePath(remoteLogPath, target);
   const resolvedSessionsPath = findSessionsPath(target, source.sessionsDir);
 
@@ -210,6 +214,7 @@ export async function pullRemoteFilesRailway(opts: {
   let pulledSessions = false;
 
   if (logCheck.exists) {
+    onProgress?.(`Pulling gateway logs from ${remoteLogPath}...`);
     const { stdout: isFile } = railwayExec(`test -f ${remoteLogPath} && echo file`, target);
     if (isFile === 'file') {
       const parentDir = remoteLogPath.slice(0, remoteLogPath.lastIndexOf('/')) || '/tmp';
@@ -230,6 +235,7 @@ export async function pullRemoteFilesRailway(opts: {
   }
 
   if (resolvedSessionsPath) {
+    onProgress?.(`Pulling session files from ${resolvedSessionsPath}...`);
     pulledSessions = tarRailwayPull({
       target,
       remotePath: resolvedSessionsPath,
@@ -257,17 +263,20 @@ export async function pullRemoteFilesRailway(opts: {
 
   if (pulledLog) result.logFile = gatewayDir;
   if (pulledSessions) result.sessionsDir = sessionsDir;
+  onProgress?.('Railway files pulled successfully.');
 
   return result;
 }
 
 export async function runRailwayDoctor(opts: {
   source: RemoteSource;
+  onProgress?: (message: string) => void;
 }): Promise<RailwayDoctorReport> {
-  const { source } = opts;
+  const { source, onProgress } = opts;
   const target = source.railway;
   const notes: string[] = [];
 
+  onProgress?.('Checking whether the Railway CLI is installed...');
   const whichCheck = spawnSync('which', ['railway'], { stdio: 'pipe', timeout: 5_000 });
   const railwayCliInstalled = whichCheck.status === 0;
 
@@ -285,6 +294,7 @@ export async function runRailwayDoctor(opts: {
   }
 
   const railwayPath = whichCheck.stdout?.toString().trim() ?? 'railway';
+  onProgress?.('Checking Railway CLI authentication...');
   const versionCheck = spawnSync('railway', ['version'], { stdio: 'pipe', timeout: 10_000 });
   const versionStr =
     versionCheck.status === 0 ? versionCheck.stdout?.toString().trim() : railwayPath;
@@ -309,6 +319,7 @@ export async function runRailwayDoctor(opts: {
 
   notes.push(`Authenticated as: ${railwayAuthUser}`);
 
+  onProgress?.('Testing Railway service connectivity...');
   const { status: reachStatus } = railwayExec('echo ok', target);
   const serviceReachable = reachStatus === 0;
 
@@ -336,6 +347,7 @@ export async function runRailwayDoctor(opts: {
 
   notes.push('Service connectivity: OK');
 
+  onProgress?.('Inspecting Railway default paths...');
   const gateway = checkRemotePath(DEFAULT_GATEWAY_DIR, target);
   const { stdout: expandedDefault } = railwayExec(`eval echo ${DEFAULT_SESSIONS_DIR}`, target);
   const resolvedDefault = expandedDefault || DEFAULT_SESSIONS_DIR;

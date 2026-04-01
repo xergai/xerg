@@ -32,6 +32,7 @@ type AuditCliOptions = {
   dryRun?: boolean;
   failAboveWasteRate?: number;
   failAboveWasteUsd?: number;
+  verbose?: boolean;
 };
 
 type PushCliOptions = {
@@ -49,6 +50,7 @@ type DoctorCliOptions = {
   railwayProject?: string;
   railwayEnvironment?: string;
   railwayService?: string;
+  verbose?: boolean;
 };
 
 const VERSION = readVersion();
@@ -189,6 +191,9 @@ function parseAuditOptions(raw: string[]) {
       case '--dry-run':
         options.dryRun = true;
         break;
+      case '--verbose':
+        options.verbose = true;
+        break;
       case '--fail-above-waste-rate':
         options.failAboveWasteRate = readFloat(arg, argv[index + 1]);
         index += 1;
@@ -280,6 +285,9 @@ function parseDoctorOptions(raw: string[]) {
       case '--service':
         options.railwayService = readValue(arg, argv[index + 1]);
         index += 1;
+        break;
+      case '--verbose':
+        options.verbose = true;
         break;
       default:
         throw new Error(`Unknown doctor option "${arg}". Run \`xerg doctor --help\` for usage.`);
@@ -379,6 +387,7 @@ Railway options:
 Push options:
   --push                      Push the audit summary to the Xerg API after computing it
   --dry-run                   With --push: print the payload to stdout without sending it
+  --verbose                   Print progress updates to stderr while the audit runs
 
 Threshold options:
   --fail-above-waste-rate <n> Exit with code 3 if structural waste rate exceeds threshold (e.g. 0.30)
@@ -420,6 +429,7 @@ Usage:
 Options:
   --log-file <path>           Explicit OpenClaw gateway log file to inspect
   --sessions-dir <path>       Explicit OpenClaw sessions directory to inspect
+  --verbose                   Print progress updates to stderr while doctor runs
 
 Remote options (SSH):
   --remote <user@host>        SSH target in user@host or user@host:port format

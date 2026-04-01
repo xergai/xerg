@@ -268,17 +268,25 @@ export async function pullRemoteFiles(opts: {
   source: RemoteSource;
   since?: string;
   keepFiles?: boolean;
+  onProgress?: (message: string) => void;
 }): Promise<PullResult> {
-  const { source, since, keepFiles = false } = opts;
+  const { source, since, keepFiles = false, onProgress } = opts;
 
+  onProgress?.(`Testing SSH connectivity to ${source.host}...`);
   const connectivity = testSshConnectivity(source);
   if (!connectivity.ok) {
     throw new Error(
       `Cannot connect to ${source.host}. Check SSH config and key access.${connectivity.error ? ` (${connectivity.error})` : ''}`,
     );
   }
+  onProgress?.('SSH connectivity OK.');
 
   const useRsync = isRsyncAvailable();
+  onProgress?.(
+    useRsync
+      ? 'Local rsync detected. Xerg will prefer rsync and fall back to tar over SSH if needed.'
+      : 'Local rsync not detected. Xerg will pull files with tar over SSH.',
+  );
   const localBase = resolveLocalPath(source, keepFiles);
   const gatewayDir = join(localBase, 'gateway');
   const sessionsDir = join(localBase, 'sessions');
@@ -288,6 +296,7 @@ export async function pullRemoteFiles(opts: {
 
   const { stdout: expandedSessions } = sshExec(source, `eval echo ${remoteSessionsPath}`);
   const resolvedSessionsPath = expandedSessions || remoteSessionsPath;
+  onProgress?.('Checking remote default paths for gateway logs and sessions...');
 
   const { status: logPathExists } = sshExec(source, `test -e ${remoteLogPath} && echo exists`);
   const { status: sessPathExists } = sshExec(
@@ -299,6 +308,7 @@ export async function pullRemoteFiles(opts: {
   let pulledSessions = false;
 
   if (logPathExists === 0) {
+    onProgress?.(`Pulling gateway logs from ${remoteLogPath}...`);
     const { stdout: isFile } = sshExec(source, `test -f ${remoteLogPath} && echo file`);
     if (isFile === 'file') {
       const parentDir = remoteLogPath.slice(0, remoteLogPath.lastIndexOf('/')) || '/tmp';
@@ -324,6 +334,7 @@ export async function pullRemoteFiles(opts: {
   }
 
   if (sessPathExists === 0) {
+    onProgress?.(`Pulling session files from ${resolvedSessionsPath}...`);
     pulledSessions = pullDirectory({
       source,
       remotePath: resolvedSessionsPath,
@@ -350,16 +361,19 @@ export async function pullRemoteFiles(opts: {
 
   if (pulledLog) result.logFile = gatewayDir;
   if (pulledSessions) result.sessionsDir = sessionsDir;
+  onProgress?.('Remote files pulled successfully.');
 
   return result;
 }
 
 export async function runRemoteDoctor(opts: {
   source: RemoteSource;
+  onProgress?: (message: string) => void;
 }): Promise<RemoteDoctorReport> {
-  const { source } = opts;
+  const { source, onProgress } = opts;
   const notes: string[] = [];
 
+  onProgress?.(`Testing SSH connectivity to ${source.host}...`);
   const connectivity = testSshConnectivity(source);
   if (!connectivity.ok) {
     return {
@@ -384,8 +398,10 @@ export async function runRemoteDoctor(opts: {
     };
   }
 
+  onProgress?.('SSH connectivity OK.');
   notes.push('SSH connectivity: OK');
 
+  onProgress?.('Checking rsync availability locally and on the remote host...');
   const rsyncLocal = isRsyncAvailable();
   const rsyncRemote = isRemoteRsyncAvailable(source);
   notes.push(`rsync available locally: ${rsyncLocal ? 'yes' : 'no'}`);
@@ -411,6 +427,7 @@ export async function runRemoteDoctor(opts: {
     };
   }
 
+  onProgress?.('Inspecting remote default paths...');
   const gateway = checkPath(DEFAULT_GATEWAY_DIR);
   const sessions = checkPath(DEFAULT_SESSIONS_DIR);
 

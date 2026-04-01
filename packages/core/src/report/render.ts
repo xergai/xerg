@@ -171,6 +171,17 @@ function renderCompareBlock(summary: AuditSummary) {
 }
 
 export function renderDoctorReport(report: DoctorReport) {
+  const nextSteps = report.canAudit
+    ? []
+    : [
+        '',
+        '## Next steps',
+        '- Try explicit local paths: xerg doctor --log-file /path/to/openclaw.log --sessions-dir /path/to/sessions',
+        '- Inspect an SSH host: xerg doctor --remote user@host',
+        '- Inspect a Railway service: xerg doctor --railway',
+        '- Remote audits still analyze locally after Xerg pulls the source files to your machine.',
+      ];
+
   const sections = [
     '# Xerg doctor',
     '',
@@ -187,6 +198,7 @@ export function renderDoctorReport(report: DoctorReport) {
     '',
     '## Notes',
     ...report.notes.map((note) => `- ${note}`),
+    ...nextSteps,
   ];
 
   return sections.join('\n');

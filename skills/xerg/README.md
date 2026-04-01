@@ -28,6 +28,7 @@ npx @xerg/cli audit
 
 ```bash
 xerg doctor
+xerg doctor --verbose
 xerg audit
 xerg audit --compare
 ```
@@ -38,6 +39,8 @@ xerg audit --compare
 - Remote VPS over SSH: `xerg audit --remote user@host`
 - Railway: `xerg audit --railway`
 - Multiple sources: `xerg audit --remote-config ~/.xerg/remotes.json`
+
+If local defaults are empty, inspect the target directly first with `xerg doctor --remote user@host` or `xerg doctor --railway`.
 
 ## CI And Automation
 

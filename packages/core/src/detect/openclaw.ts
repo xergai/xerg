@@ -139,11 +139,21 @@ function segmentToRegExp(segment: string) {
 }
 
 export async function inspectOpenClawSources(options: AuditOptions): Promise<DoctorReport> {
+  options.onProgress?.('Checking local OpenClaw defaults...');
   const sources = await detectOpenClawSources(options);
   const notes: string[] = [];
 
+  options.onProgress?.(
+    sources.length > 0
+      ? `Detected ${sources.length} local source file${sources.length === 1 ? '' : 's'}.`
+      : 'No local OpenClaw source files were detected.',
+  );
+
   if (sources.length === 0) {
     notes.push('No OpenClaw gateway logs or session files were detected.');
+    notes.push(
+      'Doctor checks local defaults by default. Use --remote or --railway to inspect remote targets.',
+    );
     notes.push(
       'Use --log-file or --sessions-dir if your OpenClaw data lives outside the defaults.',
     );

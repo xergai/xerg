@@ -1,5 +1,6 @@
 import { doctorOpenClaw, renderDoctorReport } from '@xergai/core';
 
+import { createCliLogger } from '../log.js';
 import {
   buildRailwaySourceFromFlags,
   buildSourceFromFlags,
@@ -18,10 +19,14 @@ export interface DoctorCommandOptions {
   railwayProject?: string;
   railwayEnvironment?: string;
   railwayService?: string;
+  verbose?: boolean;
 }
 
 export async function runDoctorCommand(options: DoctorCommandOptions) {
+  const logger = createCliLogger({ verbose: options.verbose });
+
   if (options.railway) {
+    logger.verbose('Inspecting Railway audit readiness.');
     const railwayTarget = buildRailwayTarget(options);
     const source = buildRailwaySourceFromFlags({
       railway: railwayTarget,
@@ -29,26 +34,36 @@ export async function runDoctorCommand(options: DoctorCommandOptions) {
       remoteSessionsDir: options.remoteSessionsDir,
     });
 
-    const report = await runRailwayDoctor({ source });
+    const report = await runRailwayDoctor({ source, onProgress: logger.verbose });
     process.stdout.write(`${renderRailwayDoctorReport(report)}\n`);
     return;
   }
 
   if (options.remote) {
+    logger.verbose(`Inspecting SSH audit readiness for ${options.remote}.`);
     const source = buildSourceFromFlags({
       remote: options.remote,
       remoteLogFile: options.remoteLogFile,
       remoteSessionsDir: options.remoteSessionsDir,
     });
 
-    const report = await runRemoteDoctor({ source });
+    const report = await runRemoteDoctor({ source, onProgress: logger.verbose });
     process.stdout.write(`${renderRemoteDoctorReport(report)}\n`);
     return;
+  }
+
+  logger.verbose('Inspecting local OpenClaw audit readiness.');
+  if (options.logFile) {
+    logger.verbose(`Using explicit local log file: ${options.logFile}`);
+  }
+  if (options.sessionsDir) {
+    logger.verbose(`Using explicit local sessions directory: ${options.sessionsDir}`);
   }
 
   const report = await doctorOpenClaw({
     logFile: options.logFile,
     sessionsDir: options.sessionsDir,
+    onProgress: logger.verbose,
   });
 
   process.stdout.write(`${renderDoctorReport(report)}\n`);

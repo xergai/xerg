@@ -9,6 +9,7 @@ description: Check local, SSH, or Railway audit readiness before you run a full 
 
 ```bash
 npx @xerg/cli doctor
+npx @xerg/cli doctor --verbose
 ```
 
 Xerg reports:
@@ -17,6 +18,8 @@ Xerg reports:
 - the default sessions pattern
 - detected source files
 - notes about what is missing
+
+Use `--verbose` when you want progress messages on stderr while doctor is checking paths and transports.
 
 Use explicit local paths when your data is not in the defaults:
 
@@ -78,4 +81,6 @@ If doctor cannot find any OpenClaw data:
 
 - verify that OpenClaw is writing gateway logs and session files
 - pass explicit paths with `--log-file` and `--sessions-dir`
+- run `xerg doctor --remote user@host` to inspect an SSH target directly from your machine
+- run `xerg doctor --railway` to inspect a linked Railway service
 - use [remote audits](/remote-audits) if the data lives on another machine or service

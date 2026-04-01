@@ -10,6 +10,7 @@ Everything runs locally by default. No account is required for local audits. No 
 
 ```bash
 npx @xerg/cli doctor
+npx @xerg/cli doctor --verbose
 npx @xerg/cli audit
 npx @xerg/cli audit --compare
 ```
@@ -114,6 +115,13 @@ xerg audit --log-file /path/to/openclaw.log
 xerg audit --sessions-dir /path/to/sessions
 ```
 
+If your local machine has no OpenClaw files, inspect remote targets directly instead:
+
+```bash
+xerg doctor --remote user@host
+xerg doctor --railway
+```
+
 ## Authentication and config
 
 Push commands resolve credentials in this order:
@@ -161,6 +169,7 @@ Xerg v0 stores economic metadata and audit summaries locally. It does not store 
 ## Troubleshooting
 
 - `better-sqlite3` is a native dependency. If install fails, retry on a supported Node version and make sure standard native build tooling is available for your platform.
+- `--verbose` prints progress updates to stderr for `xerg doctor` and `xerg audit`, which helps distinguish package install time from CLI runtime.
 - If `xerg audit --remote ...` fails before pulling files, verify that both `ssh` and `rsync` are installed and reachable on your `PATH`.
 - If `xerg audit --railway` fails immediately, verify that the `railway` CLI is installed, authenticated, and can access the target project.
 

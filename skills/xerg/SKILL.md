@@ -15,6 +15,7 @@ Local audits need no account. No data leaves your machine unless you explicitly 
 
 ```bash
 xerg doctor
+xerg doctor --verbose
 xerg audit
 xerg audit --compare
 ```
@@ -44,9 +45,13 @@ Additional requirements:
 
 ```bash
 xerg doctor
+xerg doctor --verbose
 xerg doctor --remote user@host
 xerg doctor --railway
 ```
+
+- `xerg doctor --verbose` shows progress on stderr while Xerg checks local paths or remote transports
+- If local defaults are empty, prefer `xerg doctor --remote ...` or `xerg doctor --railway` instead of guessing paths
 
 2. Run a baseline audit:
 

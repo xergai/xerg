@@ -11,6 +11,7 @@ import {
 import type { AuditSummary, WirePayloadMeta } from '@xergai/core';
 
 import { NoDataError } from '../errors.js';
+import { createCliLogger } from '../log.js';
 import { loadPushConfig, pushAudit } from '../push/index.js';
 import {
   buildComparisonKeyForRailway,
@@ -45,6 +46,7 @@ export interface AuditCommandOptions {
   dryRun?: boolean;
   failAboveWasteRate?: number;
   failAboveWasteUsd?: number;
+  verbose?: boolean;
 }
 
 const NO_DATA_PATTERN = /no openclaw sources were detected/i;
@@ -63,6 +65,8 @@ async function auditOrNoData(
 }
 
 export async function runAuditCommand(options: AuditCommandOptions) {
+  const logger = createCliLogger({ verbose: options.verbose });
+
   if (options.dryRun && !options.push) {
     throw new Error('--dry-run requires --push.');
   }
@@ -75,7 +79,7 @@ export async function runAuditCommand(options: AuditCommandOptions) {
   }
 
   if (!options.remote && !options.remoteConfig && !options.railway) {
-    return runLocalAudit(options);
+    return runLocalAudit(options, logger);
   }
 
   if (options.railway) {
@@ -85,15 +89,15 @@ export async function runAuditCommand(options: AuditCommandOptions) {
       remoteLogFile: options.remoteLogFile,
       remoteSessionsDir: options.remoteSessionsDir,
     });
-    return runSingleRemoteAudit(source, options);
+    return runSingleRemoteAudit(source, options, logger);
   }
 
   if (options.remoteConfig) {
     const sources = loadRemoteConfig(options.remoteConfig);
     if (sources.length === 1) {
-      return runSingleRemoteAudit(sources[0], options);
+      return runSingleRemoteAudit(sources[0], options, logger);
     }
-    return runMultiRemoteAudit(sources, options);
+    return runMultiRemoteAudit(sources, options, logger);
   }
 
   const remote = options.remote as string;
@@ -102,7 +106,7 @@ export async function runAuditCommand(options: AuditCommandOptions) {
     remoteLogFile: options.remoteLogFile,
     remoteSessionsDir: options.remoteSessionsDir,
   });
-  return runSingleRemoteAudit(source, options);
+  return runSingleRemoteAudit(source, options, logger);
 }
 
 function buildRailwayTarget(options: AuditCommandOptions): RailwayTarget | undefined {
@@ -116,7 +120,18 @@ function buildRailwayTarget(options: AuditCommandOptions): RailwayTarget | undef
   return undefined;
 }
 
-async function runLocalAudit(options: AuditCommandOptions) {
+async function runLocalAudit(
+  options: AuditCommandOptions,
+  logger: ReturnType<typeof createCliLogger>,
+) {
+  logger.verbose('Running a local audit.');
+  if (options.logFile) {
+    logger.verbose(`Using explicit local log file: ${options.logFile}`);
+  }
+  if (options.sessionsDir) {
+    logger.verbose(`Using explicit local sessions directory: ${options.sessionsDir}`);
+  }
+
   const summary = await auditOrNoData({
     logFile: options.logFile,
     sessionsDir: options.sessionsDir,
@@ -124,6 +139,7 @@ async function runLocalAudit(options: AuditCommandOptions) {
     compare: options.compare,
     dbPath: options.db,
     noDb: options.noDb,
+    onProgress: logger.verbose,
   });
 
   renderOutput(summary, options);
@@ -143,11 +159,16 @@ function getComparisonKey(source: RemoteSource): string {
   return buildComparisonKeyForRemote(source);
 }
 
-function pullFiles(source: RemoteSource, since?: string, keepFiles?: boolean): Promise<PullResult> {
+function pullFiles(
+  source: RemoteSource,
+  since?: string,
+  keepFiles?: boolean,
+  onProgress?: (message: string) => void,
+): Promise<PullResult> {
   if (source.transport === 'railway') {
-    return pullRemoteFilesRailway({ source, since, keepFiles });
+    return pullRemoteFilesRailway({ source, since, keepFiles, onProgress });
   }
-  return pullRemoteFiles({ source, since, keepFiles });
+  return pullRemoteFiles({ source, since, keepFiles, onProgress });
 }
 
 function describeSource(source: RemoteSource): string {
@@ -163,10 +184,20 @@ function sourceEnvironment(source: RemoteSource): WirePayloadMeta['environment']
   return source.transport === 'railway' ? 'railway' : 'remote';
 }
 
-async function runSingleRemoteAudit(source: RemoteSource, options: AuditCommandOptions) {
-  process.stderr.write(`Pulling files from ${describeSource(source)}...\n`);
+async function runSingleRemoteAudit(
+  source: RemoteSource,
+  options: AuditCommandOptions,
+  logger: ReturnType<typeof createCliLogger>,
+) {
+  logger.info(`Pulling files from ${describeSource(source)}...`);
 
-  const pullResult = await pullFiles(source, options.since, options.keepRemoteFiles);
+  const pullResult = await pullFiles(
+    source,
+    options.since,
+    options.keepRemoteFiles,
+    logger.verbose,
+  );
+  logger.verbose(`Files staged at ${pullResult.localPath}.`);
 
   try {
     const comparisonKeyOverride = getComparisonKey(source);
@@ -178,6 +209,7 @@ async function runSingleRemoteAudit(source: RemoteSource, options: AuditCommandO
       dbPath: options.db,
       noDb: options.noDb,
       comparisonKeyOverride,
+      onProgress: logger.verbose,
     });
 
     renderOutput(summary, options);
@@ -197,14 +229,23 @@ async function runSingleRemoteAudit(source: RemoteSource, options: AuditCommandO
   }
 }
 
-async function runMultiRemoteAudit(sources: RemoteSource[], options: AuditCommandOptions) {
+async function runMultiRemoteAudit(
+  sources: RemoteSource[],
+  options: AuditCommandOptions,
+  logger: ReturnType<typeof createCliLogger>,
+) {
   const results: { source: RemoteSource; pullResult: PullResult }[] = [];
   const errors: { source: RemoteSource; error: string }[] = [];
 
   for (const source of sources) {
-    process.stderr.write(`Pulling files from ${source.name} (${describeSource(source)})...\n`);
+    logger.info(`Pulling files from ${source.name} (${describeSource(source)})...`);
     try {
-      const pullResult = await pullFiles(source, options.since, options.keepRemoteFiles);
+      const pullResult = await pullFiles(
+        source,
+        options.since,
+        options.keepRemoteFiles,
+        logger.verbose,
+      );
       results.push({ source, pullResult });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
@@ -230,6 +271,7 @@ async function runMultiRemoteAudit(sources: RemoteSource[], options: AuditComman
         dbPath: options.db,
         noDb: options.noDb,
         comparisonKeyOverride,
+        onProgress: logger.verbose,
       });
       summaries.push({ name: source.name, source, summary });
     }
