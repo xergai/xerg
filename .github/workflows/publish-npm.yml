@@ -22,6 +22,9 @@ on:
         required: true
         default: latest,audit,cli,cost,efficiency,finops,openclaw,waste
         type: string
+  release:
+    types:
+      - published
 
 jobs:
   verify:
@@ -63,7 +66,7 @@ jobs:
         run: pnpm cli:smoke
 
   publish-schemas:
-    if: ${{ github.event.inputs.publish_target == 'schemas' || github.event.inputs.publish_target == 'all' }}
+    if: ${{ (github.event_name == 'workflow_dispatch' && (github.event.inputs.publish_target == 'schemas' || github.event.inputs.publish_target == 'all')) || (github.event_name == 'release' && startsWith(github.event.release.tag_name, 'schemas-v')) }}
     runs-on: ubuntu-latest
     needs: verify
     permissions:
@@ -88,12 +91,21 @@ jobs:
       - name: Build schemas
         run: pnpm --filter @xerg/schemas build
 
+      - name: Verify release tag matches @xerg/schemas version
+        if: ${{ github.event_name == 'release' }}
+        run: |
+          EXPECTED_TAG="schemas-v$(node -p "require('./packages/schemas/package.json').version")"
+          if [ "${{ github.event.release.tag_name }}" != "$EXPECTED_TAG" ]; then
+            echo "Release tag ${GITHUB_EVENT_NAME}:${{ github.event.release.tag_name }} does not match $EXPECTED_TAG" >&2
+            exit 1
+          fi
+
       - name: Publish @xerg/schemas
         working-directory: packages/schemas
         run: npm publish --access public
 
   publish-cli:
-    if: ${{ github.event.inputs.publish_target == 'cli' || github.event.inputs.publish_target == 'all' }}
+    if: ${{ (github.event_name == 'workflow_dispatch' && (github.event.inputs.publish_target == 'cli' || github.event.inputs.publish_target == 'all')) || (github.event_name == 'release' && startsWith(github.event.release.tag_name, 'cli-v')) }}
     runs-on: ubuntu-latest
     needs: verify
     permissions:
@@ -118,13 +130,24 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Verify release tag matches @xerg/cli version
+        if: ${{ github.event_name == 'release' }}
+        run: |
+          EXPECTED_TAG="cli-v$(node -p "require('./packages/cli/package.json').version")"
+          if [ "${{ github.event.release.tag_name }}" != "$EXPECTED_TAG" ]; then
+            echo "Release tag ${GITHUB_EVENT_NAME}:${{ github.event.release.tag_name }} does not match $EXPECTED_TAG" >&2
+            exit 1
+          fi
+
       - name: Prepare ClawHub publish metadata
         id: clawhub_meta
         env:
-          INPUT_CHANGELOG: ${{ github.event.inputs.clawhub_changelog }}
+          INPUT_CHANGELOG: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.clawhub_changelog || github.event.release.body }}
+          INPUT_TAGS: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.clawhub_tags || 'latest,audit,cli,cost,efficiency,finops,openclaw,waste' }}
         run: |
           VERSION="$(node -p "require('./packages/cli/package.json').version")"
           CHANGELOG="$INPUT_CHANGELOG"
+          TAGS="$INPUT_TAGS"
 
           if [ -z "$CHANGELOG" ]; then
             CHANGELOG="Aligned with @xerg/cli $VERSION."
@@ -132,6 +155,7 @@ jobs:
 
           {
             echo "version=$VERSION"
+            echo "tags=$TAGS"
             echo "changelog<<EOF"
             echo "$CHANGELOG"
             echo "EOF"
@@ -159,7 +183,7 @@ jobs:
         env:
           XERG_SKILL_VERSION: ${{ steps.clawhub_meta.outputs.version }}
           XERG_SKILL_CHANGELOG: ${{ steps.clawhub_meta.outputs.changelog }}
-          XERG_SKILL_TAGS: ${{ github.event.inputs.clawhub_tags }}
+          XERG_SKILL_TAGS: ${{ steps.clawhub_meta.outputs.tags }}
         run: |
           clawhub --no-input publish ./skills/xerg \
             --slug xerg \
