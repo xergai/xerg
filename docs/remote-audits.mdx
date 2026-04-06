@@ -48,13 +48,17 @@ Notes:
 Prerequisites:
 
 - the `railway` CLI on your `PATH`
-- a Railway login that can reach the target project or linked project
+- a Railway login that can reach the target project or the service linked to the current working directory
 
 Use the linked project:
 
 ```bash
 npx @xerg/cli audit --railway
 ```
+
+Linked Railway mode is cwd-dependent. Xerg uses whichever Railway service is linked in the directory where you run the command.
+
+If the current directory is linked to a database, sidecar, or another non-OpenClaw service, re-run `railway link` in that directory and choose the OpenClaw app service.
 
 Target a specific service:
 
@@ -79,6 +83,10 @@ npx @xerg/cli audit \
 ```
 
 By default, Railway audits check `/tmp/openclaw` for gateway logs and `~/.openclaw/agents` for session files. Railway also checks `/data/.clawdbot/agents/main/sessions` as an alternate session location when the default session directory is empty.
+
+Use explicit `--project`, `--environment`, and `--service` values for CI, automation, or any workflow where you want the target to stay stable regardless of the current directory.
+
+If the target Railway service is reachable but Xerg still reports no OpenClaw data, verify that you selected the OpenClaw app service rather than a database or sidecar. If the app writes data to different paths, override them with `--remote-log-file` and `--remote-sessions-dir`.
 
 ## Multi-source audits with `--remote-config`
 
@@ -132,4 +140,4 @@ Behavior to know:
 
 ## Remote comparisons
 
-Remote and Railway audits can still use `--compare`, but the baseline lives in the local SQLite database on the machine running Xerg. Re-run the same target with the same effective remote paths if you want clean before and after deltas.
+Remote and Railway audits can still use `--compare`, but the baseline lives in the local SQLite database on the machine running Xerg. Xerg pulls the remote telemetry to your machine and analyzes it locally. Re-run the same target with the same effective remote paths if you want clean before and after deltas.
