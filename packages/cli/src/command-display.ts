@@ -129,19 +129,21 @@ function detectRunnerFromSignal(signal: string): PackageExecutor | null {
     return null;
   }
 
-  if (signal.includes('pnpm')) {
+  const tokens = signal.split(/[^a-z0-9]+/).filter(Boolean);
+
+  if (tokens.includes('pnpm')) {
     return 'pnpm dlx';
   }
 
-  if (signal.includes('yarn')) {
+  if (tokens.includes('yarn')) {
     return 'yarn dlx';
   }
 
-  if (signal.includes('bun')) {
+  if (tokens.includes('bun')) {
     return 'bunx';
   }
 
-  if (signal.includes('npm')) {
+  if (tokens.includes('npm')) {
     return 'npx';
   }
 

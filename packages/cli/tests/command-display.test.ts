@@ -88,6 +88,17 @@ describe('resolveCommandDisplay', () => {
 
     expect(display.prefix).toBe('npx @xerg/cli');
   });
+
+  it('does not misclassify npm exec paths that happen to contain ubuntu as bunx', () => {
+    const display = resolveCommandDisplay({
+      argv: ['node', '/tmp/run.js'],
+      env: {
+        npm_execpath: '/home/ubuntu/.nvm/versions/node/v24.0.0/lib/node_modules/npm/bin/npm-cli.js',
+      },
+    });
+
+    expect(display.prefix).toBe('npx @xerg/cli');
+  });
 });
 
 describe('formatCommand', () => {

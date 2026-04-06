@@ -217,7 +217,7 @@ export async function pullRemoteFilesRailway(opts: {
   let pulledLog = false;
   let pulledSessions = false;
 
-  if (logCheck.exists) {
+  if (logCheck.fileCount > 0) {
     onProgress?.(`Pulling gateway logs from ${remoteLogPath}...`);
     const { stdout: isFile } = railwayExec(`test -f ${remoteLogPath} && echo file`, target);
     if (isFile === 'file') {
@@ -414,9 +414,12 @@ export async function runRailwayDoctor(opts: {
     notes,
   };
 
+  let logCheck: ReturnType<typeof checkRemotePath> | null = null;
+  let sessCheck: ReturnType<typeof checkRemotePath> | null = null;
+
   if (source.logFile || source.sessionsDir) {
-    const logCheck = source.logFile ? checkRemotePath(source.logFile, target) : null;
-    const sessCheck = source.sessionsDir ? checkRemotePath(source.sessionsDir, target) : null;
+    logCheck = source.logFile ? checkRemotePath(source.logFile, target) : null;
+    sessCheck = source.sessionsDir ? checkRemotePath(source.sessionsDir, target) : null;
 
     report.customPaths = {
       logFileExists: logCheck?.exists ?? false,
@@ -444,11 +447,11 @@ export async function runRailwayDoctor(opts: {
   }
 
   const foundOpenClawData =
-    report.defaultPaths.gatewayExists ||
-    report.defaultPaths.sessionsExists ||
-    report.alternateSessionPaths.some((path) => path.exists) ||
-    Boolean(report.customPaths?.logFileExists) ||
-    Boolean(report.customPaths?.sessionsDirExists);
+    gateway.fileCount > 0 ||
+    sessions.fileCount > 0 ||
+    alternateSessionPaths.some((path) => path.fileCount > 0) ||
+    (logCheck?.fileCount ?? 0) > 0 ||
+    (sessCheck?.fileCount ?? 0) > 0;
 
   if (!foundOpenClawData) {
     notes.push(
