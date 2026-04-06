@@ -1,5 +1,11 @@
 # @xerg/cli
 
+## 0.1.10
+
+### Patch Changes
+
+- Improve Railway diagnostics and command hints so package-run installs show the right `npx`/`pnpm dlx` guidance, document the Railway doctor and audit flow, and keep installed launcher detection accurate.
+
 ## 0.1.9
 
 ### Patch Changes
