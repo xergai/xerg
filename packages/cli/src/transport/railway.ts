@@ -162,6 +162,8 @@ export function buildRailwaySourceFromFlags(opts: {
   remoteLogFile?: string;
   remoteSessionsDir?: string;
 }): RemoteSource {
+  // Linked mode intentionally follows the Railway service linked to the current cwd.
+  // If that turns out to be a database or sidecar, diagnostics should nudge users to relink.
   const name = opts.railway ? `railway-${opts.railway.serviceId.slice(0, 8)}` : 'railway-linked';
   return {
     name,
@@ -195,7 +197,9 @@ export async function pullRemoteFilesRailway(opts: {
   const { status } = railwayExec('echo ok', target);
   if (status !== 0) {
     throw new Error(
-      `Cannot reach Railway service${target ? ` (project: ${target.projectId})` : ' (linked project)'}. Check railway CLI auth and service configuration.`,
+      target
+        ? `Cannot reach Railway service ${target.serviceId} (project: ${target.projectId}). Check the provided --project / --environment / --service values and confirm the Railway CLI can reach that service.`
+        : 'Cannot reach the Railway service linked to this directory. Run `railway link` here and choose the OpenClaw app service, or pass --project / --environment / --service explicitly.',
     );
   }
   onProgress?.('Railway service reachable.');
@@ -213,7 +217,7 @@ export async function pullRemoteFilesRailway(opts: {
   let pulledLog = false;
   let pulledSessions = false;
 
-  if (logCheck.exists) {
+  if (logCheck.fileCount > 0) {
     onProgress?.(`Pulling gateway logs from ${remoteLogPath}...`);
     const { stdout: isFile } = railwayExec(`test -f ${remoteLogPath} && echo file`, target);
     if (isFile === 'file') {
@@ -251,8 +255,11 @@ export async function pullRemoteFilesRailway(opts: {
     const checkedPaths = [remoteLogPath, DEFAULT_SESSIONS_DIR, ...ALTERNATE_SESSION_PATHS].join(
       ', ',
     );
+    const wrongServiceHint = target
+      ? ' Verify that the selected service is the OpenClaw app, or use --remote-log-file / --remote-sessions-dir for custom paths.'
+      : ' If this directory is linked to a database or sidecar instead of the OpenClaw app, run `railway link` again and choose the app service.';
     throw new Error(
-      `No OpenClaw data found on Railway service. Checked: ${checkedPaths}. Use --remote-log-file or --remote-sessions-dir to specify custom paths.`,
+      `No OpenClaw data found on Railway service. Checked: ${checkedPaths}. Use --remote-log-file or --remote-sessions-dir to specify custom paths.${wrongServiceHint}`,
     );
   }
 
@@ -332,15 +339,15 @@ export async function runRailwayDoctor(opts: {
       railwayAuthUser,
       serviceReachable: false,
       serviceError: target
-        ? `Cannot reach service ${target.serviceId}`
-        : 'Cannot reach linked service. Run: railway link',
+        ? `Cannot reach service ${target.serviceId} in project ${target.projectId}`
+        : 'Current directory is not linked to a reachable Railway service. Run `railway link` here and choose the OpenClaw app service, or pass --project / --environment / --service.',
       defaultPaths: emptyDefaultPaths(),
       alternateSessionPaths: [],
       notes: [
         ...notes,
         target
-          ? `Service unreachable (project: ${target.projectId}, service: ${target.serviceId})`
-          : 'Service unreachable. Ensure a project is linked with: railway link',
+          ? `Service unreachable (project: ${target.projectId}, service: ${target.serviceId}). Verify the provided Railway IDs point at the OpenClaw app service.`
+          : 'Service unreachable for the current directory. Run `railway link` here and choose the OpenClaw app service, or pass explicit Railway IDs.',
       ],
     };
   }
@@ -407,9 +414,12 @@ export async function runRailwayDoctor(opts: {
     notes,
   };
 
+  let logCheck: ReturnType<typeof checkRemotePath> | null = null;
+  let sessCheck: ReturnType<typeof checkRemotePath> | null = null;
+
   if (source.logFile || source.sessionsDir) {
-    const logCheck = source.logFile ? checkRemotePath(source.logFile, target) : null;
-    const sessCheck = source.sessionsDir ? checkRemotePath(source.sessionsDir, target) : null;
+    logCheck = source.logFile ? checkRemotePath(source.logFile, target) : null;
+    sessCheck = source.sessionsDir ? checkRemotePath(source.sessionsDir, target) : null;
 
     report.customPaths = {
       logFileExists: logCheck?.exists ?? false,
@@ -434,6 +444,21 @@ export async function runRailwayDoctor(opts: {
     } else if (source.sessionsDir) {
       notes.push(`Custom sessions path ${source.sessionsDir}: not found`);
     }
+  }
+
+  const foundOpenClawData =
+    gateway.fileCount > 0 ||
+    sessions.fileCount > 0 ||
+    alternateSessionPaths.some((path) => path.fileCount > 0) ||
+    (logCheck?.fileCount ?? 0) > 0 ||
+    (sessCheck?.fileCount ?? 0) > 0;
+
+  if (!foundOpenClawData) {
+    notes.push(
+      target
+        ? 'No OpenClaw data was found on this Railway service. Verify that the selected service is the OpenClaw app, or use --remote-log-file / --remote-sessions-dir for custom paths.'
+        : 'No OpenClaw data was found on the linked Railway service. If this directory is linked to a database or sidecar instead of the OpenClaw app, run `railway link` again and choose the app service.',
+    );
   }
 
   return report;

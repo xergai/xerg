@@ -7,18 +7,19 @@ description: Solve the most common Xerg install, audit, compare, remote, and pus
 
 | Symptom | What it means | What to do |
 | --- | --- | --- |
-| `No OpenClaw sources were detected...` or exit code `2` | Xerg could not find any local or pulled OpenClaw data. | Run `xerg doctor`, then pass `--log-file` and `--sessions-dir` as needed, or use a remote audit. |
+| `No OpenClaw sources were detected...` or exit code `2` | Xerg could not find any local or pulled OpenClaw data. | Run `npx @xerg/cli doctor`, then pass `--log-file` and `--sessions-dir` as needed, or inspect SSH or Railway sources directly. |
 | `The --compare flag needs local snapshot history...` | You used `--compare` with `--no-db`. | Remove `--no-db` or use `--db <path>` so Xerg has a local snapshot store. |
 | `No prior comparable audit was found...` in notes | Xerg completed, but no compatible baseline exists yet. | Re-run the same audit after your next change. |
 | Install fails around `better-sqlite3` | The native dependency could not build for the current environment. | Use Node 22 or 24 and install standard native build tooling for your platform. |
 | SSH audit cannot connect or pull files | SSH access, key access, or `rsync` is missing. | Verify `ssh` connectivity, remote key access, and that `rsync` is installed locally and remotely. |
-| Railway audit says it cannot reach the service | The `railway` CLI is missing, unauthenticated, or pointed at the wrong service. | Run `railway login`, confirm your linked project or explicit IDs, and re-run `xerg doctor --railway`. |
-| Push says `No API key configured` | Xerg could not find credentials. | Set `XERG_API_KEY`, add `apiKey` to `~/.xerg/config.json`, or run `xerg login`. |
-| `xerg push` says no cached audit snapshots found | There is no audit in the default local database. | Run `xerg audit` first, or use `xerg push --file <path>`. |
+| Railway audit says it cannot reach the service | The `railway` CLI is missing, unauthenticated, the current directory is linked to the wrong service, or the explicit Railway IDs do not point at the OpenClaw app. | Run `railway login`, then either run `railway link` in the directory where you invoke Xerg and choose the OpenClaw app service, or pass explicit `--project`, `--environment`, and `--service` values. Re-run `npx @xerg/cli doctor --railway` to confirm the target. |
+| Railway audit reaches a service but still reports no OpenClaw data | The linked or selected Railway service is probably not the OpenClaw app, or the app stores logs and sessions outside the default paths. | Re-link or re-select the OpenClaw app service. If the app writes elsewhere, pass `--remote-log-file` and `--remote-sessions-dir`. |
+| Push says `No API key configured` | Xerg could not find credentials. | Set `XERG_API_KEY`, add `apiKey` to `~/.xerg/config.json`, or run `npx @xerg/cli login`. |
+| `xerg push` says no cached audit snapshots found | There is no audit in the default local database. | Run `npx @xerg/cli audit` first, or use `npx @xerg/cli push --file <path>`. |
 
 ## Debug in the right order
 
-1. Run `xerg doctor`.
+1. Run `npx @xerg/cli doctor`.
 2. Run the plain audit without extra flags.
 3. Add `--compare`, `--json`, or `--push` once the base audit works.
 4. If the data is remote, validate SSH or Railway access separately before debugging Xerg flags.

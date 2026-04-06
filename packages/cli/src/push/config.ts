@@ -3,6 +3,7 @@ import { homedir } from 'node:os';
 import { join } from 'node:path';
 
 import { loadStoredCredentials } from '../auth/credentials.js';
+import { formatCommand } from '../command-display.js';
 
 export interface PushConfig {
   apiKey: string;
@@ -46,6 +47,6 @@ export function loadPushConfig(): PushConfig {
   }
 
   throw new Error(
-    `No API key configured. Set XERG_API_KEY, add "apiKey" to ${CONFIG_PATH}, or run \`xerg login\`.\nGet your key at https://xerg.ai/dashboard/settings`,
+    `No API key configured. Set XERG_API_KEY, add "apiKey" to ${CONFIG_PATH}, or run \`${formatCommand('login')}\`.\nGet your key at https://xerg.ai/dashboard/settings`,
   );
 }

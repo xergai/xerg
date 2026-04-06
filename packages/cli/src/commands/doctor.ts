@@ -20,6 +20,7 @@ export interface DoctorCommandOptions {
   railwayEnvironment?: string;
   railwayService?: string;
   verbose?: boolean;
+  commandPrefix?: string;
 }
 
 export async function runDoctorCommand(options: DoctorCommandOptions) {
@@ -66,7 +67,7 @@ export async function runDoctorCommand(options: DoctorCommandOptions) {
     onProgress: logger.verbose,
   });
 
-  process.stdout.write(`${renderDoctorReport(report)}\n`);
+  process.stdout.write(`${renderDoctorReport(report, { commandPrefix: options.commandPrefix })}\n`);
 }
 
 function buildRailwayTarget(options: DoctorCommandOptions): RailwayTarget | undefined {

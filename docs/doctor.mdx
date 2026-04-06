@@ -5,6 +5,8 @@ description: Check local, SSH, or Railway audit readiness before you run a full 
 
 `xerg doctor` is the fastest way to confirm that Xerg can see OpenClaw data before you run an audit.
 
+Examples use `npx @xerg/cli`. If you installed the CLI globally, substitute `xerg`.
+
 ## Local checks
 
 ```bash
@@ -56,7 +58,9 @@ npx @xerg/cli doctor \
 npx @xerg/cli doctor --railway
 ```
 
-By default, Railway doctor uses the linked project from your local `railway` CLI context.
+By default, Railway doctor uses the Railway service linked to the current working directory in your local `railway` CLI context.
+
+If `railway link` in this directory points at a database, sidecar, or another non-OpenClaw service, doctor can authenticate successfully but still report that the linked service is unreachable or has no OpenClaw data. Re-run `railway link` in the directory where you invoke Xerg and choose the OpenClaw app service.
 
 You can also target a specific service:
 
@@ -73,7 +77,14 @@ Railway doctor checks:
 - whether the `railway` CLI is installed
 - whether the `railway` CLI is authenticated
 - whether the target service is reachable
-- default and alternate session paths
+- default and alternate OpenClaw paths
+- optional custom remote paths when you pass `--remote-log-file` or `--remote-sessions-dir`
+
+Railway checks these paths by default:
+
+- `/tmp/openclaw` for gateway logs
+- `~/.openclaw/agents` for session files
+- `/data/.clawdbot/agents/main/sessions` as an alternate session directory when the default one is empty
 
 ## When doctor says no data
 
@@ -81,6 +92,7 @@ If doctor cannot find any OpenClaw data:
 
 - verify that OpenClaw is writing gateway logs and session files
 - pass explicit paths with `--log-file` and `--sessions-dir`
-- run `xerg doctor --remote user@host` to inspect an SSH target directly from your machine
-- run `xerg doctor --railway` to inspect a linked Railway service
+- run `npx @xerg/cli doctor --remote user@host` to inspect an SSH target directly from your machine
+- run `npx @xerg/cli doctor --railway` to inspect a linked Railway service
+- use `--project`, `--environment`, and `--service` when you want a deterministic Railway target instead of the service linked to the current directory
 - use [remote audits](/remote-audits) if the data lives on another machine or service
