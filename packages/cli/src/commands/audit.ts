@@ -47,6 +47,7 @@ export interface AuditCommandOptions {
   failAboveWasteRate?: number;
   failAboveWasteUsd?: number;
   verbose?: boolean;
+  commandPrefix?: string;
 }
 
 const NO_DATA_PATTERN = /no openclaw sources were detected/i;
@@ -139,6 +140,7 @@ async function runLocalAudit(
     compare: options.compare,
     dbPath: options.db,
     noDb: options.noDb,
+    commandPrefix: options.commandPrefix,
     onProgress: logger.verbose,
   });
 
@@ -209,6 +211,7 @@ async function runSingleRemoteAudit(
       dbPath: options.db,
       noDb: options.noDb,
       comparisonKeyOverride,
+      commandPrefix: options.commandPrefix,
       onProgress: logger.verbose,
     });
 
@@ -271,6 +274,7 @@ async function runMultiRemoteAudit(
         dbPath: options.db,
         noDb: options.noDb,
         comparisonKeyOverride,
+        commandPrefix: options.commandPrefix,
         onProgress: logger.verbose,
       });
       summaries.push({ name: source.name, source, summary });

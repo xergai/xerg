@@ -26,7 +26,7 @@ export async function auditOpenClaw(options: AuditOptions) {
   if (sources.length === 0) {
     options.onProgress?.('No OpenClaw source files were detected.');
     throw new Error(
-      'No OpenClaw sources were detected. Run `xerg doctor` or provide --log-file / --sessions-dir.',
+      `No OpenClaw sources were detected. Run \`${options.commandPrefix ?? 'xerg'} doctor\` or provide --log-file / --sessions-dir.`,
     );
   }
   options.onProgress?.(`Detected ${sources.length} source file${sources.length === 1 ? '' : 's'}.`);

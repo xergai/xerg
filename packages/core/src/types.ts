@@ -16,6 +16,7 @@ export interface AuditOptions {
   noDb?: boolean;
   compare?: boolean;
   comparisonKeyOverride?: string;
+  commandPrefix?: string;
   onProgress?: (message: string) => void;
 }
 

@@ -4,6 +4,7 @@ import type { AuditPushPayload } from '@xerg/schemas';
 import { getDefaultDbPath, listStoredAuditSummaries, toWirePayload } from '@xergai/core';
 import type { WirePayloadMeta } from '@xergai/core';
 
+import { formatCommand } from '../command-display.js';
 import { NoDataError } from '../errors.js';
 import { loadPushConfig, pushAudit } from '../push/index.js';
 
@@ -67,13 +68,13 @@ function loadPayloadFromCache(): AuditPushPayload {
     summaries = listStoredAuditSummaries(dbPath);
   } catch {
     throw new NoDataError(
-      'No local audit database found. Run `xerg audit` first, or use `xerg push --file <path>`.',
+      `No local audit database found. Run \`${formatCommand('audit')}\` first, or use \`${formatCommand('push --file <path>')}\`.`,
     );
   }
 
   if (summaries.length === 0) {
     throw new NoDataError(
-      'No cached audit snapshots found. Run `xerg audit` first, or use `xerg push --file <path>`.',
+      `No cached audit snapshots found. Run \`${formatCommand('audit')}\` first, or use \`${formatCommand('push --file <path>')}\`.`,
     );
   }
 

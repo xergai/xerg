@@ -3,6 +3,7 @@
 import { readFileSync } from 'node:fs';
 import { styleText } from 'node:util';
 
+import { formatCommand, resolveCommandDisplay } from './command-display.js';
 import { runAuditCommand } from './commands/audit.js';
 import { runDoctorCommand } from './commands/doctor.js';
 import { runLoginCommand } from './commands/login.js';
@@ -55,11 +56,12 @@ type DoctorCliOptions = {
 
 const VERSION = readVersion();
 const argv = process.argv.slice(2);
+const commandDisplay = resolveCommandDisplay();
 
 const command = argv[0];
 
 if (!command || command === '--help' || command === '-h' || command === 'help') {
-  process.stdout.write(renderRootHelp());
+  process.stdout.write(renderRootHelp(commandDisplay));
   process.exit(0);
 }
 
@@ -70,7 +72,7 @@ if (command === '--version' || command === '-v' || command === 'version') {
 
 run().catch((error: unknown) => {
   const message = error instanceof Error ? error.message : 'Unknown error';
-  process.stderr.write(`${colorError(`xerg failed: ${message}`)}\n`);
+  process.stderr.write(`${colorError(`${commandDisplay.name} failed: ${message}`)}\n`);
   process.exitCode = error instanceof NoDataError ? 2 : 1;
 });
 
@@ -81,13 +83,19 @@ async function run() {
       throw new Error('Use either --json or --markdown, not both.');
     }
 
-    await runAuditCommand(options);
+    await runAuditCommand({
+      ...options,
+      commandPrefix: commandDisplay.prefix,
+    });
     return;
   }
 
   if (command === 'doctor') {
     const options = parseDoctorOptions(argv.slice(1));
-    await runDoctorCommand(options);
+    await runDoctorCommand({
+      ...options,
+      commandPrefix: commandDisplay.prefix,
+    });
     return;
   }
 
@@ -107,7 +115,9 @@ async function run() {
     return;
   }
 
-  throw new Error(`Unknown command "${command}". Run \`xerg --help\` to see available commands.`);
+  throw new Error(
+    `Unknown command "${command}". Run \`${formatCommand('--help', commandDisplay.prefix)}\` to see available commands.`,
+  );
 }
 
 function parseAuditOptions(raw: string[]) {
@@ -120,7 +130,7 @@ function parseAuditOptions(raw: string[]) {
     switch (arg) {
       case '--help':
       case '-h':
-        process.stdout.write(renderAuditHelp());
+        process.stdout.write(renderAuditHelp(commandDisplay.prefix));
         process.exit(0);
         break;
       case '--log-file':
@@ -203,7 +213,9 @@ function parseAuditOptions(raw: string[]) {
         index += 1;
         break;
       default:
-        throw new Error(`Unknown audit option "${arg}". Run \`xerg audit --help\` for usage.`);
+        throw new Error(
+          `Unknown audit option "${arg}". Run \`${formatCommand(['audit', '--help'], commandDisplay.prefix)}\` for usage.`,
+        );
     }
   }
 
@@ -220,7 +232,7 @@ function parsePushOptions(raw: string[]) {
     switch (arg) {
       case '--help':
       case '-h':
-        process.stdout.write(renderPushHelp());
+        process.stdout.write(renderPushHelp(commandDisplay.prefix));
         process.exit(0);
         break;
       case '--file':
@@ -231,7 +243,9 @@ function parsePushOptions(raw: string[]) {
         options.dryRun = true;
         break;
       default:
-        throw new Error(`Unknown push option "${arg}". Run \`xerg push --help\` for usage.`);
+        throw new Error(
+          `Unknown push option "${arg}". Run \`${formatCommand(['push', '--help'], commandDisplay.prefix)}\` for usage.`,
+        );
     }
   }
 
@@ -248,7 +262,7 @@ function parseDoctorOptions(raw: string[]) {
     switch (arg) {
       case '--help':
       case '-h':
-        process.stdout.write(renderDoctorHelp());
+        process.stdout.write(renderDoctorHelp(commandDisplay.prefix));
         process.exit(0);
         break;
       case '--log-file':
@@ -290,7 +304,9 @@ function parseDoctorOptions(raw: string[]) {
         options.verbose = true;
         break;
       default:
-        throw new Error(`Unknown doctor option "${arg}". Run \`xerg doctor --help\` for usage.`);
+        throw new Error(
+          `Unknown doctor option "${arg}". Run \`${formatCommand(['doctor', '--help'], commandDisplay.prefix)}\` for usage.`,
+        );
     }
   }
 
@@ -327,13 +343,13 @@ function readFloat(flag: string, value: string | undefined): number {
   return num;
 }
 
-function renderRootHelp() {
-  return `xerg ${VERSION}
+function renderRootHelp(display = commandDisplay) {
+  return `${display.name} ${VERSION}
 
 Waste intelligence for OpenClaw workflows.
 
 Usage:
-  xerg <command> [options]
+  ${formatCommand('<command> [options]', display.prefix)}
 
 Commands:
   audit    Analyze OpenClaw logs and produce a waste intelligence report.
@@ -348,13 +364,13 @@ Global options:
 `;
 }
 
-function renderAuditHelp() {
-  return `xerg audit
+function renderAuditHelp(commandPrefix = commandDisplay.prefix) {
+  return `${formatCommand('audit', commandPrefix)}
 
 Analyze OpenClaw logs and produce a waste intelligence report.
 
 Usage:
-  xerg audit [options]
+  ${formatCommand('audit [options]', commandPrefix)}
 
 Options:
   --log-file <path>           Explicit OpenClaw gateway log file to analyze
@@ -397,13 +413,13 @@ Threshold options:
 `;
 }
 
-function renderPushHelp() {
-  return `xerg push
+function renderPushHelp(commandPrefix = commandDisplay.prefix) {
+  return `${formatCommand('push', commandPrefix)}
 
 Push a cached audit snapshot to the Xerg API.
 
 Usage:
-  xerg push [options]
+  ${formatCommand('push [options]', commandPrefix)}
 
 Options:
   --file <path>               Push a specific snapshot file instead of the most recent cached audit
@@ -413,18 +429,18 @@ Options:
 
 Authentication:
   Set XERG_API_KEY in your environment, add "apiKey" to ~/.xerg/config.json,
-  or run \`xerg login\` to authenticate via browser.
+  or run \`${formatCommand('login', commandPrefix)}\` to authenticate via browser.
   Browser login stores a token at ~/.config/xerg/credentials.json by default.
 `;
 }
 
-function renderDoctorHelp() {
-  return `xerg doctor
+function renderDoctorHelp(commandPrefix = commandDisplay.prefix) {
+  return `${formatCommand('doctor', commandPrefix)}
 
 Inspect your machine for OpenClaw sources and audit readiness.
 
 Usage:
-  xerg doctor [options]
+  ${formatCommand('doctor [options]', commandPrefix)}
 
 Options:
   --log-file <path>           Explicit OpenClaw gateway log file to inspect

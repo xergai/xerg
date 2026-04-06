@@ -5,6 +5,7 @@ import {
   loadStoredCredentials,
   storeCredentials,
 } from '../auth/credentials.js';
+import { formatCommand } from '../command-display.js';
 
 const DEFAULT_AUTH_URL = 'https://xerg.ai/dashboard/settings';
 const DEFAULT_API_URL = 'https://api.xerg.ai';
@@ -15,7 +16,7 @@ export async function runLoginCommand() {
   const existing = loadStoredCredentials();
   if (existing) {
     process.stderr.write(
-      `Already logged in. Credentials stored at ${getCredentialsPath()}.\nRun ${colorBold('xerg logout')} first to re-authenticate.\n`,
+      `Already logged in. Credentials stored at ${getCredentialsPath()}.\nRun ${colorBold(formatCommand('logout'))} first to re-authenticate.\n`,
     );
     return;
   }
@@ -84,7 +85,7 @@ export async function runLoginCommand() {
       }
 
       if (res.status === 410) {
-        throw new Error('Device code expired. Please run `xerg login` again.');
+        throw new Error(`Device code expired. Please run \`${formatCommand('login')}\` again.`);
       }
 
       const body = (await res.json().catch(() => ({}))) as { error?: string };
@@ -100,7 +101,7 @@ export async function runLoginCommand() {
     }
   }
 
-  throw new Error('Authentication timed out. Please run `xerg login` again.');
+  throw new Error(`Authentication timed out. Please run \`${formatCommand('login')}\` again.`);
 }
 
 async function openBrowser(url: string): Promise<void> {
