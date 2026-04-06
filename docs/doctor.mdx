@@ -3,7 +3,7 @@ title: Doctor
 description: Check local, SSH, or Railway audit readiness before you run a full Xerg audit.
 ---
 
-`xerg doctor` is the fastest way to confirm that Xerg can see OpenClaw data before you run an audit.
+`npx @xerg/cli doctor` is the fastest way to confirm that Xerg can see OpenClaw data before you run an audit.
 
 Examples use `npx @xerg/cli`. If you installed the CLI globally, substitute `xerg`.
 
@@ -62,6 +62,8 @@ By default, Railway doctor uses the Railway service linked to the current workin
 
 If `railway link` in this directory points at a database, sidecar, or another non-OpenClaw service, doctor can authenticate successfully but still report that the linked service is unreachable or has no OpenClaw data. Re-run `railway link` in the directory where you invoke Xerg and choose the OpenClaw app service.
 
+Use explicit `--project`, `--environment`, and `--service` values when you want a deterministic Railway target instead of the service linked to the current directory.
+
 You can also target a specific service:
 
 ```bash
@@ -95,4 +97,5 @@ If doctor cannot find any OpenClaw data:
 - run `npx @xerg/cli doctor --remote user@host` to inspect an SSH target directly from your machine
 - run `npx @xerg/cli doctor --railway` to inspect a linked Railway service
 - use `--project`, `--environment`, and `--service` when you want a deterministic Railway target instead of the service linked to the current directory
-- use [remote audits](/remote-audits) if the data lives on another machine or service
+- run `npx @xerg/cli audit --remote user@host` or `npx @xerg/cli audit --railway` when the data lives on another machine or service; see [remote audits](/remote-audits) for the full workflow
+- remote audits still pull telemetry to the machine where you run Xerg and analyze it locally
