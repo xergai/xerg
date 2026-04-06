@@ -34,6 +34,25 @@ describe('resolveCommandDisplay', () => {
     expect(display.prefix).toBe('pnpm dlx @xerg/cli');
   });
 
+  it('keeps installed pnpm exec binaries on xerg', () => {
+    const display = resolveCommandDisplay({
+      argv: ['node', '/tmp/project/node_modules/@xerg/cli/dist/index.js'],
+      env: { npm_config_user_agent: 'pnpm/10.6.2 npm/? node/v24.14.1 linux x64' },
+    });
+
+    expect(display.prefix).toBe('xerg');
+    expect(display.name).toBe('xerg');
+  });
+
+  it('keeps node_modules bin shims on xerg', () => {
+    const display = resolveCommandDisplay({
+      argv: ['node', '/tmp/project/node_modules/.bin/xerg'],
+      env: { npm_config_user_agent: 'pnpm/10.6.2 npm/? node/v24.14.1 linux x64' },
+    });
+
+    expect(display.prefix).toBe('xerg');
+  });
+
   it('uses yarn dlx for yarn user agents', () => {
     const display = resolveCommandDisplay({
       argv: ['node', '/tmp/run.js'],

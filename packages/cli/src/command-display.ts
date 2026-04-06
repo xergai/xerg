@@ -45,6 +45,15 @@ function detectPackageExecutor(context?: {
   const execPath = normalizeSignal(env.npm_execpath);
   const argvPath = normalizeSignal(argv[1]);
 
+  const fromArgvPath = detectRunnerFromArgvPath(argvPath);
+  if (fromArgvPath) {
+    return fromArgvPath;
+  }
+
+  if (looksLikeInstalledCli(argvPath)) {
+    return null;
+  }
+
   const fromUserAgent = detectRunnerFromSignal(userAgent);
   if (fromUserAgent) {
     return fromUserAgent;
@@ -76,6 +85,43 @@ function detectPackageExecutor(context?: {
   }
 
   return null;
+}
+
+function detectRunnerFromArgvPath(argvPath: string): PackageExecutor | null {
+  if (!argvPath) {
+    return null;
+  }
+
+  if (argvPath.includes('/_npx/') || argvPath.includes('\\_npx\\')) {
+    return 'npx';
+  }
+
+  if (argvPath.includes('/.yarn/') && argvPath.includes('/dlx/')) {
+    return 'yarn dlx';
+  }
+
+  if (argvPath.includes('/bunx/') || argvPath.includes('\\bunx\\')) {
+    return 'bunx';
+  }
+
+  if (argvPath.includes('/dlx-') || argvPath.includes('\\dlx-')) {
+    return 'pnpm dlx';
+  }
+
+  return null;
+}
+
+function looksLikeInstalledCli(argvPath: string): boolean {
+  if (!argvPath) {
+    return false;
+  }
+
+  const normalized = argvPath.replaceAll('\\', '/');
+  return (
+    normalized.endsWith('/node_modules/.bin/xerg') ||
+    normalized.includes('/node_modules/@xerg/cli/dist/index.js') ||
+    normalized.endsWith('/bin/xerg')
+  );
 }
 
 function detectRunnerFromSignal(signal: string): PackageExecutor | null {
