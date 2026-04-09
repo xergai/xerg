@@ -1,5 +1,8 @@
 import type {
   AuditSummary,
+  CursorUsageCsvDoctorReport,
+  CursorUsageModeBreakdown,
+  CursorUsageModelBreakdown,
   DoctorReport,
   Finding,
   FindingChange,
@@ -27,9 +30,17 @@ function formatPercentDelta(value: number) {
   return `${sign}${points.toFixed(0)} pts`;
 }
 
+function formatCount(value: number) {
+  return new Intl.NumberFormat('en-US').format(value);
+}
+
 function formatUsdDelta(value: number) {
   const sign = value > 0 ? '+' : '';
   return `${sign}${formatUsd(value)}`;
+}
+
+function isCursorUsageSummary(summary: AuditSummary) {
+  return summary.sourceFiles.some((source) => source.kind === 'cursor-usage-csv');
 }
 
 function topRows(rows: SpendBreakdown[], limit = 5) {
@@ -205,7 +216,209 @@ export function renderDoctorReport(report: DoctorReport, options?: { commandPref
   return sections.join('\n');
 }
 
+export function renderCursorDoctorReport(report: CursorUsageCsvDoctorReport) {
+  const status = report.canAudit ? 'Cursor usage CSV detected.' : 'Cursor usage CSV is not ready.';
+
+  return [
+    '# Xerg doctor [cursor csv]',
+    '',
+    status,
+    '',
+    `File: ${report.filePath || '(not provided)'}`,
+    `Rows: ${formatCount(report.rowCount)}`,
+    `Date range: ${report.dateRange ? `${report.dateRange.start} -> ${report.dateRange.end}` : 'unavailable'}`,
+    '',
+    '## Pricing coverage',
+    `- Priced rows: ${formatCount(report.pricingCoverage.pricedCallCount)}`,
+    `- Unpriced rows: ${formatCount(report.pricingCoverage.unpricedCallCount)}`,
+    `- Priced tokens: ${formatCount(report.pricingCoverage.pricedTokenCount)}`,
+    `- Unpriced tokens: ${formatCount(report.pricingCoverage.unpricedTokenCount)}`,
+    ...(report.pricingCoverage.topUnpricedModels.length > 0
+      ? report.pricingCoverage.topUnpricedModels.map(
+          (model) =>
+            `- Unpriced model: ${model.key} (${formatCount(model.totalTokens)} tokens across ${formatCount(model.callCount)} row${model.callCount === 1 ? '' : 's'})`,
+        )
+      : ['- Unpriced model: none']),
+    '',
+    '## Notes',
+    ...report.notes.map((note) => `- ${note}`),
+  ].join('\n');
+}
+
+function renderCursorModeRows(rows: CursorUsageModeBreakdown[]) {
+  if (rows.length === 0) {
+    return ['- none'];
+  }
+
+  return rows.map((row) => {
+    return `- ${row.key}: ${formatCount(row.callCount)} row${row.callCount === 1 ? '' : 's'}, ${formatCount(row.totalTokens)} tokens, ${formatUsd(row.estimatedSpendUsd)} spend`;
+  });
+}
+
+function renderCursorModelRows(rows: CursorUsageModelBreakdown[]) {
+  if (rows.length === 0) {
+    return ['- none'];
+  }
+
+  return rows.slice(0, 8).map((row) => {
+    const coverage =
+      row.unpricedCallCount === 0
+        ? `${formatUsd(row.estimatedSpendUsd)} spend`
+        : row.pricedCallCount === 0
+          ? 'unpriced'
+          : `${formatUsd(row.estimatedSpendUsd)} spend, ${formatCount(row.unpricedCallCount)} unpriced row${row.unpricedCallCount === 1 ? '' : 's'}`;
+
+    return `- ${row.key}: ${formatCount(row.callCount)} row${row.callCount === 1 ? '' : 's'}, ${formatCount(row.totalTokens)} tokens, ${coverage}`;
+  });
+}
+
+function renderCursorPricingCoverage(summary: AuditSummary) {
+  const coverage = summary.pricingCoverage;
+  if (!coverage) {
+    return ['- Pricing coverage unavailable'];
+  }
+
+  return [
+    `- Priced rows: ${formatCount(coverage.pricedCallCount)}`,
+    `- Unpriced rows: ${formatCount(coverage.unpricedCallCount)}`,
+    `- Priced tokens: ${formatCount(coverage.pricedTokenCount)}`,
+    `- Unpriced tokens: ${formatCount(coverage.unpricedTokenCount)}`,
+    ...(coverage.topUnpricedModels.length > 0
+      ? coverage.topUnpricedModels.map(
+          (model) =>
+            `- Unpriced model: ${model.key} (${formatCount(model.totalTokens)} tokens across ${formatCount(model.callCount)} row${model.callCount === 1 ? '' : 's'})`,
+        )
+      : ['- Unpriced model: none']),
+  ];
+}
+
+function renderCursorCompareBlock(summary: AuditSummary) {
+  if (!summary.comparison) {
+    return [];
+  }
+
+  const comparison = summary.comparison;
+  const modeSwing = comparison.workflowDeltas[0];
+  const modelSwing = comparison.modelDeltas[0];
+
+  return [
+    '## Before / after',
+    `Compared against ${comparison.baselineGeneratedAt}`,
+    `- Total spend: ${formatUsd(comparison.baselineTotalSpendUsd)} -> ${formatUsd(summary.totalSpendUsd)} (${formatUsdDelta(comparison.deltaTotalSpendUsd)})`,
+    `- Rows analyzed: ${formatCount(comparison.baselineRunCount)} -> ${formatCount(summary.runCount)} (${comparison.deltaRunCount > 0 ? '+' : ''}${comparison.deltaRunCount})`,
+    `- Usage rows with pricing: ${formatCount(summary.pricingCoverage?.pricedCallCount ?? 0)}`,
+    modeSwing
+      ? `- Mode swing to inspect: ${describeSpendDelta(modeSwing)}`
+      : '- Mode swing to inspect: none',
+    modelSwing
+      ? `- Model swing to inspect: ${describeSpendDelta(modelSwing)}`
+      : '- Model swing to inspect: none',
+  ];
+}
+
+function renderCursorTerminalSummary(summary: AuditSummary) {
+  const usage = summary.cursorUsage;
+  const wasteFindings = summary.findings.filter((finding) => finding.classification === 'waste');
+  const opportunityFindings = summary.findings.filter(
+    (finding) => finding.classification === 'opportunity',
+  );
+
+  return [
+    '# Xerg audit [cursor csv]',
+    '',
+    `Total spend: ${formatUsd(summary.totalSpendUsd)}`,
+    `Observed spend: ${formatUsd(summary.observedSpendUsd)}`,
+    `Estimated spend: ${formatUsd(summary.estimatedSpendUsd)}`,
+    `Rows analyzed: ${formatCount(summary.runCount)}`,
+    `Usage rows with pricing: ${formatCount(summary.pricingCoverage?.pricedCallCount ?? 0)} / ${formatCount(summary.runCount)}`,
+    `Total tokens: ${formatCount(usage?.totalTokens ?? 0)}`,
+    `Structural waste identified: ${formatUsd(summary.wasteSpendUsd)} (${formatPercent(summary.structuralWasteRate)})`,
+    `Potential impact surfaced: ${formatUsd(summary.opportunitySpendUsd)}`,
+    '',
+    '## Token mix',
+    `- Input tokens: ${formatCount(usage?.totalInputTokens ?? 0)}`,
+    `- Output tokens: ${formatCount(usage?.totalOutputTokens ?? 0)}`,
+    `- Cache read tokens: ${formatCount(usage?.totalCacheReadTokens ?? 0)}`,
+    `- Input (cache write): ${formatCount(usage?.totalInputWithCacheWriteTokens ?? 0)}`,
+    `- Input (no cache write): ${formatCount(usage?.totalInputWithoutCacheWriteTokens ?? 0)}`,
+    '',
+    '## Max mode usage',
+    ...renderCursorModeRows(usage?.modes ?? []),
+    '',
+    '## Model mix',
+    ...renderCursorModelRows(usage?.models ?? []),
+    '',
+    '## Pricing coverage',
+    ...renderCursorPricingCoverage(summary),
+    '',
+    '## Waste taxonomy',
+    'Structural waste',
+    ...renderTaxonomyRows(summary.wasteByKind, 'No confirmed waste buckets detected.'),
+    'Savings opportunities',
+    ...renderTaxonomyRows(
+      summary.opportunityByKind,
+      'No opportunity buckets detected.',
+      '(directional)',
+    ),
+    '',
+    '## Findings',
+    ...renderFindingList(summary.findings, 'none detected'),
+    '',
+    ...renderCursorCompareBlock(summary),
+    ...(summary.comparison ? [''] : []),
+    '## Notes',
+    ...summary.notes.map((note) => `- ${note}`),
+  ].join('\n');
+}
+
+function renderCursorMarkdownSummary(summary: AuditSummary) {
+  const usage = summary.cursorUsage;
+
+  return [
+    '# Xerg Cursor CSV Audit',
+    '',
+    `- Generated: ${summary.generatedAt}`,
+    `- Total spend: ${formatUsd(summary.totalSpendUsd)}`,
+    `- Observed spend: ${formatUsd(summary.observedSpendUsd)}`,
+    `- Estimated spend: ${formatUsd(summary.estimatedSpendUsd)}`,
+    `- Structural waste identified: ${formatUsd(summary.wasteSpendUsd)} (${formatPercent(summary.structuralWasteRate)})`,
+    `- Potential impact surfaced: ${formatUsd(summary.opportunitySpendUsd)}`,
+    `- Rows analyzed: ${formatCount(summary.runCount)}`,
+    `- Usage rows with pricing: ${formatCount(summary.pricingCoverage?.pricedCallCount ?? 0)} / ${formatCount(summary.runCount)}`,
+    `- Total tokens: ${formatCount(usage?.totalTokens ?? 0)}`,
+    '',
+    '## Token mix',
+    `- Input tokens: ${formatCount(usage?.totalInputTokens ?? 0)}`,
+    `- Output tokens: ${formatCount(usage?.totalOutputTokens ?? 0)}`,
+    `- Cache read tokens: ${formatCount(usage?.totalCacheReadTokens ?? 0)}`,
+    '',
+    '## Max mode usage',
+    ...renderCursorModeRows(usage?.modes ?? []),
+    '',
+    '## Model mix',
+    ...renderCursorModelRows(usage?.models ?? []),
+    '',
+    '## Pricing coverage',
+    ...renderCursorPricingCoverage(summary),
+    '',
+    ...renderTaxonomyBlock(summary),
+    '',
+    '## Findings',
+    ...summary.findings.slice(0, 10).map((finding) => {
+      return `- **${finding.title}** (${finding.classification}, ${finding.confidence}) — ${finding.summary} Estimated impact: ${formatUsd(finding.costImpactUsd)}.`;
+    }),
+    ...(summary.comparison ? ['', ...renderCursorCompareBlock(summary)] : []),
+    '',
+    '## Notes',
+    ...summary.notes.map((note) => `- ${note}`),
+  ].join('\n');
+}
+
 export function renderTerminalSummary(summary: AuditSummary) {
+  if (isCursorUsageSummary(summary)) {
+    return renderCursorTerminalSummary(summary);
+  }
+
   const wasteFindings = summary.findings.filter((finding) => finding.classification === 'waste');
   const opportunityFindings = summary.findings.filter(
     (finding) => finding.classification === 'opportunity',
@@ -260,6 +473,10 @@ export function renderTerminalSummary(summary: AuditSummary) {
 }
 
 export function renderMarkdownSummary(summary: AuditSummary) {
+  if (isCursorUsageSummary(summary)) {
+    return renderCursorMarkdownSummary(summary);
+  }
+
   const lines = [
     '# Xerg Audit Report',
     '',

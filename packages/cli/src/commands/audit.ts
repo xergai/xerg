@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { rmSync } from 'node:fs';
-import { hostname } from 'node:os';
 import {
+  auditCursorUsageCsv,
   auditOpenClaw,
   buildRecommendations,
   renderMarkdownSummary,
@@ -13,6 +13,7 @@ import type { AuditSummary, WirePayloadMeta } from '@xergai/core';
 import { NoDataError } from '../errors.js';
 import { createCliLogger } from '../log.js';
 import { loadPushConfig, pushAudit } from '../push/index.js';
+import { buildLocalPushSourceMeta, buildRemotePushSourceMeta } from '../source-meta.js';
 import {
   buildComparisonKeyForRailway,
   buildComparisonKeyForRemote,
@@ -27,6 +28,7 @@ import type { PullResult, RailwayTarget, RemoteSource } from '../transport/index
 export interface AuditCommandOptions {
   logFile?: string;
   sessionsDir?: string;
+  cursorUsageCsv?: string;
   since?: string;
   compare?: boolean;
   json?: boolean;
@@ -71,6 +73,8 @@ export async function runAuditCommand(options: AuditCommandOptions) {
   if (options.dryRun && !options.push) {
     throw new Error('--dry-run requires --push.');
   }
+
+  validateCursorUsageCsvOptions(options);
 
   const remoteFlags = [options.remote, options.remoteConfig, options.railway].filter(
     Boolean,
@@ -125,6 +129,31 @@ async function runLocalAudit(
   options: AuditCommandOptions,
   logger: ReturnType<typeof createCliLogger>,
 ) {
+  if (options.cursorUsageCsv) {
+    logger.verbose('Running a local Cursor usage CSV audit.');
+    logger.verbose(`Using Cursor usage CSV: ${options.cursorUsageCsv}`);
+
+    const summary = await auditCursorUsageCsv({
+      cursorUsageCsv: options.cursorUsageCsv,
+      since: options.since,
+      compare: options.compare,
+      dbPath: options.db,
+      noDb: options.noDb,
+      commandPrefix: options.commandPrefix,
+      onProgress: logger.verbose,
+    });
+
+    renderOutput(summary, options);
+
+    if (options.push) {
+      const meta = buildMeta(buildLocalPushSourceMeta('cursor'));
+      await handlePush(summary, meta, options);
+    }
+
+    checkThresholds(summary, options);
+    return;
+  }
+
   logger.verbose('Running a local audit.');
   if (options.logFile) {
     logger.verbose(`Using explicit local log file: ${options.logFile}`);
@@ -147,11 +176,35 @@ async function runLocalAudit(
   renderOutput(summary, options);
 
   if (options.push) {
-    const meta = buildMeta({ environment: 'local', sourceId: hostname(), sourceHost: hostname() });
+    const meta = buildMeta(buildLocalPushSourceMeta('openclaw'));
     await handlePush(summary, meta, options);
   }
 
   checkThresholds(summary, options);
+}
+
+function validateCursorUsageCsvOptions(options: AuditCommandOptions) {
+  if (!options.cursorUsageCsv) {
+    return;
+  }
+
+  const conflicts = [
+    options.logFile ? '--log-file' : null,
+    options.sessionsDir ? '--sessions-dir' : null,
+    options.remote ? '--remote' : null,
+    options.remoteLogFile ? '--remote-log-file' : null,
+    options.remoteSessionsDir ? '--remote-sessions-dir' : null,
+    options.remoteConfig ? '--remote-config' : null,
+    options.keepRemoteFiles ? '--keep-remote-files' : null,
+    options.railway ? '--railway' : null,
+    options.railwayProject ? '--project' : null,
+    options.railwayEnvironment ? '--environment' : null,
+    options.railwayService ? '--service' : null,
+  ].filter((flag): flag is string => flag !== null);
+
+  if (conflicts.length > 0) {
+    throw new Error(`The --cursor-usage-csv flag cannot be combined with ${conflicts.join(', ')}.`);
+  }
 }
 
 function getComparisonKey(source: RemoteSource): string {
@@ -180,10 +233,6 @@ function describeSource(source: RemoteSource): string {
       : `${source.name} (Railway linked project)`;
   }
   return source.host;
-}
-
-function sourceEnvironment(source: RemoteSource): WirePayloadMeta['environment'] {
-  return source.transport === 'railway' ? 'railway' : 'remote';
 }
 
 async function runSingleRemoteAudit(
@@ -218,11 +267,7 @@ async function runSingleRemoteAudit(
     renderOutput(summary, options);
 
     if (options.push) {
-      const meta = buildMeta({
-        environment: sourceEnvironment(source),
-        sourceId: source.name,
-        sourceHost: source.host,
-      });
+      const meta = buildMeta(buildRemotePushSourceMeta(source));
       await handlePush(summary, meta, options);
     }
 
@@ -315,11 +360,7 @@ async function runMultiRemoteAudit(
 
     if (options.push) {
       for (const { source, summary } of summaries) {
-        const meta = buildMeta({
-          environment: sourceEnvironment(source),
-          sourceId: source.name,
-          sourceHost: source.host,
-        });
+        const meta = buildMeta(buildRemotePushSourceMeta(source));
         await handlePush(summary, meta, options);
       }
     }

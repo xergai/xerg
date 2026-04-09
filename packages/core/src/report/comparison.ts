@@ -239,6 +239,8 @@ export function hydrateAuditSummary(summary: AuditSummary): AuditSummary {
         ? summary.opportunityByKind
         : buildTaxonomyBuckets(summary.findings, 'opportunity'),
     notes: summary.notes ?? [],
+    pricingCoverage: summary.pricingCoverage ?? null,
+    cursorUsage: summary.cursorUsage ?? null,
   };
 }
 

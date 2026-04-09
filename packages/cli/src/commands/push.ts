@@ -1,5 +1,4 @@
 import { readFileSync } from 'node:fs';
-import { hostname } from 'node:os';
 import type { AuditPushPayload } from '@xerg/schemas';
 import { getDefaultDbPath, listStoredAuditSummaries, toWirePayload } from '@xergai/core';
 import type { WirePayloadMeta } from '@xergai/core';
@@ -7,6 +6,7 @@ import type { WirePayloadMeta } from '@xergai/core';
 import { formatCommand } from '../command-display.js';
 import { NoDataError } from '../errors.js';
 import { loadPushConfig, pushAudit } from '../push/index.js';
+import { buildCachedPushSourceMeta } from '../source-meta.js';
 
 export interface PushCommandOptions {
   file?: string;
@@ -79,7 +79,7 @@ function loadPayloadFromCache(): AuditPushPayload {
   }
 
   const latest = summaries[0];
-  const meta = buildMeta();
+  const meta = buildMeta(latest);
 
   process.stderr.write(
     `Using most recent cached audit: ${latest.auditId} (${latest.generatedAt})\n`,
@@ -98,11 +98,12 @@ function readCliVersion(): string {
   }
 }
 
-function buildMeta(): WirePayloadMeta {
+function buildMeta(summary: Parameters<typeof buildCachedPushSourceMeta>[0]): WirePayloadMeta {
+  const sourceMeta = buildCachedPushSourceMeta(summary);
   return {
     cliVersion: readCliVersion(),
-    sourceId: hostname(),
-    sourceHost: hostname(),
-    environment: 'local',
+    sourceId: sourceMeta.sourceId,
+    sourceHost: sourceMeta.sourceHost,
+    environment: sourceMeta.environment,
   };
 }

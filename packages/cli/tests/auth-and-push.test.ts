@@ -276,4 +276,42 @@ describe('Phase 2b CLI commands', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(output.getStderr()).toContain('Using most recent cached audit: audit_cached_123');
   });
+
+  it('uses a descriptive railway source label for cached push dry runs', async () => {
+    vi.doMock('@xergai/core', () => ({
+      getDefaultDbPath: () => '/tmp/xerg-test.db',
+      listStoredAuditSummaries: () => [
+        {
+          auditId: 'audit_cached_railway',
+          generatedAt: '2026-03-25T12:00:00.000Z',
+          comparisonKey: 'railway-linked:/tmp/openclaw:~/.openclaw/agents',
+          sourceFiles: [],
+        },
+      ],
+      toWirePayload: (summary: { auditId: string }, meta: Record<string, unknown>) => ({
+        version: 1,
+        summary: {
+          auditId: summary.auditId,
+          generatedAt: '2026-03-25T12:00:00.000Z',
+        },
+        meta,
+      }),
+    }));
+
+    const { runPushCommand } = await import('../src/commands/push.js');
+    const output = captureOutput();
+    await runPushCommand({ dryRun: true });
+    output.restore();
+
+    const payload = JSON.parse(output.getStdout()) as {
+      meta?: { sourceId?: string; sourceHost?: string; environment?: string };
+    };
+
+    expect(payload.meta).toMatchObject({
+      sourceId: 'OpenClaw - Railway',
+      sourceHost: 'Railway',
+      environment: 'railway',
+    });
+    expect(output.getStderr()).toContain('Using most recent cached audit: audit_cached_railway');
+  });
 });

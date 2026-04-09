@@ -30,6 +30,14 @@ npx @xerg/cli doctor --log-file /path/to/openclaw.log
 npx @xerg/cli doctor --sessions-dir /path/to/sessions
 ```
 
+To inspect a local Cursor usage export instead:
+
+```bash
+npx @xerg/cli doctor --cursor-usage-csv ~/Downloads/usage-events-2026-04-08.csv
+```
+
+Cursor CSV doctor validates the file shape, row count, date range, and current pricing coverage.
+
 ## SSH checks
 
 ```bash

@@ -13,7 +13,15 @@ export default defineConfig({
     environment: 'node',
     include: ['packages/*/tests/**/*.test.ts'],
     coverage: {
+      provider: 'v8',
       reporter: ['text', 'lcov'],
+      exclude: ['**/.next/**', '**/*.config.ts', '**/dist/**', '**/tests/**', 'scripts/**'],
+      thresholds: {
+        branches: 69,
+        functions: 73,
+        lines: 65,
+        statements: 65,
+      },
     },
   },
 });

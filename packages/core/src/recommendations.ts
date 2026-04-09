@@ -62,6 +62,28 @@ const templatesByKind: Record<string, RecommendationTemplate> = {
       strategy: 'cadence-review',
     }),
   },
+  'cache-carryover': {
+    actionType: 'prompt-trim',
+    titleFn: () => 'Summarize and reset long Cursor chats',
+    descriptionFn: (f) =>
+      `${f.summary} Create a compact recall summary, start a fresh chat, and carry forward only the facts the model actually needs.`,
+    suggestedChangeFn: (f) => ({
+      strategy: 'conversation-reset',
+      cacheReadShare: (f.details as Record<string, unknown>).cacheReadShare,
+      totalCacheReadTokens: (f.details as Record<string, unknown>).totalCacheReadTokens,
+    }),
+  },
+  'max-mode-concentration': {
+    actionType: 'model-switch',
+    titleFn: () => 'Reserve max mode for the hardest Cursor turns',
+    descriptionFn: (f) =>
+      `${f.summary} Try a two-pass workflow: standard mode first, then escalate only the prompts that truly need max mode.`,
+    suggestedChangeFn: (f) => ({
+      strategy: 'tiered-routing',
+      maxModeSpendShare: (f.details as Record<string, unknown>).maxModeSpendShare,
+      maxModeCallCount: (f.details as Record<string, unknown>).maxModeCallCount,
+    }),
+  },
 };
 
 function extractWorkflow(finding: Finding): string {

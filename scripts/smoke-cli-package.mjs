@@ -9,14 +9,21 @@ const cliDir = join(root, 'packages', 'cli');
 const tempRoot = mkdtempSync(join(tmpdir(), 'xerg-cli-smoke-'));
 const packDir = join(tempRoot, 'pack');
 const installDir = join(tempRoot, 'install');
+const npmCacheDir = join(tempRoot, 'npm-cache');
+const execEnv = {
+  ...process.env,
+  NPM_CONFIG_CACHE: npmCacheDir,
+};
 
 try {
   mkdirSync(packDir, { recursive: true });
   mkdirSync(installDir, { recursive: true });
+  mkdirSync(npmCacheDir, { recursive: true });
 
   const packOutput = execFileSync('npm', ['pack', '--pack-destination', packDir], {
     cwd: cliDir,
     encoding: 'utf8',
+    env: execEnv,
   }).trim();
   const tarballName = packOutput.split('\n').filter(Boolean).at(-1);
 
@@ -38,16 +45,19 @@ try {
 
   execFileSync('corepack', ['pnpm', 'add', join(packDir, tarballName)], {
     cwd: installDir,
+    env: execEnv,
     stdio: 'pipe',
   });
 
   const helpOutput = execFileSync('corepack', ['pnpm', 'exec', 'xerg', '--help'], {
     cwd: installDir,
     encoding: 'utf8',
+    env: execEnv,
   });
   const versionOutput = execFileSync('corepack', ['pnpm', 'exec', 'xerg', '--version'], {
     cwd: installDir,
     encoding: 'utf8',
+    env: execEnv,
   }).trim();
 
   if (!helpOutput.includes('xerg <command> [options]')) {
