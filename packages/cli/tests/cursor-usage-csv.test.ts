@@ -78,6 +78,8 @@ describe('cursor usage csv CLI', () => {
     const parsed = JSON.parse(output.getStdout()) as {
       pricingCoverage?: { pricedCallCount: number; unpricedCallCount: number };
       cursorUsage?: { totalTokens: number };
+      spendByDay?: Array<{ date: string; spendUsd: number }>;
+      wasteByDay?: Array<{ date: string; wasteUsd: number }>;
       recommendations?: unknown[];
     };
 
@@ -86,6 +88,34 @@ describe('cursor usage csv CLI', () => {
       unpricedCallCount: 2,
     });
     expect(parsed.cursorUsage?.totalTokens).toBe(13850);
+    expect(parsed.spendByDay).toEqual([
+      {
+        date: '2026-04-01',
+        spendUsd: 0,
+        observedSpendUsd: 0,
+        estimatedSpendUsd: 0,
+        callCount: 1,
+      },
+      {
+        date: '2026-04-02',
+        spendUsd: 0.0027,
+        observedSpendUsd: 0,
+        estimatedSpendUsd: 0.0027,
+        callCount: 1,
+      },
+      {
+        date: '2026-04-03',
+        spendUsd: 0.04275,
+        observedSpendUsd: 0,
+        estimatedSpendUsd: 0.04275,
+        callCount: 3,
+      },
+    ]);
+    expect(parsed.wasteByDay).toEqual([
+      { date: '2026-04-01', wasteUsd: 0 },
+      { date: '2026-04-02', wasteUsd: 0 },
+      { date: '2026-04-03', wasteUsd: 0 },
+    ]);
     expect(Array.isArray(parsed.recommendations)).toBe(true);
   });
 
@@ -105,6 +135,10 @@ describe('cursor usage csv CLI', () => {
 
     const parsed = JSON.parse(output.getStdout()) as {
       meta?: { sourceId?: string; sourceHost?: string; environment?: string };
+      summary?: {
+        spendByDay?: Array<{ date: string; spendUsd: number }>;
+        wasteByDay?: Array<{ date: string; wasteUsd: number }>;
+      };
     };
 
     expect(parsed.meta).toMatchObject({
@@ -112,6 +146,34 @@ describe('cursor usage csv CLI', () => {
       sourceHost: hostname(),
       environment: 'local',
     });
+    expect(parsed.summary?.spendByDay).toEqual([
+      {
+        date: '2026-04-01',
+        spendUsd: 0,
+        observedSpendUsd: 0,
+        estimatedSpendUsd: 0,
+        callCount: 1,
+      },
+      {
+        date: '2026-04-02',
+        spendUsd: 0.0027,
+        observedSpendUsd: 0,
+        estimatedSpendUsd: 0.0027,
+        callCount: 1,
+      },
+      {
+        date: '2026-04-03',
+        spendUsd: 0.04275,
+        observedSpendUsd: 0,
+        estimatedSpendUsd: 0.04275,
+        callCount: 3,
+      },
+    ]);
+    expect(parsed.summary?.wasteByDay).toEqual([
+      { date: '2026-04-01', wasteUsd: 0 },
+      { date: '2026-04-02', wasteUsd: 0 },
+      { date: '2026-04-03', wasteUsd: 0 },
+    ]);
     expect(output.getStderr()).toBe('');
   });
 

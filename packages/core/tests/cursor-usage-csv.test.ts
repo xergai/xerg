@@ -80,6 +80,34 @@ describe('cursor usage csv audit', () => {
     });
     expect(summary.cursorUsage?.totalTokens).toBe(13850);
     expect(summary.cursorUsage?.models[0]?.key).toBe('anthropic/claude-opus-4');
+    expect(summary.spendByDay).toEqual([
+      {
+        date: '2026-04-01',
+        spendUsd: 0,
+        observedSpendUsd: 0,
+        estimatedSpendUsd: 0,
+        callCount: 1,
+      },
+      {
+        date: '2026-04-02',
+        spendUsd: 0.0027,
+        observedSpendUsd: 0,
+        estimatedSpendUsd: 0.0027,
+        callCount: 1,
+      },
+      {
+        date: '2026-04-03',
+        spendUsd: 0.04275,
+        observedSpendUsd: 0,
+        estimatedSpendUsd: 0.04275,
+        callCount: 3,
+      },
+    ]);
+    expect(summary.wasteByDay).toEqual([
+      { date: '2026-04-01', wasteUsd: 0 },
+      { date: '2026-04-02', wasteUsd: 0 },
+      { date: '2026-04-03', wasteUsd: 0 },
+    ]);
     expect(
       summary.notes.some((note) => note.includes('do not have full local pricing coverage')),
     ).toBe(true);
@@ -157,5 +185,20 @@ describe('cursor usage csv audit', () => {
     expect(summary.opportunitySpendUsd).toBeGreaterThan(0);
     expect(summary.spendByWorkflow[0]?.key).toBe('on-demand / max mode');
     expect(summary.spendByModel[0]?.key).toBe('anthropic/claude-sonnet-4-5');
+    expect(summary.spendByDay).toEqual([
+      {
+        date: '2026-04-03',
+        spendUsd: 60,
+        observedSpendUsd: 60,
+        estimatedSpendUsd: 0,
+        callCount: 24,
+      },
+    ]);
+    expect(summary.wasteByDay).toEqual([
+      {
+        date: '2026-04-03',
+        wasteUsd: summary.wasteSpendUsd,
+      },
+    ]);
   });
 });

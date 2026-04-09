@@ -1,7 +1,7 @@
 {
   "name": "xerg-workspace",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "packageManager": "pnpm@10.6.2",
   "engines": {
     "node": ">=22 <25"
@@ -13,7 +13,7 @@
     "format": "biome format --write .",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "typecheck": "corepack pnpm -r typecheck",
+    "typecheck": "corepack pnpm --filter @xerg/schemas build && corepack pnpm -r typecheck",
     "prepare": "husky",
     "changeset": "changeset",
     "release": "changeset version",

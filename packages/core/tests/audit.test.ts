@@ -22,6 +22,21 @@ describe('xerg audit', () => {
     expect(summary.findings.some((finding) => finding.kind === 'loop-waste')).toBe(true);
     expect(summary.findings.some((finding) => finding.kind === 'candidate-downgrade')).toBe(true);
     expect(summary.findings.some((finding) => finding.kind === 'context-outlier')).toBe(true);
+    expect(summary.spendByDay).toEqual([
+      {
+        date: '2026-03-06',
+        spendUsd: summary.totalSpendUsd,
+        observedSpendUsd: summary.observedSpendUsd,
+        estimatedSpendUsd: summary.estimatedSpendUsd,
+        callCount: summary.callCount,
+      },
+    ]);
+    expect(summary.wasteByDay).toEqual([
+      {
+        date: '2026-03-06',
+        wasteUsd: summary.wasteSpendUsd,
+      },
+    ]);
   });
 
   it('inspects session transcript sources in doctor mode', async () => {

@@ -159,12 +159,36 @@ export interface SpendBreakdown {
   observedShare: number;
 }
 
+export interface DailySpendBreakdown {
+  date: string;
+  spendUsd: number;
+  observedSpendUsd: number;
+  estimatedSpendUsd: number;
+  callCount: number;
+}
+
+export interface DailyWasteBreakdown {
+  date: string;
+  wasteUsd: number;
+}
+
 export interface FindingTaxonomyBucket {
   kind: string;
   label: string;
   classification: FindingClassification;
   spendUsd: number;
   findingCount: number;
+}
+
+export interface WasteAttribution {
+  kind: string;
+  timestamp: string;
+  wasteUsd: number;
+}
+
+export interface FindingBuildResult {
+  findings: Finding[];
+  wasteAttributions: WasteAttribution[];
 }
 
 export interface SpendDelta {
@@ -232,6 +256,8 @@ export interface AuditSummary {
   opportunityByKind: FindingTaxonomyBucket[];
   spendByWorkflow: SpendBreakdown[];
   spendByModel: SpendBreakdown[];
+  spendByDay: DailySpendBreakdown[];
+  wasteByDay: DailyWasteBreakdown[];
   findings: Finding[];
   notes: string[];
   sourceFiles: DetectedSourceFile[];

@@ -1,4 +1,10 @@
-import type { Finding, FindingClassification, FindingConfidence, NormalizedRun } from '../types.js';
+import type {
+  Finding,
+  FindingBuildResult,
+  FindingClassification,
+  FindingConfidence,
+  NormalizedRun,
+} from '../types.js';
 import { sha1 } from '../utils/hash.js';
 
 function round(value: number) {
@@ -22,18 +28,18 @@ function asBoolean(value: unknown) {
   return value === true;
 }
 
-export function buildCursorUsageFindings(runs: NormalizedRun[]): Finding[] {
+export function buildCursorUsageFindings(runs: NormalizedRun[]): FindingBuildResult {
   const calls = runs.flatMap((run) => run.calls);
   const billableCalls = calls.filter((call) => call.costUsd > 0);
   if (billableCalls.length === 0) {
-    return [];
+    return { findings: [], wasteAttributions: [] };
   }
 
   const cacheAwareCalls = billableCalls.filter((call) => {
     return asNumber(call.metadata.cacheReadTokens) > 0;
   });
   if (cacheAwareCalls.length === 0) {
-    return [];
+    return { findings: [], wasteAttributions: [] };
   }
 
   const totalSpendUsd = billableCalls.reduce((sum, call) => sum + call.costUsd, 0);
@@ -74,7 +80,7 @@ export function buildCursorUsageFindings(runs: NormalizedRun[]): Finding[] {
     cacheCoverageShare >= 0.25;
 
   if (!meetsWasteBar && !meetsOpportunityBar) {
-    return [];
+    return { findings: [], wasteAttributions: [] };
   }
 
   const classification: FindingClassification = meetsWasteBar ? 'waste' : 'opportunity';
@@ -150,5 +156,19 @@ export function buildCursorUsageFindings(runs: NormalizedRun[]): Finding[] {
     );
   }
 
-  return findings.sort((left, right) => right.costImpactUsd - left.costImpactUsd);
+  const wasteAttributions =
+    classification === 'waste'
+      ? billableCalls
+          .map((call) => ({
+            kind: 'cache-carryover',
+            timestamp: call.timestamp,
+            wasteUsd: round((call.cacheCostUsd ?? 0) + asNumber(call.metadata.cacheWriteCostUsd)),
+          }))
+          .filter((attribution) => attribution.wasteUsd > 0)
+      : [];
+
+  return {
+    findings: findings.sort((left, right) => right.costImpactUsd - left.costImpactUsd),
+    wasteAttributions,
+  };
 }

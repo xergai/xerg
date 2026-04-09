@@ -1,8 +1,8 @@
 # xerg
 
-Audit OpenClaw workflows in dollars, compare fixes, and surface savings opportunities.
+Audit OpenClaw workflows in dollars, compare fixes, and export daily spend and waste trends.
 
-Xerg audits OpenClaw workflows in dollars, not tokens. It reads your gateway logs and session transcripts, surfaces five spend categories across confirmed waste and savings opportunities, and lets you re-run the same audit with `--compare` so you can see exactly what changed after a fix.
+Xerg audits OpenClaw workflows in dollars, not tokens. It reads your gateway logs and session transcripts, surfaces daily spend and waste rollups plus the highest-leverage findings, and lets you re-run the same audit with `--compare` so you can see exactly what changed after a fix.
 
 Everything runs locally by default. No account is required for local audits. No data leaves your machine unless you explicitly `--push` results to the Xerg API for a team dashboard.
 
@@ -149,9 +149,10 @@ Example `~/.xerg/config.json`:
 ## What the audit shows
 
 - Total spend by workflow and model, in dollars
+- Daily spend and confirmed waste rollups in UTC
 - Observed vs. estimated cost (always labeled)
-- Confirmed waste: retry, loop
-- Savings opportunities: context bloat, downgrade candidates, idle
+- Confirmed waste: retry, loop, cache carryover where applicable
+- Savings opportunities: context bloat, downgrade candidates, idle, max mode concentration where applicable
 - Savings recommendations with suggested A/B tests
 - Before/after deltas on re-audit
 

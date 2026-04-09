@@ -1,7 +1,7 @@
 {
   "name": "@xerg/schemas",
-  "version": "0.1.0",
-  "description": "Versioned TypeScript wire types for Xerg audit payloads, findings, comparisons, and recommendations.",
+  "version": "0.2.0",
+  "description": "Versioned TypeScript wire types for Xerg audit payloads, daily rollups, findings, comparisons, and recommendations.",
   "keywords": [
     "xerg",
     "schemas",
@@ -9,6 +9,7 @@
     "types",
     "wire-types",
     "api",
+    "timeseries",
     "contracts",
     "audit",
     "openclaw",

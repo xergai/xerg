@@ -1,6 +1,15 @@
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-import { renderDoctorReport } from '../src/report/render.js';
+import { auditCursorUsageCsv } from '../src/audit.js';
+import {
+  renderDoctorReport,
+  renderMarkdownSummary,
+  renderTerminalSummary,
+} from '../src/report/render.js';
+
+const root = process.cwd();
+const cursorUsageCsv = join(root, 'fixtures', 'cursor', 'usage-sample.csv');
 
 describe('renderDoctorReport', () => {
   it('includes remote next steps when no local sources are detected', () => {
@@ -39,5 +48,17 @@ describe('renderDoctorReport', () => {
 
     expect(report).toContain('npx @xerg/cli doctor --log-file');
     expect(report).toContain('npx @xerg/cli doctor --railway');
+  });
+
+  it('renders a daily trend block when the audit spans more than one day', async () => {
+    const summary = await auditCursorUsageCsv({
+      cursorUsageCsv,
+      noDb: true,
+    });
+
+    expect(renderTerminalSummary(summary)).toContain('## Daily trend');
+    expect(renderTerminalSummary(summary)).toContain('2026-04-03:');
+    expect(renderMarkdownSummary(summary)).toContain('## Daily trend');
+    expect(renderMarkdownSummary(summary)).toContain('2026-04-01:');
   });
 });

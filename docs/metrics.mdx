@@ -27,6 +27,7 @@ Today that means:
 
 - retry waste
 - loop waste
+- cache carryover for Cursor CSV audits when the billed pattern clears the waste bar
 
 ### Opportunity spend
 
@@ -37,6 +38,7 @@ Today that means:
 - context outliers
 - idle spend
 - downgrade candidates
+- max mode concentration for Cursor CSV audits when the billed mix is heavily premium
 
 ### Structural waste rate
 
@@ -60,6 +62,20 @@ Each row includes:
 - `observedShare`
 
 `observedShare` tells you what fraction of that row's spend came from directly observed cost rather than estimation.
+
+## Daily rollups
+
+Every audit now includes:
+
+- `spendByDay`
+- `wasteByDay`
+
+These series use UTC calendar days in `YYYY-MM-DD` format.
+
+- `spendByDay` includes `spendUsd`, `observedSpendUsd`, `estimatedSpendUsd`, and `callCount`
+- `wasteByDay` includes confirmed waste only
+- `sum(spendByDay.spendUsd)` reconciles to `totalSpendUsd`
+- `sum(wasteByDay.wasteUsd)` reconciles to `wasteSpendUsd`
 
 ## Compare metrics
 

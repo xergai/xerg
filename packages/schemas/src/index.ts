@@ -7,6 +7,8 @@ export type { WireFinding, WireFindingScope } from './wire-finding.js';
 export type { WireComparison } from './wire-comparison.js';
 export type {
   AuditPushPayload,
+  DailySpendBreakdown,
+  DailyWasteBreakdown,
   FindingTaxonomyBucket,
   SpendBreakdown,
 } from './audit-push-payload.js';

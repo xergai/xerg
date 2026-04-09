@@ -21,6 +21,19 @@ export interface SpendBreakdown {
   observedShare: number;
 }
 
+export interface DailySpendBreakdown {
+  date: string;
+  spendUsd: number;
+  observedSpendUsd: number;
+  estimatedSpendUsd: number;
+  callCount: number;
+}
+
+export interface DailyWasteBreakdown {
+  date: string;
+  wasteUsd: number;
+}
+
 export interface AuditPushPayload {
   version: AuditPushPayloadVersion;
   summary: {
@@ -39,6 +52,8 @@ export interface AuditPushPayload {
     opportunityByKind: FindingTaxonomyBucket[];
     spendByWorkflow: SpendBreakdown[];
     spendByModel: SpendBreakdown[];
+    spendByDay: DailySpendBreakdown[];
+    wasteByDay: DailyWasteBreakdown[];
     findings: WireFinding[];
     notes: string[];
     comparison?: WireComparison | null;

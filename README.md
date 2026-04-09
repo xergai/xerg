@@ -1,11 +1,11 @@
 # Xerg
 
 Xerg helps teams understand AI agent spend in economic terms, starting with local waste
-intelligence for OpenClaw workflows.
+intelligence and daily spend trends for OpenClaw workflows.
 
 This repository currently contains:
 
-- `packages/schemas`: public wire types for push payloads, findings, comparisons, and recommendations
+- `packages/schemas`: public wire types for push payloads, daily rollups, findings, comparisons, and recommendations
 - `packages/cli`: the `xerg` CLI, published as `@xerg/cli`
 - `packages/core`: the local economics engine, parsers, storage, and reporting logic
 - `skills/xerg`: the skill package for ecosystem listings
@@ -68,13 +68,13 @@ Export a shareable report:
 xerg audit --markdown > xerg-audit.md
 ```
 
-Export JSON with machine-readable recommendations:
+Export JSON with machine-readable recommendations and daily spend/waste rollups:
 
 ```bash
 xerg audit --json
 ```
 
-Push an audit summary to the Xerg API:
+Push an audit summary and daily rollups to the Xerg API:
 
 ```bash
 xerg audit --push
