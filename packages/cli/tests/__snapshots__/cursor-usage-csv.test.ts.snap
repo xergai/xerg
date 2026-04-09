@@ -1,0 +1,55 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`cursor usage csv CLI > keeps the markdown audit output stable 1`] = `
+"# Xerg Cursor CSV Audit
+
+- Generated: 2026-04-08T12:00:00.000Z
+- Total spend: $0.0455
+- Observed spend: $0.0000
+- Estimated spend: $0.0455
+- Structural waste identified: $0.0000 (0%)
+- Potential impact surfaced: $0.0000
+- Rows analyzed: 5
+- Usage rows with pricing: 3 / 5
+- Total tokens: 13,850
+
+## Token mix
+- Input tokens: 12,750
+- Output tokens: 1,100
+- Cache read tokens: 6,000
+
+## Max mode usage
+- included / max mode: 2 rows, 8,600 tokens, $0.0428 spend
+- included / standard mode: 2 rows, 4,850 tokens, $0.0027 spend
+- not charged / failed or aborted: 1 row, 400 tokens, $0.0000 spend
+
+## Model mix
+- anthropic/claude-opus-4: 1 row, 6,300 tokens, $0.0428 spend
+- openai/gpt-5.4-medium: 1 row, 3,500 tokens, unpriced
+- cursor/auto: 1 row, 2,300 tokens, unpriced
+- anthropic/claude-sonnet-4-5: 1 row, 1,350 tokens, $0.0027 spend
+- cursor/composer-2-fast: 1 row, 400 tokens, $0.0000 spend
+
+## Pricing coverage
+- Priced rows: 3
+- Unpriced rows: 2
+- Priced tokens: 8,050
+- Unpriced tokens: 5,800
+- Unpriced model: gpt-5.4-medium (3,500 tokens across 1 row)
+- Unpriced model: auto (2,300 tokens across 1 row)
+
+## Waste taxonomy
+Structural waste
+- No confirmed waste buckets detected.
+Savings opportunities
+- No opportunity buckets detected.
+
+## Findings
+
+## Notes
+- Cursor CSV audits analyze exported usage rows rather than raw session transcripts.
+- OpenClaw-specific retry, loop, and session-level workflow findings are still unavailable for Cursor CSV inputs because the export does not include retries, iterations, or real workflow IDs.
+- This CSV did not include numeric Cost values, so spend was estimated from local model pricing where possible.
+- Some Cursor aliases do not have full local pricing coverage: gpt-5.4-medium, auto.
+"
+`;

@@ -29,4 +29,7 @@ pnpm check
 
 - Node is pinned by `.nvmrc`.
 - The project uses Biome for formatting and linting.
+- `pnpm test` is the fast local test loop.
+- `pnpm check` is the full gate: lint, typecheck, and coverage-enforced tests.
+- `pnpm install` enables the Husky pre-commit hook, which runs Biome on staged files.
 - Keep the repo focused on the CLI, core engine, public schemas, and supporting docs.

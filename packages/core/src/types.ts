@@ -1,8 +1,8 @@
 import type { PushEnvironment } from '@xerg/schemas';
 
-export type SourceKind = 'gateway' | 'sessions';
+export type SourceKind = 'gateway' | 'sessions' | 'cursor-usage-csv';
 
-export type CostSource = 'observed' | 'estimated';
+export type CostSource = 'observed' | 'estimated' | 'unpriced';
 
 export type FindingClassification = 'waste' | 'opportunity';
 
@@ -11,6 +11,7 @@ export type FindingConfidence = 'high' | 'medium' | 'low';
 export interface AuditOptions {
   logFile?: string;
   sessionsDir?: string;
+  cursorUsageCsv?: string;
   since?: string;
   dbPath?: string;
   noDb?: boolean;
@@ -34,6 +35,60 @@ export interface DoctorReport {
     gatewayPattern: string;
     sessionsPattern: string;
   };
+  notes: string[];
+}
+
+export interface PricingCoverageModel {
+  key: string;
+  callCount: number;
+  totalTokens: number;
+}
+
+export interface PricingCoverage {
+  pricedCallCount: number;
+  unpricedCallCount: number;
+  pricedTokenCount: number;
+  unpricedTokenCount: number;
+  topUnpricedModels: PricingCoverageModel[];
+}
+
+export interface CursorUsageModeBreakdown {
+  key: string;
+  callCount: number;
+  totalTokens: number;
+  estimatedSpendUsd: number;
+}
+
+export interface CursorUsageModelBreakdown {
+  key: string;
+  callCount: number;
+  totalTokens: number;
+  estimatedSpendUsd: number;
+  pricedCallCount: number;
+  unpricedCallCount: number;
+}
+
+export interface CursorUsageInsights {
+  totalTokens: number;
+  totalInputTokens: number;
+  totalOutputTokens: number;
+  totalCacheReadTokens: number;
+  totalInputWithCacheWriteTokens: number;
+  totalInputWithoutCacheWriteTokens: number;
+  modes: CursorUsageModeBreakdown[];
+  models: CursorUsageModelBreakdown[];
+}
+
+export interface CursorUsageCsvDoctorReport {
+  canAudit: boolean;
+  filePath: string;
+  source: DetectedSourceFile | null;
+  rowCount: number;
+  dateRange: {
+    start: string;
+    end: string;
+  } | null;
+  pricingCoverage: PricingCoverage;
   notes: string[];
 }
 
@@ -180,6 +235,8 @@ export interface AuditSummary {
   findings: Finding[];
   notes: string[];
   sourceFiles: DetectedSourceFile[];
+  pricingCoverage?: PricingCoverage | null;
+  cursorUsage?: CursorUsageInsights | null;
   dbPath?: string;
 }
 

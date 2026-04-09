@@ -1,5 +1,6 @@
 export * from './audit.js';
 export * from './db/read.js';
+export * from './findings/cursor.js';
 export * from './detect/openclaw.js';
 export * from './recommendations.js';
 export * from './report/render.js';

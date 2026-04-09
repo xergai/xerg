@@ -23,6 +23,18 @@ npx @xerg/cli audit --sessions-dir /path/to/sessions
 
 You can pass one, the other, or both.
 
+## Audit a Cursor usage CSV locally
+
+```bash
+npx @xerg/cli audit --cursor-usage-csv ~/Downloads/usage-events-2026-04-08.csv
+```
+
+This local-only path analyzes Cursor's exported usage rows instead of OpenClaw session logs.
+
+- Xerg estimates spend only for Cursor aliases that have an explicit local pricing map
+- unmapped aliases stay visible in token and model breakdowns as `unpriced`
+- OpenClaw-only findings like retry waste and loop waste are intentionally disabled for this source
+
 ## Limit the audit window
 
 ```bash

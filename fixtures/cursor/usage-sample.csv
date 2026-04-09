@@ -1,0 +1,6 @@
+Date,Kind,Model,Max Mode,Input (w/ Cache Write),Input (w/o Cache Write),Cache Read,Output Tokens,Total Tokens,Cost
+2026-04-03T18:10:11.107Z,Included,claude-4.6-opus-high-thinking,Yes,1000,100,5000,200,6300,Included
+2026-04-03T17:58:57.632Z,Included,gpt-5.4-medium,No,0,3000,0,500,3500,Included
+2026-04-03T16:00:00.000Z,"Errored, No Charge",composer-2-fast,Yes,0,400,0,0,400,-
+2026-04-02T12:00:00.000Z,Included,claude-4.5-sonnet,No,200,50,1000,100,1350,Included
+2026-04-01T12:00:00.000Z,Included,auto,Yes,0,2000,0,300,2300,Included

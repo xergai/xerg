@@ -1,4 +1,9 @@
-import { doctorOpenClaw, renderDoctorReport } from '@xergai/core';
+import {
+  doctorCursorUsageCsv,
+  doctorOpenClaw,
+  renderCursorDoctorReport,
+  renderDoctorReport,
+} from '@xergai/core';
 
 import { createCliLogger } from '../log.js';
 import {
@@ -12,6 +17,7 @@ import type { RailwayDoctorReport, RailwayTarget, RemoteDoctorReport } from '../
 export interface DoctorCommandOptions {
   logFile?: string;
   sessionsDir?: string;
+  cursorUsageCsv?: string;
   remote?: string;
   remoteLogFile?: string;
   remoteSessionsDir?: string;
@@ -25,6 +31,7 @@ export interface DoctorCommandOptions {
 
 export async function runDoctorCommand(options: DoctorCommandOptions) {
   const logger = createCliLogger({ verbose: options.verbose });
+  validateCursorUsageCsvOptions(options);
 
   if (options.railway) {
     logger.verbose('Inspecting Railway audit readiness.');
@@ -53,6 +60,17 @@ export async function runDoctorCommand(options: DoctorCommandOptions) {
     return;
   }
 
+  if (options.cursorUsageCsv) {
+    logger.verbose('Inspecting local Cursor usage CSV audit readiness.');
+    logger.verbose(`Using Cursor usage CSV: ${options.cursorUsageCsv}`);
+    const report = await doctorCursorUsageCsv({
+      cursorUsageCsv: options.cursorUsageCsv,
+      onProgress: logger.verbose,
+    });
+    process.stdout.write(`${renderCursorDoctorReport(report)}\n`);
+    return;
+  }
+
   logger.verbose('Inspecting local OpenClaw audit readiness.');
   if (options.logFile) {
     logger.verbose(`Using explicit local log file: ${options.logFile}`);
@@ -68,6 +86,28 @@ export async function runDoctorCommand(options: DoctorCommandOptions) {
   });
 
   process.stdout.write(`${renderDoctorReport(report, { commandPrefix: options.commandPrefix })}\n`);
+}
+
+function validateCursorUsageCsvOptions(options: DoctorCommandOptions) {
+  if (!options.cursorUsageCsv) {
+    return;
+  }
+
+  const conflicts = [
+    options.logFile ? '--log-file' : null,
+    options.sessionsDir ? '--sessions-dir' : null,
+    options.remote ? '--remote' : null,
+    options.remoteLogFile ? '--remote-log-file' : null,
+    options.remoteSessionsDir ? '--remote-sessions-dir' : null,
+    options.railway ? '--railway' : null,
+    options.railwayProject ? '--project' : null,
+    options.railwayEnvironment ? '--environment' : null,
+    options.railwayService ? '--service' : null,
+  ].filter((flag): flag is string => flag !== null);
+
+  if (conflicts.length > 0) {
+    throw new Error(`The --cursor-usage-csv flag cannot be combined with ${conflicts.join(', ')}.`);
+  }
 }
 
 function buildRailwayTarget(options: DoctorCommandOptions): RailwayTarget | undefined {

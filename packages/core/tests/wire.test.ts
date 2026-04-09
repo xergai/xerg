@@ -2,12 +2,13 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { auditOpenClaw } from '../src/audit.js';
+import { auditCursorUsageCsv, auditOpenClaw } from '../src/audit.js';
 import type { WirePayloadMeta } from '../src/types.js';
 import { toWirePayload } from '../src/wire.js';
 
 const root = process.cwd();
 const gatewayLog = join(root, 'fixtures', 'openclaw', 'gateway', 'openclaw-2026-03-06.log');
+const cursorUsageCsv = join(root, 'fixtures', 'cursor', 'usage-sample.csv');
 
 const testMeta: WirePayloadMeta = {
   cliVersion: '0.1.4',
@@ -67,6 +68,17 @@ describe('toWirePayload', () => {
     expect(summaryObj).not.toHaveProperty('sourceFiles');
     expect(summaryObj).not.toHaveProperty('dbPath');
     expect(summaryObj).not.toHaveProperty('since');
+  });
+
+  it('keeps cursor-only local fields out of the push payload', async () => {
+    const summary = await auditCursorUsageCsv({ cursorUsageCsv, noDb: true });
+    const payload = toWirePayload(summary, testMeta);
+    const summaryObj = payload.summary as Record<string, unknown>;
+
+    expect(summary.pricingCoverage).not.toBeNull();
+    expect(summary.cursorUsage).not.toBeNull();
+    expect(summaryObj).not.toHaveProperty('pricingCoverage');
+    expect(summaryObj).not.toHaveProperty('cursorUsage');
   });
 
   it('sets meta fields correctly', async () => {
