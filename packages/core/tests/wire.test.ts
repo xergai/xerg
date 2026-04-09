@@ -34,6 +34,8 @@ describe('toWirePayload', () => {
     expect(payload.summary.wasteSpendUsd).toBe(summary.wasteSpendUsd);
     expect(payload.summary.opportunitySpendUsd).toBe(summary.opportunitySpendUsd);
     expect(payload.summary.structuralWasteRate).toBe(summary.structuralWasteRate);
+    expect(payload.summary.spendByDay).toEqual(summary.spendByDay);
+    expect(payload.summary.wasteByDay).toEqual(summary.wasteByDay);
     expect(payload.summary.notes).toEqual(summary.notes);
   });
 
@@ -164,5 +166,7 @@ describe('toWirePayload', () => {
     expect(payload.summary.opportunityByKind).toEqual(summary.opportunityByKind);
     expect(payload.summary.spendByWorkflow).toEqual(summary.spendByWorkflow);
     expect(payload.summary.spendByModel).toEqual(summary.spendByModel);
+    expect(payload.summary.spendByDay).toEqual(summary.spendByDay);
+    expect(payload.summary.wasteByDay).toEqual(summary.wasteByDay);
   });
 });

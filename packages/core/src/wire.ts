@@ -56,6 +56,8 @@ export function toWirePayload(summary: AuditSummary, meta: WirePayloadMeta): Aud
       opportunityByKind: summary.opportunityByKind,
       spendByWorkflow: summary.spendByWorkflow,
       spendByModel: summary.spendByModel,
+      spendByDay: summary.spendByDay,
+      wasteByDay: summary.wasteByDay,
       findings: summary.findings.map(toWireFinding),
       notes: summary.notes,
       comparison: summary.comparison ? toWireComparison(summary.comparison) : null,

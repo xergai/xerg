@@ -3,6 +3,8 @@ import type {
   CursorUsageCsvDoctorReport,
   CursorUsageModeBreakdown,
   CursorUsageModelBreakdown,
+  DailySpendBreakdown,
+  DailyWasteBreakdown,
   DoctorReport,
   Finding,
   FindingChange,
@@ -181,6 +183,25 @@ function renderCompareBlock(summary: AuditSummary) {
   ];
 }
 
+function renderDailyTrendRows(
+  spendByDay: DailySpendBreakdown[],
+  wasteByDay: DailyWasteBreakdown[],
+) {
+  if (spendByDay.length <= 1) {
+    return [];
+  }
+
+  const wasteByDate = new Map(wasteByDay.map((row) => [row.date, row.wasteUsd]));
+
+  return [
+    '## Daily trend',
+    ...spendByDay.map((row) => {
+      const wasteUsd = wasteByDate.get(row.date) ?? 0;
+      return `- ${row.date}: ${formatUsd(row.spendUsd)} spend, ${formatUsd(wasteUsd)} waste`;
+    }),
+  ];
+}
+
 export function renderDoctorReport(report: DoctorReport, options?: { commandPrefix?: string }) {
   const commandPrefix = options?.commandPrefix ?? 'xerg';
   const nextSteps = report.canAudit
@@ -318,10 +339,6 @@ function renderCursorCompareBlock(summary: AuditSummary) {
 
 function renderCursorTerminalSummary(summary: AuditSummary) {
   const usage = summary.cursorUsage;
-  const wasteFindings = summary.findings.filter((finding) => finding.classification === 'waste');
-  const opportunityFindings = summary.findings.filter(
-    (finding) => finding.classification === 'opportunity',
-  );
 
   return [
     '# Xerg audit [cursor csv]',
@@ -351,6 +368,8 @@ function renderCursorTerminalSummary(summary: AuditSummary) {
     '## Pricing coverage',
     ...renderCursorPricingCoverage(summary),
     '',
+    ...renderDailyTrendRows(summary.spendByDay, summary.wasteByDay),
+    ...(summary.spendByDay.length > 1 ? [''] : []),
     '## Waste taxonomy',
     'Structural waste',
     ...renderTaxonomyRows(summary.wasteByKind, 'No confirmed waste buckets detected.'),
@@ -401,6 +420,8 @@ function renderCursorMarkdownSummary(summary: AuditSummary) {
     '## Pricing coverage',
     ...renderCursorPricingCoverage(summary),
     '',
+    ...renderDailyTrendRows(summary.spendByDay, summary.wasteByDay),
+    ...(summary.spendByDay.length > 1 ? [''] : []),
     ...renderTaxonomyBlock(summary),
     '',
     '## Findings',
@@ -445,6 +466,8 @@ export function renderTerminalSummary(summary: AuditSummary) {
     '## Top models',
     ...topRows(summary.spendByModel),
     '',
+    ...renderDailyTrendRows(summary.spendByDay, summary.wasteByDay),
+    ...(summary.spendByDay.length > 1 ? [''] : []),
     '## High-confidence waste',
     ...renderFindingList(wasteFindings, 'none detected'),
     '',
@@ -493,6 +516,9 @@ export function renderMarkdownSummary(summary: AuditSummary) {
     '',
     '## Top workflows',
     ...topRows(summary.spendByWorkflow),
+    '',
+    ...renderDailyTrendRows(summary.spendByDay, summary.wasteByDay),
+    ...(summary.spendByDay.length > 1 ? [''] : []),
     '',
     '## Findings',
     ...summary.findings.slice(0, 10).map((finding) => {

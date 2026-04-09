@@ -122,12 +122,13 @@ export async function auditOpenClaw(options: AuditOptions) {
   const runs = normalizeOpenClawSources(sources, options.since);
   options.onProgress?.(`Normalized ${runs.length} run${runs.length === 1 ? '' : 's'}.`);
   options.onProgress?.('Computing waste and savings findings...');
-  const findings = buildFindings(runs);
+  const { findings, wasteAttributions } = buildFindings(runs);
   const dbPath = options.noDb ? undefined : (options.dbPath ?? getDefaultDbPath());
   options.onProgress?.('Building audit summary...');
   const summary = buildAuditSummary({
     runs,
     findings,
+    wasteAttributions,
     sources,
     since: options.since,
     dbPath,
@@ -161,12 +162,13 @@ export async function auditCursorUsageCsv(options: AuditOptions) {
     `Normalized ${normalized.runs.length} usage row${normalized.runs.length === 1 ? '' : 's'}.`,
   );
   options.onProgress?.('Computing Cursor-specific findings...');
-  const findings = buildCursorUsageFindings(normalized.runs);
+  const { findings, wasteAttributions } = buildCursorUsageFindings(normalized.runs);
   const dbPath = options.noDb ? undefined : (options.dbPath ?? getDefaultDbPath());
   options.onProgress?.('Building audit summary...');
   const summary = buildAuditSummary({
     runs: normalized.runs,
     findings,
+    wasteAttributions,
     sources: [parsed.source],
     since: options.since,
     dbPath,

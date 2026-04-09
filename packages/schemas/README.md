@@ -1,6 +1,6 @@
 # @xerg/schemas
 
-Versioned TypeScript wire types for Xerg audit payloads, findings, comparisons, and recommendations.
+Versioned TypeScript wire types for Xerg audit payloads, daily rollups, findings, comparisons, and recommendations.
 
 ## What it is
 
@@ -9,6 +9,7 @@ Versioned TypeScript wire types for Xerg audit payloads, findings, comparisons, 
 It is intentionally small and stable:
 
 - TypeScript-first types for Xerg wire payloads
+- Daily spend and waste rollups for hosted dashboards and ingestion pipelines
 - A runtime `AUDIT_PUSH_PAYLOAD_VERSION` constant for compatibility checks
 - A dependency-light package surface for backends, ingestion services, and internal tooling
 
@@ -35,7 +36,7 @@ export function acceptAuditPayload(payload: AuditPushPayload) {
     throw new Error(`Unsupported payload version: ${payload.version}`);
   }
 
-  return payload.summary.auditId;
+  return payload.summary.spendByDay;
 }
 ```
 
@@ -55,11 +56,15 @@ import { AUDIT_PUSH_PAYLOAD_VERSION } from '@xerg/schemas';
 AUDIT_PUSH_PAYLOAD_VERSION; // 1
 ```
 
+Daily series such as `spendByDay` and `wasteByDay` were added without bumping the payload version because they are additive fields that older consumers can ignore safely.
+
 ## Exports
 
 Primary exports include:
 
 - `AuditPushPayload`
+- `DailySpendBreakdown`
+- `DailyWasteBreakdown`
 - `WireFinding`
 - `WireComparison`
 - `XergRecommendation`

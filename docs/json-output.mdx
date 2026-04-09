@@ -37,6 +37,8 @@ Shape:
   "opportunityByKind": [],
   "spendByWorkflow": [],
   "spendByModel": [],
+  "spendByDay": [],
+  "wasteByDay": [],
   "findings": [],
   "notes": [],
   "sourceFiles": [],
@@ -50,6 +52,7 @@ Key details:
 - `recommendations` are added by the CLI on top of the audit summary
 - `sourceFiles` and `dbPath` are present here because this is the local summary format
 - `comparison` is `null` unless a compatible baseline was found
+- `spendByDay` and `wasteByDay` use UTC `YYYY-MM-DD` buckets
 - Cursor CSV audits also add local-only `pricingCoverage` and `cursorUsage` fields
 
 ## Multi-source JSON
@@ -109,6 +112,8 @@ Shape:
     "opportunityByKind": [],
     "spendByWorkflow": [],
     "spendByModel": [],
+    "spendByDay": [],
+    "wasteByDay": [],
     "findings": [],
     "notes": [],
     "comparison": null
@@ -126,6 +131,7 @@ Shape:
 Key details:
 
 - the push payload does not include `sourceFiles`, `dbPath`, or `recommendations`
+- the push payload now includes daily spend and confirmed waste rollups for charting
 - `audit --push --dry-run` prints only the payload, not the normal audit report
 - `meta.environment` is `local`, `remote`, or `railway` depending on how the audit was run
 

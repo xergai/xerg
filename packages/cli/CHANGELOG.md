@@ -1,5 +1,11 @@
 # @xerg/cli
 
+## 0.2.0
+
+### Minor Changes
+
+- Add daily spend and waste series to local audit output and pushed audit payloads, keeping the hosted API contract version stable while expanding the dashboard-ready rollups.
+
 ## 0.1.10
 
 ### Patch Changes

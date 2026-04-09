@@ -26,6 +26,8 @@ describe('@xerg/schemas contracts', () => {
         opportunityByKind: [],
         spendByWorkflow: [],
         spendByModel: [],
+        spendByDay: [],
+        wasteByDay: [],
         findings: [],
         notes: [],
         comparison: null,

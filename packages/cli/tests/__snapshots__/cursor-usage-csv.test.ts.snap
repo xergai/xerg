@@ -38,6 +38,11 @@ exports[`cursor usage csv CLI > keeps the markdown audit output stable 1`] = `
 - Unpriced model: gpt-5.4-medium (3,500 tokens across 1 row)
 - Unpriced model: auto (2,300 tokens across 1 row)
 
+## Daily trend
+- 2026-04-01: $0.0000 spend, $0.0000 waste
+- 2026-04-02: $0.0027 spend, $0.0000 waste
+- 2026-04-03: $0.0428 spend, $0.0000 waste
+
 ## Waste taxonomy
 Structural waste
 - No confirmed waste buckets detected.

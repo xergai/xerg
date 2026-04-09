@@ -4,10 +4,12 @@ import type {
   Finding,
   NormalizedRun,
   SpendBreakdown,
+  WasteAttribution,
 } from '../types.js';
 import { sha1 } from '../utils/hash.js';
 import { isoNow } from '../utils/time.js';
 import { buildComparisonKey, buildTaxonomyBuckets } from './comparison.js';
+import { buildObservedUtcDayRange, buildSpendByDay, buildWasteByDay } from './timeseries.js';
 
 function buildBreakdown(
   items: { key: string; spendUsd: number; observedSpendUsd: number }[],
@@ -41,6 +43,7 @@ function buildBreakdown(
 export function buildAuditSummary(input: {
   runs: NormalizedRun[];
   findings: Finding[];
+  wasteAttributions: WasteAttribution[];
   sources: DetectedSourceFile[];
   since?: string;
   dbPath?: string;
@@ -57,6 +60,8 @@ export function buildAuditSummary(input: {
     .filter((finding) => finding.classification === 'opportunity')
     .reduce((sum, finding) => sum + finding.costImpactUsd, 0);
   const generatedAt = isoNow();
+  const spendByDay = buildSpendByDay(input.runs);
+  const observedDays = buildObservedUtcDayRange(input.runs);
 
   return {
     auditId: sha1(
@@ -99,6 +104,8 @@ export function buildAuditSummary(input: {
         })),
       ),
     ),
+    spendByDay,
+    wasteByDay: buildWasteByDay(input.wasteAttributions, observedDays, wasteSpendUsd),
     findings: input.findings,
     notes: [
       'Cost per outcome is intentionally unavailable in v0. Xerg is measuring waste intelligence only.',

@@ -238,6 +238,8 @@ export function hydrateAuditSummary(summary: AuditSummary): AuditSummary {
       summary.opportunityByKind?.length > 0
         ? summary.opportunityByKind
         : buildTaxonomyBuckets(summary.findings, 'opportunity'),
+    spendByDay: summary.spendByDay ?? [],
+    wasteByDay: summary.wasteByDay ?? [],
     notes: summary.notes ?? [],
     pricingCoverage: summary.pricingCoverage ?? null,
     cursorUsage: summary.cursorUsage ?? null,

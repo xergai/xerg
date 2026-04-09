@@ -1,4 +1,4 @@
-import type { Finding, NormalizedRun } from '../types.js';
+import type { Finding, FindingBuildResult, NormalizedRun, WasteAttribution } from '../types.js';
 import { sha1 } from '../utils/hash.js';
 
 function createFinding(input: Omit<Finding, 'id'>): Finding {
@@ -14,8 +14,9 @@ function round(value: number) {
   return Number(value.toFixed(6));
 }
 
-export function buildFindings(runs: NormalizedRun[]): Finding[] {
+export function buildFindings(runs: NormalizedRun[]): FindingBuildResult {
   const findings: Finding[] = [];
+  const wasteAttributions: WasteAttribution[] = [];
   const allCalls = runs.flatMap((run) => run.calls.map((call) => ({ run, call })));
 
   const retryCandidates = allCalls.filter(({ call }) => {
@@ -25,6 +26,13 @@ export function buildFindings(runs: NormalizedRun[]): Finding[] {
 
   const retryCost = retryCandidates.reduce((sum, item) => sum + item.call.costUsd, 0);
   if (retryCost > 0) {
+    wasteAttributions.push(
+      ...retryCandidates.map(({ call }) => ({
+        kind: 'retry-waste',
+        timestamp: call.timestamp,
+        wasteUsd: call.costUsd,
+      })),
+    );
     findings.push(
       createFinding({
         classification: 'waste',
@@ -47,6 +55,13 @@ export function buildFindings(runs: NormalizedRun[]): Finding[] {
     if (maxIteration >= 7) {
       const loopCalls = run.calls.filter((call) => (call.iteration ?? 0) > 5);
       const loopCost = loopCalls.reduce((sum, call) => sum + call.costUsd, 0);
+      wasteAttributions.push(
+        ...loopCalls.map((call) => ({
+          kind: 'loop-waste',
+          timestamp: call.timestamp,
+          wasteUsd: call.costUsd,
+        })),
+      );
       findings.push(
         createFinding({
           classification: 'waste',
@@ -161,5 +176,8 @@ export function buildFindings(runs: NormalizedRun[]): Finding[] {
     }
   }
 
-  return findings.sort((left, right) => right.costImpactUsd - left.costImpactUsd);
+  return {
+    findings: findings.sort((left, right) => right.costImpactUsd - left.costImpactUsd),
+    wasteAttributions,
+  };
 }
