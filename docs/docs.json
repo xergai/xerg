@@ -34,8 +34,12 @@
         "pages": ["compare", "remote-audits", "findings-and-recommendations", "json-output"]
       },
       {
+        "group": "Hosted and Pro",
+        "pages": ["hosted-mcp", "auth-and-push"]
+      },
+      {
         "group": "Automate and share",
-        "pages": ["ci-gates", "auth-and-push", "skill-bundle", "troubleshooting"]
+        "pages": ["ci-gates", "skill-bundle", "troubleshooting"]
       }
     ]
   }

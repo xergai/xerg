@@ -1,9 +1,11 @@
 ---
 title: Authentication and push
-description: Authenticate to the Xerg API, push audit summaries, and understand what data is sent.
+description: Authenticate to the Xerg API, push audit summaries, and understand how hosted Pro features use workspace API keys.
 ---
 
 Use `--push` when you want the audit summary sent as part of the same command that computed it. Use `xerg push` when you want to send the most recent cached snapshot later.
+
+> Hosted features such as the dashboard, Ask Xerg, and the hosted MCP server require a Pro or Enterprise workspace.
 
 ## Recommended flow
 
@@ -65,6 +67,8 @@ Example config:
 }
 ```
 
+The same workspace API key can be used for hosted MCP access. See [hosted MCP](/hosted-mcp) for client configuration.
+
 ## Browser login
 
 Start the device flow:
@@ -97,8 +101,21 @@ The push payload contains:
 
 The push payload does not include raw prompt or response content. It also omits local-only `sourceFiles` and `dbPath` fields from the audit summary.
 
+## Push versus hosted MCP
+
+Use push when you want to send audit summaries from the CLI into your hosted workspace.
+
+Use hosted MCP when you want a remote MCP client to read hosted audit history, trends, recommendations, or selected hosted control actions from that workspace.
+
+A common sequence is:
+
+1. run `xerg audit --push`
+2. verify the hosted audit in the dashboard
+3. connect a remote client to [hosted MCP](/hosted-mcp)
+
 ## Important gotchas
 
 - `xerg push` reads from the default local database path. It does not accept `--db`.
 - If you used `xerg audit --db /custom/path`, push immediately with `xerg audit --push`, or export the payload and use `xerg push --file`.
 - `--dry-run` on `xerg audit` requires `--push`.
+- If hosted MCP returns empty audit results, push an audit first so the workspace has hosted data to query.
