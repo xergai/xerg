@@ -3,8 +3,12 @@ import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { platform } from 'node:process';
 
+function getUserHome() {
+  return process.env.HOME ?? homedir();
+}
+
 export function getAppPaths() {
-  const home = homedir();
+  const home = getUserHome();
   return platform === 'darwin'
     ? {
         data: join(home, 'Library', 'Application Support', 'xerg'),
@@ -37,10 +41,26 @@ export function getDefaultDbPath() {
   return join(getAppPaths().data, 'xerg.db');
 }
 
+export function getDefaultOpenClawSessionsPattern() {
+  return join(getUserHome(), '.openclaw', 'agents', '*', 'sessions', '*.jsonl');
+}
+
+export function getDefaultOpenClawGatewayPattern() {
+  return '/tmp/openclaw/openclaw-*.log';
+}
+
+export function getDefaultHermesSessionsPattern() {
+  return join(getUserHome(), '.hermes', 'sessions', '**', '*.{json,jsonl}');
+}
+
+export function getDefaultHermesGatewayPattern() {
+  return join(getUserHome(), '.hermes', 'logs', 'agent.log* (fallback: gateway.log*)');
+}
+
 export function getDefaultSessionsPattern() {
-  return join(homedir(), '.openclaw', 'agents', '*', 'sessions', '*.jsonl');
+  return getDefaultOpenClawSessionsPattern();
 }
 
 export function getDefaultGatewayPattern() {
-  return '/tmp/openclaw/openclaw-*.log';
+  return getDefaultOpenClawGatewayPattern();
 }

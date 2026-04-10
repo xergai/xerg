@@ -1,7 +1,7 @@
 # Xerg
 
 Xerg helps teams understand AI agent spend in economic terms, starting with local waste
-intelligence and daily spend trends for OpenClaw workflows.
+intelligence and daily spend trends for OpenClaw and Hermes workflows.
 
 This repository currently contains:
 
@@ -38,7 +38,7 @@ xerg audit
 
 ## Quick start
 
-Inspect your local OpenClaw sources first:
+Inspect your local sources first:
 
 ```bash
 xerg doctor
@@ -108,7 +108,7 @@ pnpm --filter @xerg/cli dev -- audit
 Common CLI flows:
 
 ```bash
-# Inspect your local OpenClaw sources first
+# Inspect your local OpenClaw or Hermes sources first
 pnpm --filter @xerg/cli dev -- doctor
 
 # Run the first local audit
@@ -139,23 +139,29 @@ pnpm --filter @xerg/cli dev -- push
 pnpm --filter @xerg/cli dev -- audit --fail-above-waste-rate 0.30
 ```
 
-## Where Xerg looks for OpenClaw data
+## Where Xerg looks for local agent data
 
 By default, Xerg checks:
 
-- gateway logs: `/tmp/openclaw/openclaw-*.log`
-- session transcripts: `~/.openclaw/agents/*/sessions/*.jsonl`
+- OpenClaw gateway logs: `/tmp/openclaw/openclaw-*.log`
+- OpenClaw session transcripts: `~/.openclaw/agents/*/sessions/*.jsonl`
+- Hermes logs: `~/.hermes/logs/agent.log*` with `gateway.log*` fallback
+- Hermes session transcripts: `~/.hermes/sessions/`
 
 If your data lives elsewhere, point Xerg at it directly:
 
 ```bash
-xerg audit --log-file /path/to/openclaw.log
-xerg audit --sessions-dir /path/to/sessions
+xerg audit --runtime openclaw --log-file /path/to/openclaw.log
+xerg audit --runtime openclaw --sessions-dir /path/to/sessions
+xerg audit --runtime hermes --log-file ~/.hermes/logs/agent.log
+xerg audit --runtime hermes --sessions-dir ~/.hermes/sessions
 ```
+
+If you omit `--runtime`, Xerg auto-detects the local runtime when it can and asks you to choose when both OpenClaw and Hermes data are present.
 
 ## Pilot
 
-If you are using OpenClaw and want to try Xerg in the real world, the pilot page is here:
+If you are using OpenClaw or Hermes and want to try Xerg in the real world, the pilot page is here:
 
 - [xerg.ai/pilot](https://xerg.ai/pilot)
 

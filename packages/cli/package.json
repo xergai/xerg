@@ -1,8 +1,8 @@
 {
   "name": "@xerg/cli",
   "version": "0.2.0",
-  "description": "Audit OpenClaw workflows in dollars, compare fixes, and export daily spend and waste trends.",
-  "keywords": ["ai", "agents", "finops", "llm", "openclaw", "cost", "cli", "cursor", "analytics"],
+  "description": "Audit OpenClaw and Hermes workflows in dollars, compare fixes, and export daily spend and waste trends.",
+  "keywords": ["ai", "agents", "finops", "llm", "openclaw", "hermes", "cost", "cli", "cursor", "analytics"],
   "homepage": "https://xerg.ai",
   "repository": {
     "type": "git",

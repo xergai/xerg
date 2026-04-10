@@ -1,4 +1,5 @@
 import type {
+  AuditRuntime,
   AuditComparison,
   AuditSummary,
   DetectedSourceFile,
@@ -73,6 +74,7 @@ export function getComparisonSourceRoot(source: DetectedSourceFile) {
 }
 
 export function buildComparisonKey(input: {
+  runtime: AuditRuntime;
   sources: DetectedSourceFile[];
   since?: string;
 }) {
@@ -83,6 +85,7 @@ export function buildComparisonKey(input: {
 
   return sha1(
     JSON.stringify({
+      runtime: input.runtime,
       kinds,
       roots,
       since: normalizeSinceValue(input.since),
@@ -220,15 +223,40 @@ function buildFindingChanges(currentFindings: Finding[], baselineFindings: Findi
   };
 }
 
+function inferSummaryRuntime(summary: AuditSummary): AuditRuntime {
+  if ('runtime' in summary && summary.runtime) {
+    return summary.runtime;
+  }
+
+  if (summary.sourceFiles.some((source) => source.kind === 'cursor-usage-csv')) {
+    return 'cursor';
+  }
+
+  return 'openclaw';
+}
+
 export function hydrateAuditSummary(summary: AuditSummary): AuditSummary {
+  const runtime = inferSummaryRuntime(summary);
+  const shouldRebuildComparisonKey = !('runtime' in summary) || !summary.runtime || !summary.comparisonKey;
+  const hydratedSources = summary.sourceFiles.map((source) => ({
+    ...source,
+    runtime:
+      source.runtime ??
+      (source.kind === 'cursor-usage-csv' ? 'cursor' : runtime === 'cursor' ? 'openclaw' : runtime),
+  }));
+
   return {
     ...summary,
+    runtime,
+    sourceFiles: hydratedSources,
     comparisonKey:
-      summary.comparisonKey ??
-      buildComparisonKey({
-        sources: summary.sourceFiles,
-        since: summary.since,
-      }),
+      shouldRebuildComparisonKey
+        ? buildComparisonKey({
+            runtime,
+            sources: hydratedSources,
+            since: summary.since,
+          })
+        : summary.comparisonKey,
     comparison: summary.comparison ?? null,
     wasteByKind:
       summary.wasteByKind?.length > 0

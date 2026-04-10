@@ -5,18 +5,43 @@ import {
 } from './cursor/usage-csv.js';
 import { persistAudit } from './db/persist.js';
 import { readLatestComparableAuditSummary } from './db/read.js';
-import { detectOpenClawSources, inspectOpenClawSources } from './detect/openclaw.js';
 import { buildCursorUsageFindings } from './findings/cursor.js';
 import { buildFindings } from './findings/engine.js';
-import { normalizeOpenClawSources } from './normalize/openclaw.js';
 import { PRICING_CATALOG } from './pricing-catalog.js';
 import { buildAuditComparison } from './report/comparison.js';
 import { buildAuditSummary } from './report/summary.js';
-import type { AuditOptions, AuditSummary, PricingCoverage } from './types.js';
+import { doctorAgentRuntime, getRuntimeAdapter, resolveLocalAgentRuntime } from './runtime.js';
+import type { AgentRuntime, AuditOptions, AuditSummary, PricingCoverage } from './types.js';
 import { getDefaultDbPath } from './utils/paths.js';
 
 export async function doctorOpenClaw(options: AuditOptions) {
-  return inspectOpenClawSources(options);
+  return doctorAgentRuntime({
+    ...options,
+    runtime: 'openclaw',
+  });
+}
+
+export async function doctorHermes(options: AuditOptions) {
+  return doctorAgentRuntime({
+    ...options,
+    runtime: 'hermes',
+  });
+}
+
+export { doctorAgentRuntime };
+
+export async function auditOpenClaw(options: AuditOptions) {
+  return auditAgentRuntime({
+    ...options,
+    runtime: 'openclaw',
+  });
+}
+
+export async function auditHermes(options: AuditOptions) {
+  return auditAgentRuntime({
+    ...options,
+    runtime: 'hermes',
+  });
 }
 
 export async function doctorCursorUsageCsv(options: AuditOptions) {
@@ -104,28 +129,31 @@ function hasPricingCoverageChange(
   );
 }
 
-export async function auditOpenClaw(options: AuditOptions) {
-  options.onProgress?.('Scanning for OpenClaw source files...');
-
+async function auditResolvedRuntime(
+  runtime: AgentRuntime,
+  options: AuditOptions,
+  detectedSources?: Awaited<ReturnType<typeof resolveLocalAgentRuntime>>['sources'],
+) {
+  const adapter = getRuntimeAdapter(runtime);
+  options.onProgress?.(`Scanning for ${adapter.productName} source files...`);
   validateCompareOptions(options);
 
-  const sources = await detectOpenClawSources(options);
+  const sources = detectedSources ?? (await adapter.detectSources(options));
   if (sources.length === 0) {
-    options.onProgress?.('No OpenClaw source files were detected.');
-    throw new Error(
-      `No OpenClaw sources were detected. Run \`${options.commandPrefix ?? 'xerg'} doctor\` or provide --log-file / --sessions-dir.`,
-    );
+    options.onProgress?.(`No ${adapter.productName} source files were detected.`);
+    throw new Error(adapter.noDataError(options.commandPrefix ?? 'xerg'));
   }
   options.onProgress?.(`Detected ${sources.length} source file${sources.length === 1 ? '' : 's'}.`);
 
-  options.onProgress?.('Normalizing OpenClaw source files...');
-  const runs = normalizeOpenClawSources(sources, options.since);
+  options.onProgress?.(`Normalizing ${adapter.productName} source files...`);
+  const runs = adapter.normalizeSources(sources, options.since);
   options.onProgress?.(`Normalized ${runs.length} run${runs.length === 1 ? '' : 's'}.`);
   options.onProgress?.('Computing waste and savings findings...');
   const { findings, wasteAttributions } = buildFindings(runs);
   const dbPath = options.noDb ? undefined : (options.dbPath ?? getDefaultDbPath());
   options.onProgress?.('Building audit summary...');
   const summary = buildAuditSummary({
+    runtime,
     runs,
     findings,
     wasteAttributions,
@@ -139,6 +167,17 @@ export async function auditOpenClaw(options: AuditOptions) {
   persistLocalSnapshot(summary, runs, dbPath, options.onProgress);
 
   return summary;
+}
+
+export async function auditAgentRuntime(options: AuditOptions) {
+  const runtime = options.runtime ?? 'auto';
+
+  if (runtime !== 'auto') {
+    return auditResolvedRuntime(runtime, options);
+  }
+
+  const resolved = await resolveLocalAgentRuntime(options);
+  return auditResolvedRuntime(resolved.adapter.runtime, options, resolved.sources);
 }
 
 export async function auditCursorUsageCsv(options: AuditOptions) {
@@ -166,6 +205,7 @@ export async function auditCursorUsageCsv(options: AuditOptions) {
   const dbPath = options.noDb ? undefined : (options.dbPath ?? getDefaultDbPath());
   options.onProgress?.('Building audit summary...');
   const summary = buildAuditSummary({
+    runtime: 'cursor',
     runs: normalized.runs,
     findings,
     wasteAttributions,

@@ -1,7 +1,7 @@
 import { rmSync } from 'node:fs';
 import {
+  auditAgentRuntime,
   auditCursorUsageCsv,
-  auditOpenClaw,
   buildRecommendations,
   renderMarkdownSummary,
   renderTerminalSummary,
@@ -26,6 +26,7 @@ import type { PullResult, RailwayTarget, RemoteSource } from '../transport/index
 import { getCliVersion } from '../version.js';
 
 export interface AuditCommandOptions {
+  runtime?: 'openclaw' | 'hermes';
   logFile?: string;
   sessionsDir?: string;
   cursorUsageCsv?: string;
@@ -52,13 +53,14 @@ export interface AuditCommandOptions {
   commandPrefix?: string;
 }
 
-const NO_DATA_PATTERN = /no openclaw sources were detected/i;
+const NO_DATA_PATTERN =
+  /no (openclaw|hermes|supported local runtime) sources? were detected/i;
 
 async function auditOrNoData(
-  ...args: Parameters<typeof auditOpenClaw>
-): ReturnType<typeof auditOpenClaw> {
+  ...args: Parameters<typeof auditAgentRuntime>
+): ReturnType<typeof auditAgentRuntime> {
   try {
-    return await auditOpenClaw(...args);
+    return await auditAgentRuntime(...args);
   } catch (err) {
     if (err instanceof Error && NO_DATA_PATTERN.test(err.message)) {
       throw new NoDataError(err.message);
@@ -74,7 +76,9 @@ export async function runAuditCommand(options: AuditCommandOptions) {
     throw new Error('--dry-run requires --push.');
   }
 
+  validateRuntimeOption(options.runtime);
   validateCursorUsageCsvOptions(options);
+  validateHermesLocalOnly(options);
 
   const remoteFlags = [options.remote, options.remoteConfig, options.railway].filter(
     Boolean,
@@ -154,7 +158,11 @@ async function runLocalAudit(
     return;
   }
 
-  logger.verbose('Running a local audit.');
+  logger.verbose(
+    options.runtime
+      ? `Running a local ${options.runtime === 'hermes' ? 'Hermes' : 'OpenClaw'} audit.`
+      : 'Running a local runtime audit with auto-detection.',
+  );
   if (options.logFile) {
     logger.verbose(`Using explicit local log file: ${options.logFile}`);
   }
@@ -163,6 +171,7 @@ async function runLocalAudit(
   }
 
   const summary = await auditOrNoData({
+    runtime: options.runtime ?? 'auto',
     logFile: options.logFile,
     sessionsDir: options.sessionsDir,
     since: options.since,
@@ -176,11 +185,21 @@ async function runLocalAudit(
   renderOutput(summary, options);
 
   if (options.push) {
-    const meta = buildMeta(buildLocalPushSourceMeta('openclaw'));
+    const meta = buildMeta(buildLocalPushSourceMeta(summary.runtime));
     await handlePush(summary, meta, options);
   }
 
   checkThresholds(summary, options);
+}
+
+function validateRuntimeOption(runtime?: AuditCommandOptions['runtime']) {
+  if (!runtime) {
+    return;
+  }
+
+  if (runtime !== 'openclaw' && runtime !== 'hermes') {
+    throw new Error(`Unsupported runtime "${runtime}". Use --runtime openclaw or --runtime hermes.`);
+  }
 }
 
 function validateCursorUsageCsvOptions(options: AuditCommandOptions) {
@@ -189,6 +208,7 @@ function validateCursorUsageCsvOptions(options: AuditCommandOptions) {
   }
 
   const conflicts = [
+    options.runtime ? '--runtime' : null,
     options.logFile ? '--log-file' : null,
     options.sessionsDir ? '--sessions-dir' : null,
     options.remote ? '--remote' : null,
@@ -204,6 +224,30 @@ function validateCursorUsageCsvOptions(options: AuditCommandOptions) {
 
   if (conflicts.length > 0) {
     throw new Error(`The --cursor-usage-csv flag cannot be combined with ${conflicts.join(', ')}.`);
+  }
+}
+
+function validateHermesLocalOnly(options: AuditCommandOptions) {
+  if (options.runtime !== 'hermes') {
+    return;
+  }
+
+  const conflicts = [
+    options.remote ? '--remote' : null,
+    options.remoteLogFile ? '--remote-log-file' : null,
+    options.remoteSessionsDir ? '--remote-sessions-dir' : null,
+    options.remoteConfig ? '--remote-config' : null,
+    options.keepRemoteFiles ? '--keep-remote-files' : null,
+    options.railway ? '--railway' : null,
+    options.railwayProject ? '--project' : null,
+    options.railwayEnvironment ? '--environment' : null,
+    options.railwayService ? '--service' : null,
+  ].filter((flag): flag is string => flag !== null);
+
+  if (conflicts.length > 0) {
+    throw new Error(
+      `Hermes remote transport is not supported yet. Remove ${conflicts.join(', ')} or switch to --runtime openclaw.`,
+    );
   }
 }
 
@@ -253,6 +297,7 @@ async function runSingleRemoteAudit(
   try {
     const comparisonKeyOverride = getComparisonKey(source);
     const summary = await auditOrNoData({
+      runtime: 'openclaw',
       logFile: pullResult.logFile,
       sessionsDir: pullResult.sessionsDir,
       since: options.since,
@@ -312,6 +357,7 @@ async function runMultiRemoteAudit(
     for (const { source, pullResult } of results) {
       const comparisonKeyOverride = getComparisonKey(source);
       const summary = await auditOrNoData({
+        runtime: 'openclaw',
         logFile: pullResult.logFile,
         sessionsDir: pullResult.sessionsDir,
         since: options.since,

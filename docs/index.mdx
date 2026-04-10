@@ -1,15 +1,15 @@
 ---
 title: Xerg
-description: Audit OpenClaw agent spend in dollars, compare before and after changes, run remote audits, and gate CI on waste thresholds.
+description: Audit OpenClaw and Hermes agent spend in dollars, compare before and after changes, run remote audits, and gate CI on waste thresholds.
 ---
 
-Xerg audits OpenClaw usage in dollars rather than tokens. It reads OpenClaw gateway logs and session transcripts, normalizes runs locally, and surfaces where spend is leaking.
+Xerg audits OpenClaw and Hermes usage in dollars rather than tokens. It reads local gateway logs and session transcripts, normalizes runs locally, and surfaces where spend is leaking.
 
 > Hosted features such as dashboard pushes, Ask Xerg, and the hosted MCP server require a Pro or Enterprise workspace.
 
 ## What Xerg does
 
-- Audits local OpenClaw activity from default paths or explicit files.
+- Audits local OpenClaw and Hermes activity from default paths or explicit files.
 - Compares the current audit with the newest compatible cached snapshot.
 - Audits SSH and Railway targets from your local machine.
 - Exports human-readable, Markdown, and machine-readable JSON output.
@@ -29,8 +29,10 @@ The opportunity classes are directional. They are worth testing, but they are no
 
 By default, Xerg looks for:
 
-- gateway logs at `/tmp/openclaw/openclaw-*.log`
-- session transcripts at `~/.openclaw/agents/*/sessions/*.jsonl`
+- OpenClaw gateway logs at `/tmp/openclaw/openclaw-*.log`
+- OpenClaw session transcripts at `~/.openclaw/agents/*/sessions/*.jsonl`
+- Hermes logs at `~/.hermes/logs/agent.log*` with `gateway.log*` fallback
+- Hermes session transcripts at `~/.hermes/sessions/`
 
 If your data lives elsewhere, use `--log-file` and `--sessions-dir`.
 
@@ -38,7 +40,7 @@ If your data lives elsewhere, use `--log-file` and `--sessions-dir`.
 
 1. [Install Xerg](/installation).
 2. [Run the quickstart](/quickstart).
-3. If the data lives elsewhere, start with [doctor](/doctor) and [remote audits](/remote-audits).
+3. If the data lives elsewhere, start with [doctor](/doctor). Use [remote audits](/remote-audits) for OpenClaw SSH and Railway targets.
 4. Learn the core model in [waste taxonomy](/waste-taxonomy), [metrics](/metrics), and [how it works](/how-it-works).
 5. When you want hosted features, use [push summaries](/auth-and-push) and [hosted MCP](/hosted-mcp).
 6. When you want local automation, use [CI gates](/ci-gates).

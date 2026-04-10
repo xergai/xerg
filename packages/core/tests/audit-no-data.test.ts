@@ -15,7 +15,7 @@ describe('auditOpenClaw no-data guidance', () => {
     const { auditOpenClaw } = await import('../src/audit.js');
 
     await expect(auditOpenClaw({ commandPrefix: 'npx @xerg/cli' })).rejects.toThrow(
-      'Run `npx @xerg/cli doctor` or provide --log-file / --sessions-dir.',
+      'Run `npx @xerg/cli doctor --runtime openclaw` or provide --log-file / --sessions-dir.',
     );
   });
 });

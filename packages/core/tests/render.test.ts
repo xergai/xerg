@@ -15,20 +15,30 @@ describe('renderDoctorReport', () => {
   it('includes remote next steps when no local sources are detected', () => {
     const report = renderDoctorReport({
       canAudit: false,
+      mode: 'none',
+      runtime: null,
       sources: [],
-      defaults: {
-        gatewayPattern: '/tmp/openclaw/openclaw-*.log',
-        sessionsPattern: '/Users/test/.openclaw/agents/*/sessions/*.jsonl',
-      },
+      defaults: [
+        {
+          runtime: 'openclaw',
+          gatewayPattern: '/tmp/openclaw/openclaw-*.log',
+          sessionsPattern: '/Users/test/.openclaw/agents/*/sessions/*.jsonl',
+        },
+        {
+          runtime: 'hermes',
+          gatewayPattern: '/Users/test/.hermes/logs/agent.log* (fallback: gateway.log*)',
+          sessionsPattern: '/Users/test/.hermes/sessions/**/*.{json,jsonl}',
+        },
+      ],
       notes: [
-        'No OpenClaw gateway logs or session files were detected.',
-        'Doctor checks local defaults by default. Use --remote or --railway to inspect remote targets.',
+        'No supported local runtime sources were detected.',
+        'Auto-detection checked both OpenClaw and Hermes local defaults.',
       ],
     });
 
     expect(report).toContain('## Next steps');
-    expect(report).toContain('xerg doctor --remote user@host');
-    expect(report).toContain('xerg doctor --railway');
+    expect(report).toContain('xerg doctor --runtime openclaw');
+    expect(report).toContain('xerg doctor --runtime hermes');
     expect(report).toContain('Remote audits still analyze locally');
   });
 
@@ -36,17 +46,27 @@ describe('renderDoctorReport', () => {
     const report = renderDoctorReport(
       {
         canAudit: false,
+        mode: 'none',
+        runtime: null,
         sources: [],
-        defaults: {
-          gatewayPattern: '/tmp/openclaw/openclaw-*.log',
-          sessionsPattern: '/Users/test/.openclaw/agents/*/sessions/*.jsonl',
-        },
-        notes: ['No OpenClaw gateway logs or session files were detected.'],
+        defaults: [
+          {
+            runtime: 'openclaw',
+            gatewayPattern: '/tmp/openclaw/openclaw-*.log',
+            sessionsPattern: '/Users/test/.openclaw/agents/*/sessions/*.jsonl',
+          },
+          {
+            runtime: 'hermes',
+            gatewayPattern: '/Users/test/.hermes/logs/agent.log* (fallback: gateway.log*)',
+            sessionsPattern: '/Users/test/.hermes/sessions/**/*.{json,jsonl}',
+          },
+        ],
+        notes: ['No supported local runtime sources were detected.'],
       },
       { commandPrefix: 'npx @xerg/cli' },
     );
 
-    expect(report).toContain('npx @xerg/cli doctor --log-file');
+    expect(report).toContain('npx @xerg/cli doctor --runtime hermes --log-file');
     expect(report).toContain('npx @xerg/cli doctor --railway');
   });
 

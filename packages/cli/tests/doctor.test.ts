@@ -45,6 +45,7 @@ describe('doctor command', () => {
 
     try {
       await runDoctorCommand({
+        runtime: 'openclaw',
         sessionsDir,
         verbose: true,
       });

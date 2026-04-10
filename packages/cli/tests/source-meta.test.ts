@@ -12,6 +12,7 @@ function buildSummary(overrides: Partial<AuditSummary> = {}): AuditSummary {
   return {
     auditId: 'audit_test_123',
     generatedAt: '2026-04-08T12:00:00.000Z',
+    runtime: 'openclaw',
     comparisonKey: 'local-default',
     comparison: null,
     since: undefined,
@@ -56,6 +57,14 @@ describe('source push metadata', () => {
     });
   });
 
+  it('labels local Hermes audits with the Hermes product name', () => {
+    expect(buildLocalPushSourceMeta('hermes', 'workstation.local')).toEqual({
+      environment: 'local',
+      sourceId: 'Hermes - workstation.local',
+      sourceHost: 'workstation.local',
+    });
+  });
+
   it('normalizes railway sources to a clearer product label', () => {
     const source: RemoteSource = {
       name: 'railway-linked',
@@ -89,6 +98,7 @@ describe('source push metadata', () => {
       sourceFiles: [
         {
           kind: 'cursor-usage-csv',
+          runtime: 'cursor',
           path: '/tmp/usage.csv',
           sizeBytes: 123,
           mtimeMs: 456,
@@ -112,6 +122,18 @@ describe('source push metadata', () => {
       environment: 'railway',
       sourceId: 'OpenClaw - Railway',
       sourceHost: 'Railway',
+    });
+  });
+
+  it('prefers the cached Hermes runtime label when the summary records it', () => {
+    const summary = buildSummary({
+      runtime: 'hermes',
+    });
+
+    expect(buildCachedPushSourceMeta(summary, 'JackBook-Pro.local')).toEqual({
+      environment: 'local',
+      sourceId: 'Hermes - JackBook-Pro.local',
+      sourceHost: 'JackBook-Pro.local',
     });
   });
 });

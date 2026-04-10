@@ -15,6 +15,7 @@ describe('xerg audit', () => {
       noDb: true,
     });
 
+    expect(summary.runtime).toBe('openclaw');
     expect(summary.runCount).toBeGreaterThan(4);
     expect(summary.callCount).toBe(15);
     expect(summary.totalSpendUsd).toBeGreaterThan(0.06);
@@ -45,6 +46,7 @@ describe('xerg audit', () => {
     });
 
     expect(report.canAudit).toBe(true);
+    expect(report.runtime).toBe('openclaw');
     expect(report.sources.some((source) => source.kind === 'sessions')).toBe(true);
   });
 });

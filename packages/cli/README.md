@@ -1,8 +1,8 @@
 # xerg
 
-Audit OpenClaw workflows in dollars, compare fixes, and export daily spend and waste trends.
+Audit OpenClaw and Hermes workflows in dollars, compare fixes, and export daily spend and waste trends.
 
-Xerg audits OpenClaw workflows in dollars, not tokens. It reads your gateway logs and session transcripts, surfaces daily spend and waste rollups plus the highest-leverage findings, and lets you re-run the same audit with `--compare` so you can see exactly what changed after a fix.
+Xerg audits OpenClaw and Hermes workflows in dollars, not tokens. It reads local gateway logs and session transcripts, surfaces daily spend and waste rollups plus the highest-leverage findings, and lets you re-run the same audit with `--compare` so you can see exactly what changed after a fix.
 
 Everything runs locally by default. No account is required for local audits. No data leaves your machine unless you explicitly `--push` results to the Xerg API for a team dashboard.
 
@@ -89,10 +89,10 @@ xerg audit --compare
 xerg audit --since 24h --compare
 ```
 
-## Works where your OpenClaw logs live
+## Works where your local agent logs live
 
 - Local machine: yes
-- VPS or remote server: yes
+- VPS or remote server: OpenClaw only in this phase
 - If OpenClaw runs remotely, you can audit it from your local machine with `xerg audit --remote user@host`
 - Or point Xerg at exported files directly with flags
 
@@ -105,22 +105,28 @@ Remote prerequisites:
 
 By default, Xerg checks:
 
-- `/tmp/openclaw/openclaw-*.log`
-- `~/.openclaw/agents/*/sessions/*.jsonl`
+- OpenClaw: `/tmp/openclaw/openclaw-*.log`
+- OpenClaw: `~/.openclaw/agents/*/sessions/*.jsonl`
+- Hermes: `~/.hermes/logs/agent.log*` with `gateway.log*` fallback
+- Hermes: `~/.hermes/sessions/`
 
 Use explicit paths when needed:
 
 ```bash
-xerg audit --log-file /path/to/openclaw.log
-xerg audit --sessions-dir /path/to/sessions
+xerg audit --runtime openclaw --log-file /path/to/openclaw.log
+xerg audit --runtime openclaw --sessions-dir /path/to/sessions
+xerg audit --runtime hermes --log-file ~/.hermes/logs/agent.log
+xerg audit --runtime hermes --sessions-dir ~/.hermes/sessions
 ```
 
-If your local machine has no OpenClaw files, inspect remote targets directly instead:
+If your local machine has no OpenClaw or Hermes files, inspect remote targets directly instead:
 
 ```bash
 xerg doctor --remote user@host
 xerg doctor --railway
 ```
+
+Remote SSH and Railway flows are still OpenClaw-only.
 
 ## Authentication and config
 
@@ -164,7 +170,7 @@ Xerg v0 stores economic metadata and audit summaries locally. It does not store 
 
 - `0`: success
 - `1`: general failure
-- `2`: no OpenClaw data was found
+- `2`: no supported local runtime data was found
 - `3`: a `--fail-above-waste-rate` or `--fail-above-waste-usd` threshold was exceeded
 
 ## Troubleshooting

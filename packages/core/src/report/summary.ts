@@ -2,6 +2,7 @@ import type {
   AuditSummary,
   DetectedSourceFile,
   Finding,
+  AuditRuntime,
   NormalizedRun,
   SpendBreakdown,
   WasteAttribution,
@@ -41,6 +42,7 @@ function buildBreakdown(
 }
 
 export function buildAuditSummary(input: {
+  runtime: AuditRuntime;
   runs: NormalizedRun[];
   findings: Finding[];
   wasteAttributions: WasteAttribution[];
@@ -68,9 +70,11 @@ export function buildAuditSummary(input: {
       `${generatedAt}:${input.runs.length}:${input.sources.map((source) => source.path).join('|')}`,
     ),
     generatedAt,
+    runtime: input.runtime,
     comparisonKey:
       input.comparisonKeyOverride ??
       buildComparisonKey({
+        runtime: input.runtime,
         sources: input.sources,
         since: input.since,
       }),

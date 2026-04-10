@@ -11,14 +11,18 @@ npx @xerg/cli audit
 
 By default, Xerg looks at:
 
-- `/tmp/openclaw/openclaw-*.log`
-- `~/.openclaw/agents/*/sessions/*.jsonl`
+- OpenClaw: `/tmp/openclaw/openclaw-*.log`
+- OpenClaw: `~/.openclaw/agents/*/sessions/*.jsonl`
+- Hermes: `~/.hermes/logs/agent.log*` with `gateway.log*` fallback
+- Hermes: `~/.hermes/sessions/`
 
 Override either input explicitly:
 
 ```bash
-npx @xerg/cli audit --log-file /path/to/openclaw.log
-npx @xerg/cli audit --sessions-dir /path/to/sessions
+npx @xerg/cli audit --runtime openclaw --log-file /path/to/openclaw.log
+npx @xerg/cli audit --runtime openclaw --sessions-dir /path/to/sessions
+npx @xerg/cli audit --runtime hermes --log-file ~/.hermes/logs/agent.log
+npx @xerg/cli audit --runtime hermes --sessions-dir ~/.hermes/sessions
 ```
 
 You can pass one, the other, or both.
@@ -29,11 +33,11 @@ You can pass one, the other, or both.
 npx @xerg/cli audit --cursor-usage-csv ~/Downloads/usage-events-2026-04-08.csv
 ```
 
-This local-only path analyzes Cursor's exported usage rows instead of OpenClaw session logs.
+This local-only path analyzes Cursor's exported usage rows instead of agent session logs.
 
 - Xerg estimates spend only for Cursor aliases that have an explicit local pricing map
 - unmapped aliases stay visible in token and model breakdowns as `unpriced`
-- OpenClaw-only findings like retry waste and loop waste are intentionally disabled for this source
+- agent-runtime findings like retry waste and loop waste are intentionally disabled for this source
 
 ## Limit the audit window
 

@@ -1,6 +1,6 @@
 import {
   doctorCursorUsageCsv,
-  doctorOpenClaw,
+  doctorAgentRuntime,
   renderCursorDoctorReport,
   renderDoctorReport,
 } from '@xergai/core';
@@ -15,6 +15,7 @@ import {
 import type { RailwayDoctorReport, RailwayTarget, RemoteDoctorReport } from '../transport/index.js';
 
 export interface DoctorCommandOptions {
+  runtime?: 'openclaw' | 'hermes';
   logFile?: string;
   sessionsDir?: string;
   cursorUsageCsv?: string;
@@ -31,7 +32,9 @@ export interface DoctorCommandOptions {
 
 export async function runDoctorCommand(options: DoctorCommandOptions) {
   const logger = createCliLogger({ verbose: options.verbose });
+  validateRuntimeOption(options.runtime);
   validateCursorUsageCsvOptions(options);
+  validateHermesLocalOnly(options);
 
   if (options.railway) {
     logger.verbose('Inspecting Railway audit readiness.');
@@ -71,7 +74,11 @@ export async function runDoctorCommand(options: DoctorCommandOptions) {
     return;
   }
 
-  logger.verbose('Inspecting local OpenClaw audit readiness.');
+  logger.verbose(
+    options.runtime
+      ? `Inspecting local ${options.runtime === 'hermes' ? 'Hermes' : 'OpenClaw'} audit readiness.`
+      : 'Inspecting local runtime audit readiness.',
+  );
   if (options.logFile) {
     logger.verbose(`Using explicit local log file: ${options.logFile}`);
   }
@@ -79,7 +86,8 @@ export async function runDoctorCommand(options: DoctorCommandOptions) {
     logger.verbose(`Using explicit local sessions directory: ${options.sessionsDir}`);
   }
 
-  const report = await doctorOpenClaw({
+  const report = await doctorAgentRuntime({
+    runtime: options.runtime ?? 'auto',
     logFile: options.logFile,
     sessionsDir: options.sessionsDir,
     onProgress: logger.verbose,
@@ -88,12 +96,23 @@ export async function runDoctorCommand(options: DoctorCommandOptions) {
   process.stdout.write(`${renderDoctorReport(report, { commandPrefix: options.commandPrefix })}\n`);
 }
 
+function validateRuntimeOption(runtime?: DoctorCommandOptions['runtime']) {
+  if (!runtime) {
+    return;
+  }
+
+  if (runtime !== 'openclaw' && runtime !== 'hermes') {
+    throw new Error(`Unsupported runtime "${runtime}". Use --runtime openclaw or --runtime hermes.`);
+  }
+}
+
 function validateCursorUsageCsvOptions(options: DoctorCommandOptions) {
   if (!options.cursorUsageCsv) {
     return;
   }
 
   const conflicts = [
+    options.runtime ? '--runtime' : null,
     options.logFile ? '--log-file' : null,
     options.sessionsDir ? '--sessions-dir' : null,
     options.remote ? '--remote' : null,
@@ -107,6 +126,28 @@ function validateCursorUsageCsvOptions(options: DoctorCommandOptions) {
 
   if (conflicts.length > 0) {
     throw new Error(`The --cursor-usage-csv flag cannot be combined with ${conflicts.join(', ')}.`);
+  }
+}
+
+function validateHermesLocalOnly(options: DoctorCommandOptions) {
+  if (options.runtime !== 'hermes') {
+    return;
+  }
+
+  const conflicts = [
+    options.remote ? '--remote' : null,
+    options.remoteLogFile ? '--remote-log-file' : null,
+    options.remoteSessionsDir ? '--remote-sessions-dir' : null,
+    options.railway ? '--railway' : null,
+    options.railwayProject ? '--project' : null,
+    options.railwayEnvironment ? '--environment' : null,
+    options.railwayService ? '--service' : null,
+  ].filter((flag): flag is string => flag !== null);
+
+  if (conflicts.length > 0) {
+    throw new Error(
+      `Hermes remote transport is not supported yet. Remove ${conflicts.join(', ')} or switch to --runtime openclaw.`,
+    );
   }
 }
 
