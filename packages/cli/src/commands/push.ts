@@ -7,6 +7,7 @@ import { formatCommand } from '../command-display.js';
 import { NoDataError } from '../errors.js';
 import { loadPushConfig, pushAudit } from '../push/index.js';
 import { buildCachedPushSourceMeta } from '../source-meta.js';
+import { getCliVersion } from '../version.js';
 
 export interface PushCommandOptions {
   file?: string;
@@ -88,20 +89,10 @@ function loadPayloadFromCache(): AuditPushPayload {
   return toWirePayload(latest, meta);
 }
 
-function readCliVersion(): string {
-  try {
-    const packageJsonPath = new URL('../../package.json', import.meta.url);
-    const pkg = JSON.parse(readFileSync(packageJsonPath, 'utf8')) as { version?: string };
-    return pkg.version ?? '0.0.0';
-  } catch {
-    return '0.0.0';
-  }
-}
-
 function buildMeta(summary: Parameters<typeof buildCachedPushSourceMeta>[0]): WirePayloadMeta {
   const sourceMeta = buildCachedPushSourceMeta(summary);
   return {
-    cliVersion: readCliVersion(),
+    cliVersion: getCliVersion(),
     sourceId: sourceMeta.sourceId,
     sourceHost: sourceMeta.sourceHost,
     environment: sourceMeta.environment,

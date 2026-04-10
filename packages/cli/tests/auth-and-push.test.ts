@@ -8,6 +8,10 @@ function createTempDir(prefix: string): string {
   return mkdtempSync(join(tmpdir(), prefix));
 }
 
+const cliPackageVersion = JSON.parse(
+  readFileSync(join(process.cwd(), 'packages', 'cli', 'package.json'), 'utf8'),
+) as { version: string };
+
 function buildPayload(auditId = 'audit_test_123') {
   return {
     version: 1,
@@ -304,10 +308,11 @@ describe('Phase 2b CLI commands', () => {
     output.restore();
 
     const payload = JSON.parse(output.getStdout()) as {
-      meta?: { sourceId?: string; sourceHost?: string; environment?: string };
+      meta?: { cliVersion?: string; sourceId?: string; sourceHost?: string; environment?: string };
     };
 
     expect(payload.meta).toMatchObject({
+      cliVersion: cliPackageVersion.version,
       sourceId: 'OpenClaw - Railway',
       sourceHost: 'Railway',
       environment: 'railway',

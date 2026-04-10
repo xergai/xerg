@@ -1,4 +1,3 @@
-import { readFileSync } from 'node:fs';
 import { rmSync } from 'node:fs';
 import {
   auditCursorUsageCsv,
@@ -24,6 +23,7 @@ import {
   pullRemoteFilesRailway,
 } from '../transport/index.js';
 import type { PullResult, RailwayTarget, RemoteSource } from '../transport/index.js';
+import { getCliVersion } from '../version.js';
 
 export interface AuditCommandOptions {
   logFile?: string;
@@ -375,23 +375,13 @@ async function runMultiRemoteAudit(
   }
 }
 
-function readCliVersion(): string {
-  try {
-    const packageJsonPath = new URL('../../package.json', import.meta.url);
-    const pkg = JSON.parse(readFileSync(packageJsonPath, 'utf8')) as { version?: string };
-    return pkg.version ?? '0.0.0';
-  } catch {
-    return '0.0.0';
-  }
-}
-
 function buildMeta(input: {
   environment: WirePayloadMeta['environment'];
   sourceId: string;
   sourceHost: string;
 }): WirePayloadMeta {
   return {
-    cliVersion: readCliVersion(),
+    cliVersion: getCliVersion(),
     sourceId: input.sourceId,
     sourceHost: input.sourceHost,
     environment: input.environment,

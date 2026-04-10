@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const cliDir = join(root, 'packages', 'cli');
+const cursorFixture = join(root, 'fixtures', 'cursor', 'usage-sample.csv');
 const tempRoot = mkdtempSync(join(tmpdir(), 'xerg-cli-smoke-'));
 const packDir = join(tempRoot, 'pack');
 const installDir = join(tempRoot, 'install');
@@ -59,6 +60,26 @@ try {
     encoding: 'utf8',
     env: execEnv,
   }).trim();
+  const auditPayloadOutput = execFileSync(
+    'corepack',
+    [
+      'pnpm',
+      'exec',
+      'xerg',
+      'audit',
+      '--cursor-usage-csv',
+      cursorFixture,
+      '--push',
+      '--dry-run',
+      '--no-db',
+    ],
+    {
+      cwd: installDir,
+      encoding: 'utf8',
+      env: execEnv,
+    },
+  );
+  const auditPayload = JSON.parse(auditPayloadOutput);
 
   if (!helpOutput.includes('xerg <command> [options]')) {
     throw new Error('Installed package did not expose the xerg CLI as expected.');
@@ -66,6 +87,12 @@ try {
 
   if (!/^\d+\.\d+\.\d+/.test(versionOutput)) {
     throw new Error('Installed package did not report a valid semantic version.');
+  }
+
+  if (auditPayload?.meta?.cliVersion !== versionOutput) {
+    throw new Error(
+      `Installed package reported cliVersion ${auditPayload?.meta?.cliVersion ?? 'missing'} in push payload, expected ${versionOutput}.`,
+    );
   }
 
   const bundledSkillPath = join(
