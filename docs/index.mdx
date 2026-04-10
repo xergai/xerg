@@ -5,6 +5,8 @@ description: Audit OpenClaw agent spend in dollars, compare before and after cha
 
 Xerg audits OpenClaw usage in dollars rather than tokens. It reads OpenClaw gateway logs and session transcripts, normalizes runs locally, and surfaces where spend is leaking.
 
+> Hosted features such as dashboard pushes, Ask Xerg, and the hosted MCP server require a Pro or Enterprise workspace.
+
 ## What Xerg does
 
 - Audits local OpenClaw activity from default paths or explicit files.
@@ -12,6 +14,7 @@ Xerg audits OpenClaw usage in dollars rather than tokens. It reads OpenClaw gate
 - Audits SSH and Railway targets from your local machine.
 - Exports human-readable, Markdown, and machine-readable JSON output.
 - Pushes summaries to the Xerg API and can fail CI when confirmed waste is above a threshold.
+- Exposes hosted audit history, recommendations, and selected control actions through a hosted MCP server for paid workspaces.
 
 ## What Xerg surfaces
 
@@ -37,7 +40,16 @@ If your data lives elsewhere, use `--log-file` and `--sessions-dir`.
 2. [Run the quickstart](/quickstart).
 3. If the data lives elsewhere, start with [doctor](/doctor) and [remote audits](/remote-audits).
 4. Learn the core model in [waste taxonomy](/waste-taxonomy), [metrics](/metrics), and [how it works](/how-it-works).
-5. When you want automation, use [CI gates](/ci-gates) or [push summaries](/auth-and-push).
+5. When you want hosted features, use [push summaries](/auth-and-push) and [hosted MCP](/hosted-mcp).
+6. When you want local automation, use [CI gates](/ci-gates).
+
+## Hosted and Pro features
+
+If you use Xerg Pro or Enterprise, you can:
+
+- push audit summaries into a hosted workspace with [authentication and push](/auth-and-push)
+- query hosted audit history and recommendations from remote clients with [hosted MCP](/hosted-mcp)
+- use Ask Xerg in the dashboard after your workspace has hosted data
 
 ## Important v0 limits
 

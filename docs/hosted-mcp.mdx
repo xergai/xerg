@@ -1,0 +1,128 @@
+---
+title: Hosted MCP (Pro)
+description: Connect Xerg's hosted audit history, trends, recommendations, and selected control actions to remote MCP clients.
+---
+
+Xerg offers a hosted MCP server for paid workspaces. It lets remote MCP clients query the hosted data already pushed into your workspace instead of reading OpenClaw logs directly from disk.
+
+> Hosted MCP requires a Pro or Enterprise workspace plus a workspace API key.
+
+## When to use hosted MCP
+
+Use hosted MCP when you want a remote client such as Cursor or Claude Code to:
+
+- inspect the latest hosted audit
+- compare recent spend and waste trends
+- read ranked recommendations and source summaries
+- push new hosted audit payloads or ingestion jobs
+- manage hosted policy drafts with explicit write safety
+
+Use the local CLI when you need to read raw OpenClaw logs, run fresh audits from local, SSH, or Railway sources, or generate export files directly on your machine.
+
+## Requirements
+
+You need:
+
+- an active Pro or Enterprise workspace
+- a workspace API key from the Xerg dashboard
+- at least one pushed audit if you want real hosted audit data in the workspace
+
+If the workspace is empty, start with [authentication and push](/auth-and-push) and send your first audit summary from the CLI.
+
+## Endpoint and auth
+
+Production endpoint:
+
+```text
+https://mcp.xerg.ai/mcp
+```
+
+Send your workspace API key as a Bearer token on every request:
+
+```text
+Authorization: Bearer <XERG_API_KEY>
+```
+
+Example remote MCP config:
+
+```json
+{
+  "type": "http",
+  "url": "https://mcp.xerg.ai/mcp",
+  "headers": {
+    "Authorization": "Bearer <XERG_API_KEY>"
+  }
+}
+```
+
+Metadata endpoint:
+
+```text
+https://mcp.xerg.ai/server.json
+```
+
+## Supported clients
+
+Hosted MCP works best in desktop or server MCP clients that can attach custom Bearer headers.
+
+Common examples:
+
+- Cursor remote MCP
+- Claude Code
+- Claude Desktop via `mcp-remote`
+- other desktop or server MCP clients that support remote HTTP MCP
+
+Some browser-native MCP clients may require OAuth-based setup flows that are not part of the current hosted MCP path.
+
+## Available tools
+
+Read tools:
+
+- `xerg_latest_audit`
+- `xerg_history`
+- `xerg_trends`
+- `xerg_sources`
+- `xerg_recommendations`
+- `xerg_list_policies`
+
+Write tools:
+
+- `xerg_push_audit`
+- `xerg_ingest_raw_openclaw`
+- `xerg_upsert_policy`
+- `xerg_delete_policy`
+- `xerg_create_policy_from_recommendation`
+
+## Permissions and write safety
+
+Hosted MCP is workspace-scoped.
+
+- workspace members can read hosted data and push or ingest audits
+- policy creation, update, and deletion are restricted to workspace admins
+- risky writes use preview and confirmation semantics instead of silently committing changes
+
+This keeps the MCP server useful for automation while still making destructive or policy-shaping actions explicit.
+
+## Recommended flow
+
+1. run a local audit with `xerg audit`
+2. push it with `xerg audit --push`
+3. confirm the hosted workspace has data
+4. connect your MCP client to `https://mcp.xerg.ai/mcp`
+5. ask about waste, changes, or the next policy to create
+
+If you prefer a first-party hosted experience before connecting a third-party MCP client, use Ask Xerg in the dashboard after your first push.
+
+## Troubleshooting
+
+### `401` or `Missing or malformed Authorization`
+
+Your client is not sending a valid workspace API key as a Bearer token.
+
+### Empty audit results
+
+The workspace likely has no hosted audits yet. Push one first with [authentication and push](/auth-and-push).
+
+### Browser client cannot complete setup
+
+Use a desktop or server MCP client that supports remote HTTP MCP with custom Bearer headers.
