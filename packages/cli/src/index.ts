@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-import { readFileSync } from 'node:fs';
 import { styleText } from 'node:util';
 
 import { formatCommand, resolveCommandDisplay } from './command-display.js';
@@ -11,6 +10,7 @@ import { runLogoutCommand } from './commands/logout.js';
 import { runPushCommand } from './commands/push.js';
 import { NoDataError } from './errors.js';
 import { renderAuditHelp, renderDoctorHelp, renderPushHelp, renderRootHelp } from './help.js';
+import { getCliVersion } from './version.js';
 
 type AuditCliOptions = {
   logFile?: string;
@@ -57,7 +57,7 @@ type DoctorCliOptions = {
   verbose?: boolean;
 };
 
-const VERSION = readVersion();
+const VERSION = getCliVersion();
 const argv = process.argv.slice(2);
 const commandDisplay = resolveCommandDisplay();
 
@@ -356,10 +356,4 @@ function readFloat(flag: string, value: string | undefined): number {
 
 function colorError(message: string) {
   return process.stderr.isTTY ? styleText('red', message) : message;
-}
-
-function readVersion() {
-  const packageJsonPath = new URL('../package.json', import.meta.url);
-  const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8')) as { version?: string };
-  return packageJson.version ?? '0.0.0';
 }

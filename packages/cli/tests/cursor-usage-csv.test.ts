@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { hostname } from 'node:os';
 import { join } from 'node:path';
 
@@ -8,6 +9,11 @@ import { runDoctorCommand } from '../src/commands/doctor.js';
 
 const root = process.cwd();
 const cursorUsageCsv = join(root, 'fixtures', 'cursor', 'usage-sample.csv');
+const cliVersion = JSON.parse(
+  readFileSync(join(root, 'packages', 'cli', 'package.json'), 'utf8'),
+) as {
+  version: string;
+};
 
 function captureOutput() {
   let stdout = '';
@@ -134,7 +140,7 @@ describe('cursor usage csv CLI', () => {
     }
 
     const parsed = JSON.parse(output.getStdout()) as {
-      meta?: { sourceId?: string; sourceHost?: string; environment?: string };
+      meta?: { cliVersion?: string; sourceId?: string; sourceHost?: string; environment?: string };
       summary?: {
         spendByDay?: Array<{ date: string; spendUsd: number }>;
         wasteByDay?: Array<{ date: string; wasteUsd: number }>;
@@ -142,6 +148,7 @@ describe('cursor usage csv CLI', () => {
     };
 
     expect(parsed.meta).toMatchObject({
+      cliVersion: cliVersion.version,
       sourceId: `Cursor - ${hostname()}`,
       sourceHost: hostname(),
       environment: 'local',
