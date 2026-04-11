@@ -213,7 +213,11 @@ function inferToolCalls(record: JsonRecord) {
     return direct;
   }
 
-  const toolCalls = getNestedValue(record, [['tool_calls'], ['toolCalls'], ['message', 'tool_calls']]);
+  const toolCalls = getNestedValue(record, [
+    ['tool_calls'],
+    ['toolCalls'],
+    ['message', 'tool_calls'],
+  ]);
   return Array.isArray(toolCalls) ? toolCalls.length : 0;
 }
 
@@ -326,19 +330,18 @@ function buildCall(
     inputTokens,
     outputTokens,
     costUsd,
-    costSource: observedCost !== null ? 'observed' : estimatedCost !== null ? 'estimated' : 'unpriced',
+    costSource:
+      observedCost !== null ? 'observed' : estimatedCost !== null ? 'estimated' : 'unpriced',
     latencyMs:
-      asNumber(
-        getNestedValue(record, [['latency_ms'], ['latencyMs'], ['usage', 'latency_ms']]),
-      ) ?? null,
+      asNumber(getNestedValue(record, [['latency_ms'], ['latencyMs'], ['usage', 'latency_ms']])) ??
+      null,
     toolCalls: inferToolCalls(record),
     retries,
     attempt,
     iteration,
     status:
-      asString(
-        getNestedValue(record, [['status'], ['level'], ['result'], ['error', 'type']]),
-      ) ?? null,
+      asString(getNestedValue(record, [['status'], ['level'], ['result'], ['error', 'type']])) ??
+      null,
     taskClass: inferTaskClass(record, workflow),
     cacheHit: asBoolean(
       getNestedValue(record, [['cache_hit'], ['cacheHit'], ['usage', 'cache_hit']]),

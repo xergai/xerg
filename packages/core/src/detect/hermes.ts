@@ -1,12 +1,9 @@
 import { homedir } from 'node:os';
 import { basename, join } from 'node:path';
 
-import type { AuditOptions, DetectedSourceFile } from '../types.js';
-import {
-  getDefaultHermesGatewayPattern,
-  getDefaultHermesSessionsPattern,
-} from '../utils/paths.js';
 import { logFileHasBillableRecords } from '../normalize/hermes.js';
+import type { AuditOptions, DetectedSourceFile } from '../types.js';
+import { getDefaultHermesGatewayPattern, getDefaultHermesSessionsPattern } from '../utils/paths.js';
 import { collectGlobMatches, toDetected } from './shared.js';
 
 function getDefaultAgentLogPattern() {

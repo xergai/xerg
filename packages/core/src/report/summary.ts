@@ -1,8 +1,8 @@
 import type {
+  AuditRuntime,
   AuditSummary,
   DetectedSourceFile,
   Finding,
-  AuditRuntime,
   NormalizedRun,
   SpendBreakdown,
   WasteAttribution,

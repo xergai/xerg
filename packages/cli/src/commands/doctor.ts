@@ -1,6 +1,6 @@
 import {
-  doctorCursorUsageCsv,
   doctorAgentRuntime,
+  doctorCursorUsageCsv,
   renderCursorDoctorReport,
   renderDoctorReport,
 } from '@xergai/core';
@@ -102,7 +102,9 @@ function validateRuntimeOption(runtime?: DoctorCommandOptions['runtime']) {
   }
 
   if (runtime !== 'openclaw' && runtime !== 'hermes') {
-    throw new Error(`Unsupported runtime "${runtime}". Use --runtime openclaw or --runtime hermes.`);
+    throw new Error(
+      `Unsupported runtime "${runtime}". Use --runtime openclaw or --runtime hermes.`,
+    );
   }
 }
 

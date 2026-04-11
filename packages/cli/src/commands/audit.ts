@@ -53,8 +53,7 @@ export interface AuditCommandOptions {
   commandPrefix?: string;
 }
 
-const NO_DATA_PATTERN =
-  /no (openclaw|hermes|supported local runtime) sources? were detected/i;
+const NO_DATA_PATTERN = /no (openclaw|hermes|supported local runtime) sources? were detected/i;
 
 async function auditOrNoData(
   ...args: Parameters<typeof auditAgentRuntime>
@@ -198,7 +197,9 @@ function validateRuntimeOption(runtime?: AuditCommandOptions['runtime']) {
   }
 
   if (runtime !== 'openclaw' && runtime !== 'hermes') {
-    throw new Error(`Unsupported runtime "${runtime}". Use --runtime openclaw or --runtime hermes.`);
+    throw new Error(
+      `Unsupported runtime "${runtime}". Use --runtime openclaw or --runtime hermes.`,
+    );
   }
 }
 

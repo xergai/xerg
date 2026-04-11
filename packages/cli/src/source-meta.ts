@@ -12,8 +12,7 @@ export function buildLocalPushSourceMeta(
   kind: AuditRuntime,
   localHost = hostname(),
 ): PushSourceMeta {
-  const productName =
-    kind === 'cursor' ? 'Cursor' : kind === 'hermes' ? 'Hermes' : 'OpenClaw';
+  const productName = kind === 'cursor' ? 'Cursor' : kind === 'hermes' ? 'Hermes' : 'OpenClaw';
 
   return {
     environment: 'local',

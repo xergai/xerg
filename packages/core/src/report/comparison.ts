@@ -1,6 +1,6 @@
 import type {
-  AuditRuntime,
   AuditComparison,
+  AuditRuntime,
   AuditSummary,
   DetectedSourceFile,
   Finding,
@@ -237,7 +237,8 @@ function inferSummaryRuntime(summary: AuditSummary): AuditRuntime {
 
 export function hydrateAuditSummary(summary: AuditSummary): AuditSummary {
   const runtime = inferSummaryRuntime(summary);
-  const shouldRebuildComparisonKey = !('runtime' in summary) || !summary.runtime || !summary.comparisonKey;
+  const shouldRebuildComparisonKey =
+    !('runtime' in summary) || !summary.runtime || !summary.comparisonKey;
   const hydratedSources = summary.sourceFiles.map((source) => ({
     ...source,
     runtime:
@@ -249,14 +250,13 @@ export function hydrateAuditSummary(summary: AuditSummary): AuditSummary {
     ...summary,
     runtime,
     sourceFiles: hydratedSources,
-    comparisonKey:
-      shouldRebuildComparisonKey
-        ? buildComparisonKey({
-            runtime,
-            sources: hydratedSources,
-            since: summary.since,
-          })
-        : summary.comparisonKey,
+    comparisonKey: shouldRebuildComparisonKey
+      ? buildComparisonKey({
+          runtime,
+          sources: hydratedSources,
+          since: summary.since,
+        })
+      : summary.comparisonKey,
     comparison: summary.comparison ?? null,
     wasteByKind:
       summary.wasteByKind?.length > 0
