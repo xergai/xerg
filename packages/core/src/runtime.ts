@@ -114,7 +114,6 @@ function inferRuntimeFromExplicitPaths(options: AuditOptions): AgentRuntime | nu
       path.includes('/hermes/') ||
       path.includes('/.hermes') ||
       name.includes('hermes') ||
-      name === 'gateway.log' ||
       name.startsWith('agent.log')
     ) {
       hints.add('hermes');
@@ -195,6 +194,51 @@ function buildAutoAmbiguousDoctorReport(candidates: RuntimeCandidate[]): DoctorR
   };
 }
 
+function buildExplicitNoDataError(
+  options: AuditOptions,
+  hintedRuntime: AgentRuntime | null,
+): string {
+  const commandPrefix = options.commandPrefix ?? 'xerg';
+
+  if (hintedRuntime) {
+    return getRuntimeAdapter(hintedRuntime).noDataError(commandPrefix);
+  }
+
+  return `No supported local runtime sources were detected. Run \`${commandPrefix} doctor\`, or use --runtime openclaw / --runtime hermes with --log-file / --sessions-dir.`;
+}
+
+function buildExplicitNoDataDoctorReport(
+  candidates: RuntimeCandidate[],
+  hintedRuntime: AgentRuntime | null,
+): DoctorReport {
+  if (hintedRuntime) {
+    const adapter = getRuntimeAdapter(hintedRuntime);
+    return {
+      canAudit: false,
+      mode: 'none',
+      runtime: null,
+      sources: [],
+      defaults: [adapter.defaultPaths()],
+      notes: [
+        `No ${adapter.productName} sources were detected from the provided local paths.`,
+        `Verify --log-file / --sessions-dir and re-run doctor with --runtime ${adapter.runtime} if needed.`,
+      ],
+    };
+  }
+
+  return {
+    canAudit: false,
+    mode: 'none',
+    runtime: null,
+    sources: candidates.flatMap((candidate) => candidate.sources),
+    defaults: Object.values(RUNTIME_ADAPTERS).map((adapter) => adapter.defaultPaths()),
+    notes: [
+      'No supported local runtime sources were detected from the provided local paths.',
+      'Verify --log-file / --sessions-dir and re-run doctor with --runtime openclaw or --runtime hermes if needed.',
+    ],
+  };
+}
+
 export function getRuntimeProductName(runtime: AgentRuntime) {
   return getRuntimeAdapter(runtime).productName;
 }
@@ -234,6 +278,10 @@ export async function resolveLocalAgentRuntime(options: AuditOptions) {
           sources: hintedCandidate.sources,
         };
       }
+    }
+
+    if (usableCandidates.length === 0) {
+      throw new Error(buildExplicitNoDataError(options, hintedRuntime));
     }
 
     if (usableCandidates.length === 1) {
@@ -300,6 +348,10 @@ export async function doctorAgentRuntime(options: AuditOptions): Promise<DoctorR
       if (hintedCandidate) {
         return buildResolvedDoctorReport(hintedCandidate.adapter, hintedCandidate.sources);
       }
+    }
+
+    if (usableCandidates.length === 0) {
+      return buildExplicitNoDataDoctorReport(candidates, hintedRuntime);
     }
 
     if (usableCandidates.length === 1) {

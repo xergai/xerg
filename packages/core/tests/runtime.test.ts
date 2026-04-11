@@ -116,6 +116,40 @@ describe('runtime auto-resolution', () => {
     );
   });
 
+  it('treats a generic gateway.log file as ambiguous instead of forcing Hermes', async () => {
+    const tempDir = createTempDir('xerg-runtime-gateway-ambiguous-');
+    const logPath = join(tempDir, 'gateway.log');
+
+    writeFileSync(
+      logPath,
+      '{"timestamp":"2026-04-10T00:00:00.000Z","provider":"anthropic","model":"claude-haiku-4-5","usage":{"input_tokens":100,"output_tokens":20,"cost_usd":0.00038},"status":"success"}\n',
+    );
+
+    const { auditAgentRuntime } = await loadCoreIndex();
+    await expect(
+      auditAgentRuntime({
+        logFile: logPath,
+        noDb: true,
+      }),
+    ).rejects.toThrow(
+      'Could not determine whether the provided local files belong to OpenClaw or Hermes.',
+    );
+  });
+
+  it('returns a no-data error when explicit local paths do not resolve to any files', async () => {
+    const tempDir = createTempDir('xerg-runtime-missing-paths-');
+    const missingLogPath = join(tempDir, 'missing.log');
+
+    const { auditAgentRuntime } = await loadCoreIndex();
+    await expect(
+      auditAgentRuntime({
+        logFile: missingLogPath,
+        noDb: true,
+        commandPrefix: 'xerg',
+      }),
+    ).rejects.toThrow('No supported local runtime sources were detected.');
+  });
+
   it('returns an ambiguous doctor report for ambiguous explicit paths', async () => {
     const tempDir = createTempDir('xerg-runtime-doctor-ambiguous-');
     const logPath = join(tempDir, 'generic.log');
@@ -133,5 +167,25 @@ describe('runtime auto-resolution', () => {
     expect(report.mode).toBe('ambiguous');
     expect(report.canAudit).toBe(false);
     expect(report.notes.some((note) => note.includes('Could not determine whether'))).toBe(true);
+  });
+
+  it('returns a no-data doctor report when explicit local paths do not resolve to any files', async () => {
+    const tempDir = createTempDir('xerg-runtime-doctor-missing-');
+    const missingLogPath = join(tempDir, 'missing.log');
+
+    const { doctorAgentRuntime } = await loadCoreIndex();
+    const report = await doctorAgentRuntime({
+      logFile: missingLogPath,
+    });
+
+    expect(report.mode).toBe('none');
+    expect(report.canAudit).toBe(false);
+    expect(
+      report.notes.some((note) =>
+        note.includes(
+          'No supported local runtime sources were detected from the provided local paths.',
+        ),
+      ),
+    ).toBe(true);
   });
 });
