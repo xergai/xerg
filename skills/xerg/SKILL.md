@@ -99,6 +99,8 @@ Local defaults:
 xerg audit
 ```
 
+If both OpenClaw and Hermes are present locally, pass `--runtime openclaw` or `--runtime hermes` explicitly.
+
 Explicit local paths:
 
 ```bash

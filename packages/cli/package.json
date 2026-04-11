@@ -1,8 +1,9 @@
 {
   "name": "@xerg/cli",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Audit OpenClaw and Hermes workflows in dollars, compare fixes, and export daily spend and waste trends.",
   "keywords": [
+    "xerg",
     "ai",
     "agents",
     "finops",

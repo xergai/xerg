@@ -37,9 +37,9 @@ Remote audits still analyze locally. Xerg first pulls telemetry files from the t
 
 Supported transports:
 
-- SSH
-- Railway
-- multi-source config via `--remote-config`
+- SSH for OpenClaw in this phase
+- Railway for OpenClaw in this phase
+- multi-source config via `--remote-config` for OpenClaw sources in this phase
 
 For SSH, Xerg prefers `rsync` and falls back to `tar` over SSH if needed. For Railway, it uses the `railway` CLI and handles PTY-safe transfer internally.
 

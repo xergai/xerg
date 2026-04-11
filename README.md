@@ -173,4 +173,13 @@ The manual
 [`Publish to npm`](.github/workflows/publish-npm.yml)
 workflow is configured to publish both `@xerg/cli` and `@xerg/schemas`.
 
-Publishing uses npm Trusted Publishing.
+Publishing uses npm Trusted Publishing for npm and a GitHub Actions secret for ClawHub.
+
+Current release convention:
+
+- keep `package.json`, `packages/core/package.json`, `packages/cli/package.json`, and `packages/schemas/package.json` on the same semver in-repo
+- treat `packages/cli/package.json` as the source of truth for the published CLI version and the ClawHub skill version
+- update `docs/`, `packages/cli/README.md`, `skills/xerg/README.md`, and `skills/xerg/SKILL.md` whenever user-facing behavior changes
+- after merge, publish with the `Publish to npm and ClawHub` workflow using `publish_target=all` when the CLI, schemas, and skill should stay in sync
+
+See [`RELEASING.md`](RELEASING.md) for the maintainer checklist.

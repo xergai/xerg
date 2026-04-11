@@ -89,7 +89,7 @@ xerg audit --compare
 xerg audit --since 24h --compare
 ```
 
-## Works where your local agent logs live
+## Works where your agent data lives
 
 - Local machine: yes
 - VPS or remote server: OpenClaw only in this phase
@@ -118,6 +118,8 @@ xerg audit --runtime openclaw --sessions-dir /path/to/sessions
 xerg audit --runtime hermes --log-file ~/.hermes/logs/agent.log
 xerg audit --runtime hermes --sessions-dir ~/.hermes/sessions
 ```
+
+If only one supported local runtime is present, Xerg auto-selects it. If both OpenClaw and Hermes are present locally, rerun with `--runtime openclaw` or `--runtime hermes`.
 
 If your local machine has no OpenClaw or Hermes files, inspect remote targets directly instead:
 

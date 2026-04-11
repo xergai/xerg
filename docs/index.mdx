@@ -1,6 +1,6 @@
 ---
 title: Xerg
-description: Audit OpenClaw and Hermes agent spend in dollars, compare before and after changes, run remote audits, and gate CI on waste thresholds.
+description: Audit OpenClaw and Hermes agent spend in dollars, compare before and after changes, run OpenClaw remote audits, and gate CI on waste thresholds.
 ---
 
 Xerg audits OpenClaw and Hermes usage in dollars rather than tokens. It reads local gateway logs and session transcripts, normalizes runs locally, and surfaces where spend is leaking.
@@ -11,7 +11,7 @@ Xerg audits OpenClaw and Hermes usage in dollars rather than tokens. It reads lo
 
 - Audits local OpenClaw and Hermes activity from default paths or explicit files.
 - Compares the current audit with the newest compatible cached snapshot.
-- Audits SSH and Railway targets from your local machine.
+- Audits OpenClaw SSH and Railway targets from your local machine.
 - Exports human-readable, Markdown, and machine-readable JSON output.
 - Pushes summaries to the Xerg API and can fail CI when confirmed waste is above a threshold.
 - Exposes hosted audit history, recommendations, and selected control actions through a hosted MCP server for paid workspaces.
