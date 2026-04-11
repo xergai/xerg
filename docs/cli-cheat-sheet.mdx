@@ -53,8 +53,8 @@ Use this quick decision guide:
 - Want machine-readable output: `npx @xerg/cli audit --json`
 - Want a shareable report: `npx @xerg/cli audit --markdown`
 - Want before/after deltas: `npx @xerg/cli audit --compare`
-- Want to analyze Cursor export data: `npx @xerg/cli audit --cursor-usage-csv <file>`
-- Want to inspect a remote OpenClaw target first: `npx @xerg/cli doctor --remote <host>` or `npx @xerg/cli doctor --railway`
+- Want to analyze Cursor export data: `npx @xerg/cli audit --cursor-usage-csv [file]`
+- Want to inspect a remote OpenClaw target first: `npx @xerg/cli doctor --remote [user@host]` or `npx @xerg/cli doctor --railway`
 
 ## 4. Pick the source you want to audit
 
@@ -63,8 +63,8 @@ Use this quick decision guide:
 | Local OpenClaw | `npx @xerg/cli doctor --runtime openclaw` | Use this when both local runtimes exist and you want OpenClaw specifically |
 | Local Hermes | `npx @xerg/cli doctor --runtime hermes` | Hermes support is local-only in this phase |
 | Local auto-detect | `npx @xerg/cli doctor` | Best when only one supported local runtime is present |
-| Local Cursor CSV | `npx @xerg/cli doctor --cursor-usage-csv <file>` | Uses exported usage rows instead of runtime logs and transcripts |
-| Remote OpenClaw over SSH | `npx @xerg/cli doctor --remote <user@host>` | Pulls remote files to your machine and analyzes them locally |
+| Local Cursor CSV | `npx @xerg/cli doctor --cursor-usage-csv [file]` | Uses exported usage rows instead of runtime logs and transcripts |
+| Remote OpenClaw over SSH | `npx @xerg/cli doctor --remote [user@host]` | Pulls remote files to your machine and analyzes them locally |
 | Remote OpenClaw on Railway | `npx @xerg/cli doctor --railway` | Uses your linked Railway context unless you pass explicit IDs |
 
 ## 5. Local runtime basics
@@ -422,27 +422,27 @@ npx @xerg/cli audit --push
 
 | Flag | Applies to | What it does |
 | --- | --- | --- |
-| `--runtime <openclaw|hermes>` | `doctor`, `audit` | Chooses the local runtime explicitly |
-| `--log-file <path>` | `doctor`, `audit` | Points Xerg at one explicit local gateway log |
-| `--sessions-dir <path>` | `doctor`, `audit` | Points Xerg at one explicit local sessions directory |
-| `--cursor-usage-csv <path>` | `doctor`, `audit` | Uses a local Cursor usage export instead of runtime files |
-| `--since <duration>` | `audit` | Limits the audit window, for example `24h`, `7d`, or `30m` |
+| `--runtime [openclaw|hermes]` | `doctor`, `audit` | Chooses the local runtime explicitly |
+| `--log-file [path]` | `doctor`, `audit` | Points Xerg at one explicit local gateway log |
+| `--sessions-dir [path]` | `doctor`, `audit` | Points Xerg at one explicit local sessions directory |
+| `--cursor-usage-csv [path]` | `doctor`, `audit` | Uses a local Cursor usage export instead of runtime files |
+| `--since [duration]` | `audit` | Limits the audit window, for example `24h`, `7d`, or `30m` |
 | `--compare` | `audit` | Compares against the newest compatible saved snapshot |
 | `--json` | `audit` | Emits JSON output |
 | `--markdown` | `audit` | Emits Markdown output |
-| `--db <path>` | `audit` | Uses a custom SQLite path for local snapshot storage |
+| `--db [path]` | `audit` | Uses a custom SQLite path for local snapshot storage |
 | `--no-db` | `audit` | Skips local persistence |
-| `--remote <user@host>` | `doctor`, `audit` | Targets an SSH OpenClaw host |
-| `--remote-log-file <path>` | `doctor`, `audit` | Overrides the remote OpenClaw log path |
-| `--remote-sessions-dir <path>` | `doctor`, `audit` | Overrides the remote OpenClaw sessions path |
-| `--remote-config <path>` | `audit` | Runs a multi-source remote OpenClaw audit |
+| `--remote [user@host]` | `doctor`, `audit` | Targets an SSH OpenClaw host |
+| `--remote-log-file [path]` | `doctor`, `audit` | Overrides the remote OpenClaw log path |
+| `--remote-sessions-dir [path]` | `doctor`, `audit` | Overrides the remote OpenClaw sessions path |
+| `--remote-config [path]` | `audit` | Runs a multi-source remote OpenClaw audit |
 | `--keep-remote-files` | `audit` | Keeps pulled remote files under `~/.xerg/remote-cache/` |
 | `--railway` | `doctor`, `audit` | Targets a Railway OpenClaw service |
-| `--project <id>` | `doctor`, `audit` | Chooses a Railway project explicitly |
-| `--environment <id>` | `doctor`, `audit` | Chooses a Railway environment explicitly |
-| `--service <id>` | `doctor`, `audit` | Chooses a Railway service explicitly |
+| `--project [id]` | `doctor`, `audit` | Chooses a Railway project explicitly |
+| `--environment [id]` | `doctor`, `audit` | Chooses a Railway environment explicitly |
+| `--service [id]` | `doctor`, `audit` | Chooses a Railway service explicitly |
 | `--push` | `audit` | Pushes the summary after computing it |
 | `--dry-run` | `audit --push`, `push` | Prints the payload instead of sending it |
-| `--fail-above-waste-rate <n>` | `audit` | Exits `3` when waste rate is above the threshold |
-| `--fail-above-waste-usd <n>` | `audit` | Exits `3` when confirmed waste dollars are above the threshold |
+| `--fail-above-waste-rate [n]` | `audit` | Exits `3` when waste rate is above the threshold |
+| `--fail-above-waste-usd [n]` | `audit` | Exits `3` when confirmed waste dollars are above the threshold |
 | `--verbose` | `doctor`, `audit` | Prints progress updates to stderr |
