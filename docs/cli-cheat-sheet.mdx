@@ -1,0 +1,448 @@
+---
+title: CLI cheat sheet
+description: A sequenced Xerg CLI reference covering first-run local audits, explicit paths, Cursor CSVs, remote OpenClaw audits, push flows, and CI gates.
+---
+
+Examples use `npx @xerg/cli`. If you installed the CLI globally, substitute `xerg`.
+
+> Remote SSH, Railway, and `--remote-config` flows are OpenClaw-only in this phase. Hermes support is local-only.
+
+Use this page in order:
+
+- start with the four-command path
+- pick the source type you actually want to inspect
+- copy the exact command block for that workflow
+- come back to the later sections for push, CI, and troubleshooting
+
+## 1. Four-command path
+
+If you only remember four commands, remember these:
+
+```bash
+npx @xerg/cli doctor
+npx @xerg/cli audit
+npx @xerg/cli audit --compare
+npx @xerg/cli audit --push
+```
+
+What they mean:
+
+- `doctor`: checks whether Xerg can see your local source files
+- `audit`: runs the baseline audit
+- `audit --compare`: compares against the newest compatible saved snapshot
+- `audit --push`: sends the resulting summary to the hosted Xerg API
+
+## 2. Command map
+
+| Goal | Command | Use when |
+| --- | --- | --- |
+| Check local readiness | `doctor` | You want to confirm paths and detection before auditing |
+| Run an audit | `audit` | You want spend, waste, opportunities, workflows, and models |
+| Compare before and after | `audit --compare` | You already have a prior compatible cached snapshot |
+| Push a new result immediately | `audit --push` | You want to compute and push in one step |
+| Push a cached result later | `push` | You already ran an audit and want to send the latest saved snapshot |
+| Authenticate in browser | `login` | You want hosted push or other API-backed features |
+| Remove saved credentials | `logout` | You want to clear local auth state |
+
+## 3. Choose the right starting command
+
+Use this quick decision guide:
+
+- Not sure whether Xerg can see your data: `npx @xerg/cli doctor`
+- Ready to run the first local audit: `npx @xerg/cli audit`
+- Want machine-readable output: `npx @xerg/cli audit --json`
+- Want a shareable report: `npx @xerg/cli audit --markdown`
+- Want before/after deltas: `npx @xerg/cli audit --compare`
+- Want to analyze Cursor export data: `npx @xerg/cli audit --cursor-usage-csv <file>`
+- Want to inspect a remote OpenClaw target first: `npx @xerg/cli doctor --remote <host>` or `npx @xerg/cli doctor --railway`
+
+## 4. Pick the source you want to audit
+
+| Source | Best first command | Notes |
+| --- | --- | --- |
+| Local OpenClaw | `npx @xerg/cli doctor --runtime openclaw` | Use this when both local runtimes exist and you want OpenClaw specifically |
+| Local Hermes | `npx @xerg/cli doctor --runtime hermes` | Hermes support is local-only in this phase |
+| Local auto-detect | `npx @xerg/cli doctor` | Best when only one supported local runtime is present |
+| Local Cursor CSV | `npx @xerg/cli doctor --cursor-usage-csv <file>` | Uses exported usage rows instead of runtime logs and transcripts |
+| Remote OpenClaw over SSH | `npx @xerg/cli doctor --remote <user@host>` | Pulls remote files to your machine and analyzes them locally |
+| Remote OpenClaw on Railway | `npx @xerg/cli doctor --railway` | Uses your linked Railway context unless you pass explicit IDs |
+
+## 5. Local runtime basics
+
+Default local detection:
+
+```bash
+npx @xerg/cli doctor
+npx @xerg/cli audit
+```
+
+Force a specific runtime:
+
+```bash
+npx @xerg/cli doctor --runtime openclaw
+npx @xerg/cli doctor --runtime hermes
+npx @xerg/cli audit --runtime openclaw
+npx @xerg/cli audit --runtime hermes
+```
+
+Use `--runtime` when:
+
+- both OpenClaw and Hermes are present locally
+- you want deterministic behavior in automation
+- you are passing explicit local paths and already know the runtime
+
+## 6. Point Xerg at explicit local paths
+
+OpenClaw:
+
+```bash
+npx @xerg/cli doctor --runtime openclaw --log-file /path/to/openclaw.log
+npx @xerg/cli doctor --runtime openclaw --sessions-dir /path/to/sessions
+npx @xerg/cli audit --runtime openclaw --log-file /path/to/openclaw.log
+npx @xerg/cli audit --runtime openclaw --sessions-dir /path/to/sessions
+```
+
+Hermes:
+
+```bash
+npx @xerg/cli doctor --runtime hermes --log-file ~/.hermes/logs/agent.log
+npx @xerg/cli doctor --runtime hermes --sessions-dir ~/.hermes/sessions
+npx @xerg/cli audit --runtime hermes --log-file ~/.hermes/logs/agent.log
+npx @xerg/cli audit --runtime hermes --sessions-dir ~/.hermes/sessions
+```
+
+Useful rule of thumb:
+
+- use `doctor` first when you are not sure the paths are correct
+- use `audit` once `doctor` shows the files you expect
+
+## 7. Analyze a Cursor usage CSV
+
+Inspect the CSV first:
+
+```bash
+npx @xerg/cli doctor --cursor-usage-csv ~/Downloads/usage-events.csv
+```
+
+Run the audit:
+
+```bash
+npx @xerg/cli audit --cursor-usage-csv ~/Downloads/usage-events.csv
+npx @xerg/cli audit --cursor-usage-csv ~/Downloads/usage-events.csv --json
+```
+
+Use this path when you want to analyze Cursor export rows instead of agent logs and session transcripts.
+
+## 8. Output modes
+
+Human-readable terminal report:
+
+```bash
+npx @xerg/cli audit
+```
+
+JSON for automation:
+
+```bash
+npx @xerg/cli audit --json
+```
+
+Markdown for sharing:
+
+```bash
+npx @xerg/cli audit --markdown > xerg-audit.md
+```
+
+Remember:
+
+- `--json` and `--markdown` are mutually exclusive
+- plain `audit` is best for manual inspection
+- `--json` is best for agents and scripts
+
+## 9. Compare and local snapshot storage
+
+Compare against the newest compatible saved audit:
+
+```bash
+npx @xerg/cli audit --compare
+npx @xerg/cli audit --compare --json
+```
+
+Limit the comparison window:
+
+```bash
+npx @xerg/cli audit --since 24h --compare
+npx @xerg/cli audit --since 7d --compare
+npx @xerg/cli audit --since 30m --compare
+```
+
+Use a custom database:
+
+```bash
+npx @xerg/cli audit --db /path/to/xerg.sqlite
+```
+
+Skip local persistence:
+
+```bash
+npx @xerg/cli audit --no-db
+```
+
+Important:
+
+- `--compare` needs saved local snapshots
+- `--compare` and `--no-db` cannot be used together
+
+## 10. Remote OpenClaw audits
+
+### SSH
+
+Inspect first:
+
+```bash
+npx @xerg/cli doctor --remote deploy@prod.example.com
+```
+
+Audit:
+
+```bash
+npx @xerg/cli audit --remote deploy@prod.example.com
+npx @xerg/cli audit --remote deploy@prod.example.com --since 24h
+```
+
+Custom remote paths:
+
+```bash
+npx @xerg/cli doctor \
+  --remote deploy@prod.example.com \
+  --remote-log-file /var/log/openclaw \
+  --remote-sessions-dir /srv/openclaw/sessions
+
+npx @xerg/cli audit \
+  --remote deploy@prod.example.com \
+  --remote-log-file /var/log/openclaw \
+  --remote-sessions-dir /srv/openclaw/sessions
+```
+
+### Railway
+
+Inspect the linked service:
+
+```bash
+npx @xerg/cli doctor --railway
+```
+
+Audit the linked service:
+
+```bash
+npx @xerg/cli audit --railway
+```
+
+Use explicit Railway IDs:
+
+```bash
+npx @xerg/cli doctor \
+  --railway \
+  --project <project-id> \
+  --environment <environment-id> \
+  --service <service-id>
+
+npx @xerg/cli audit \
+  --railway \
+  --project <project-id> \
+  --environment <environment-id> \
+  --service <service-id>
+```
+
+### Multi-source config
+
+Run a multi-source OpenClaw audit:
+
+```bash
+npx @xerg/cli audit --remote-config ~/.xerg/remotes.json
+```
+
+Use this when one command needs to inspect several SSH and Railway sources.
+
+## 11. Push and authentication
+
+Push as part of the audit:
+
+```bash
+npx @xerg/cli audit --push
+```
+
+Preview the exact push payload:
+
+```bash
+npx @xerg/cli audit --push --dry-run
+```
+
+Push the newest cached snapshot later:
+
+```bash
+npx @xerg/cli push
+npx @xerg/cli push --dry-run
+```
+
+Push a saved payload file:
+
+```bash
+npx @xerg/cli push --file ./audit-payload.json
+```
+
+Browser auth:
+
+```bash
+npx @xerg/cli login
+npx @xerg/cli logout
+```
+
+Non-interactive auth:
+
+```bash
+XERG_API_KEY=sk_live_or_test_key npx @xerg/cli audit --push
+```
+
+Useful distinction:
+
+- use `audit --push` when you are computing a fresh audit right now
+- use `push` when you already have a saved audit snapshot and only want to send it
+
+## 12. CI gates and automation
+
+Fail on confirmed waste rate:
+
+```bash
+npx @xerg/cli audit --fail-above-waste-rate 0.30
+```
+
+Fail on confirmed waste dollars:
+
+```bash
+npx @xerg/cli audit --fail-above-waste-usd 50
+```
+
+Push and gate in one command:
+
+```bash
+npx @xerg/cli audit --push --fail-above-waste-rate 0.25
+```
+
+Remote CI gate for OpenClaw:
+
+```bash
+npx @xerg/cli audit --remote deploy@prod.example.com --fail-above-waste-rate 0.20
+```
+
+Exit codes:
+
+| Code | Meaning |
+| --- | --- |
+| `0` | success |
+| `1` | general failure |
+| `2` | no supported local runtime data found |
+| `3` | waste threshold exceeded |
+
+## 13. Troubleshooting shortcuts
+
+Verbose local discovery:
+
+```bash
+npx @xerg/cli doctor --verbose
+```
+
+Force a runtime when local auto-detection is ambiguous:
+
+```bash
+npx @xerg/cli doctor --runtime openclaw
+npx @xerg/cli doctor --runtime hermes
+```
+
+Check a remote target directly:
+
+```bash
+npx @xerg/cli doctor --remote deploy@prod.example.com
+npx @xerg/cli doctor --railway
+```
+
+Check the CLI help:
+
+```bash
+npx @xerg/cli --help
+npx @xerg/cli audit --help
+npx @xerg/cli doctor --help
+```
+
+## 14. Common copy-paste sequences
+
+First local audit:
+
+```bash
+npx @xerg/cli doctor
+npx @xerg/cli audit
+```
+
+Hermes local audit:
+
+```bash
+npx @xerg/cli doctor --runtime hermes
+npx @xerg/cli audit --runtime hermes
+```
+
+Before and after workflow test:
+
+```bash
+npx @xerg/cli audit
+# make one workflow or model change
+npx @xerg/cli audit --compare
+```
+
+Export JSON for an agent:
+
+```bash
+npx @xerg/cli audit --json > xerg-audit.json
+```
+
+Remote OpenClaw audit over SSH:
+
+```bash
+npx @xerg/cli doctor --remote deploy@prod.example.com
+npx @xerg/cli audit --remote deploy@prod.example.com --since 24h
+```
+
+Push into the hosted Xerg workspace:
+
+```bash
+npx @xerg/cli login
+npx @xerg/cli audit --push
+```
+
+## 15. Flag reference
+
+| Flag | Applies to | What it does |
+| --- | --- | --- |
+| `--runtime <openclaw|hermes>` | `doctor`, `audit` | Chooses the local runtime explicitly |
+| `--log-file <path>` | `doctor`, `audit` | Points Xerg at one explicit local gateway log |
+| `--sessions-dir <path>` | `doctor`, `audit` | Points Xerg at one explicit local sessions directory |
+| `--cursor-usage-csv <path>` | `doctor`, `audit` | Uses a local Cursor usage export instead of runtime files |
+| `--since <duration>` | `audit` | Limits the audit window, for example `24h`, `7d`, or `30m` |
+| `--compare` | `audit` | Compares against the newest compatible saved snapshot |
+| `--json` | `audit` | Emits JSON output |
+| `--markdown` | `audit` | Emits Markdown output |
+| `--db <path>` | `audit` | Uses a custom SQLite path for local snapshot storage |
+| `--no-db` | `audit` | Skips local persistence |
+| `--remote <user@host>` | `doctor`, `audit` | Targets an SSH OpenClaw host |
+| `--remote-log-file <path>` | `doctor`, `audit` | Overrides the remote OpenClaw log path |
+| `--remote-sessions-dir <path>` | `doctor`, `audit` | Overrides the remote OpenClaw sessions path |
+| `--remote-config <path>` | `audit` | Runs a multi-source remote OpenClaw audit |
+| `--keep-remote-files` | `audit` | Keeps pulled remote files under `~/.xerg/remote-cache/` |
+| `--railway` | `doctor`, `audit` | Targets a Railway OpenClaw service |
+| `--project <id>` | `doctor`, `audit` | Chooses a Railway project explicitly |
+| `--environment <id>` | `doctor`, `audit` | Chooses a Railway environment explicitly |
+| `--service <id>` | `doctor`, `audit` | Chooses a Railway service explicitly |
+| `--push` | `audit` | Pushes the summary after computing it |
+| `--dry-run` | `audit --push`, `push` | Prints the payload instead of sending it |
+| `--fail-above-waste-rate <n>` | `audit` | Exits `3` when waste rate is above the threshold |
+| `--fail-above-waste-usd <n>` | `audit` | Exits `3` when confirmed waste dollars are above the threshold |
+| `--verbose` | `doctor`, `audit` | Prints progress updates to stderr |
