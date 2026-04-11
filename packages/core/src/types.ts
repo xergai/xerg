@@ -1,5 +1,9 @@
 import type { PushEnvironment } from '@xerg/schemas';
 
+export type AgentRuntime = 'openclaw' | 'hermes';
+
+export type AuditRuntime = AgentRuntime | 'cursor';
+
 export type SourceKind = 'gateway' | 'sessions' | 'cursor-usage-csv';
 
 export type CostSource = 'observed' | 'estimated' | 'unpriced';
@@ -9,6 +13,7 @@ export type FindingClassification = 'waste' | 'opportunity';
 export type FindingConfidence = 'high' | 'medium' | 'low';
 
 export interface AuditOptions {
+  runtime?: AgentRuntime | 'auto';
   logFile?: string;
   sessionsDir?: string;
   cursorUsageCsv?: string;
@@ -23,6 +28,7 @@ export interface AuditOptions {
 
 export interface DetectedSourceFile {
   kind: SourceKind;
+  runtime: AuditRuntime;
   path: string;
   sizeBytes: number;
   mtimeMs: number;
@@ -30,11 +36,14 @@ export interface DetectedSourceFile {
 
 export interface DoctorReport {
   canAudit: boolean;
+  mode: 'resolved' | 'ambiguous' | 'none';
+  runtime: AgentRuntime | null;
   sources: DetectedSourceFile[];
-  defaults: {
+  defaults: Array<{
+    runtime: AgentRuntime;
     gatewayPattern: string;
     sessionsPattern: string;
-  };
+  }>;
   notes: string[];
 }
 
@@ -241,6 +250,7 @@ export interface AuditComparison {
 export interface AuditSummary {
   auditId: string;
   generatedAt: string;
+  runtime: AuditRuntime;
   comparisonKey: string;
   comparison?: AuditComparison | null;
   since?: string;

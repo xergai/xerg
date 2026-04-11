@@ -1,6 +1,6 @@
 # Xerg
 
-Xerg audits OpenClaw workflows in dollars, not tokens. It reads gateway logs and session transcripts, surfaces five spend categories across confirmed waste and savings opportunities, and gives you a concrete first fix to try. Run it again with `--compare` and you can see exactly what changed.
+Xerg audits OpenClaw and Hermes workflows in dollars, not tokens. It reads gateway logs and session transcripts, surfaces five spend categories across confirmed waste and savings opportunities, and gives you a concrete first fix to try. Run it again with `--compare` and you can see exactly what changed.
 
 Everything runs locally by default. The CLI is open source (MIT), published on npm as `@xerg/cli`, and the full source is at [github.com/xergai/xerg](https://github.com/xergai/xerg). No account is required for local audits. No data leaves your machine unless you explicitly `--push` results to the Xerg API for a team dashboard.
 
@@ -35,10 +35,10 @@ xerg audit --compare
 
 ## Works Where Your Agents Run
 
-- Local machine
-- Remote VPS over SSH: `xerg audit --remote user@host`
-- Railway: `xerg audit --railway`
-- Multiple sources: `xerg audit --remote-config ~/.xerg/remotes.json`
+- Local machine: OpenClaw and Hermes
+- Remote VPS over SSH: `xerg audit --remote user@host` for OpenClaw in this phase
+- Railway: `xerg audit --railway` for OpenClaw in this phase
+- Multiple sources: `xerg audit --remote-config ~/.xerg/remotes.json` for OpenClaw sources in this phase
 
 If local defaults are empty, inspect the target directly first with `xerg doctor --remote user@host` or `xerg doctor --railway`.
 

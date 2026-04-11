@@ -1,0 +1,1 @@
+2026-04-09T11:00:00.000Z INFO {"timestamp":"2026-04-09T11:00:00.000Z","event":"gateway.forwarded","session_id":"gateway-only","source":"gateway_bridge","provider":"anthropic","model":"claude-haiku-4-5","token_usage":{"input_tokens":50,"output_tokens":10},"cost":{"total_usd":0.00008},"status":"success"}

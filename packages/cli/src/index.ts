@@ -13,6 +13,7 @@ import { renderAuditHelp, renderDoctorHelp, renderPushHelp, renderRootHelp } fro
 import { getCliVersion } from './version.js';
 
 type AuditCliOptions = {
+  runtime?: 'openclaw' | 'hermes';
   logFile?: string;
   sessionsDir?: string;
   cursorUsageCsv?: string;
@@ -44,6 +45,7 @@ type PushCliOptions = {
 };
 
 type DoctorCliOptions = {
+  runtime?: 'openclaw' | 'hermes';
   logFile?: string;
   sessionsDir?: string;
   cursorUsageCsv?: string;
@@ -138,6 +140,10 @@ function parseAuditOptions(raw: string[]) {
         break;
       case '--log-file':
         options.logFile = readValue(arg, argv[index + 1]);
+        index += 1;
+        break;
+      case '--runtime':
+        options.runtime = readValue(arg, argv[index + 1]) as AuditCliOptions['runtime'];
         index += 1;
         break;
       case '--sessions-dir':
@@ -274,6 +280,10 @@ function parseDoctorOptions(raw: string[]) {
         break;
       case '--log-file':
         options.logFile = readValue(arg, argv[index + 1]);
+        index += 1;
+        break;
+      case '--runtime':
+        options.runtime = readValue(arg, argv[index + 1]) as DoctorCliOptions['runtime'];
         index += 1;
         break;
       case '--sessions-dir':

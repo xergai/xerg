@@ -3,14 +3,14 @@
 exports[`renderRootHelp > keeps the root help output stable 1`] = `
 "xerg 9.9.9
 
-Waste intelligence for OpenClaw workflows and local Cursor usage CSVs.
+Waste intelligence for OpenClaw and Hermes workflows plus local Cursor usage CSVs.
 
 Usage:
   xerg <command> [options]
 
 Commands:
-  audit    Analyze OpenClaw logs or a local Cursor usage CSV.
-  doctor   Inspect OpenClaw sources or a local Cursor usage CSV.
+  audit    Analyze OpenClaw or Hermes logs, or a local Cursor usage CSV.
+  doctor   Inspect OpenClaw or Hermes sources, or a local Cursor usage CSV.
   push     Push a cached audit snapshot to the Xerg API.
   login    Authenticate with the Xerg API via browser.
   logout   Remove stored Xerg API credentials.

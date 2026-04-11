@@ -1,5 +1,5 @@
 import { hostname } from 'node:os';
-import type { AuditSummary, WirePayloadMeta } from '@xergai/core';
+import type { AuditRuntime, AuditSummary, WirePayloadMeta } from '@xergai/core';
 
 import { parseRemoteTarget } from './transport/index.js';
 import type { RemoteSource } from './transport/index.js';
@@ -9,12 +9,14 @@ type PushSourceMeta = Pick<WirePayloadMeta, 'environment' | 'sourceHost' | 'sour
 const RAILWAY_SOURCE_ID = 'OpenClaw - Railway';
 
 export function buildLocalPushSourceMeta(
-  kind: 'cursor' | 'openclaw',
+  kind: AuditRuntime,
   localHost = hostname(),
 ): PushSourceMeta {
+  const productName = kind === 'cursor' ? 'Cursor' : kind === 'hermes' ? 'Hermes' : 'OpenClaw';
+
   return {
     environment: 'local',
-    sourceId: `${kind === 'cursor' ? 'Cursor' : 'OpenClaw'} - ${localHost}`,
+    sourceId: `${productName} - ${localHost}`,
     sourceHost: localHost,
   };
 }
@@ -41,6 +43,10 @@ export function buildCachedPushSourceMeta(
   summary: AuditSummary,
   localHost = hostname(),
 ): PushSourceMeta {
+  if (summary.runtime === 'cursor') {
+    return buildLocalPushSourceMeta('cursor', localHost);
+  }
+
   const sourceFiles = summary.sourceFiles ?? [];
   const comparisonKey = summary.comparisonKey ?? '';
 
@@ -63,6 +69,10 @@ export function buildCachedPushSourceMeta(
       sourceId: `OpenClaw - ${remoteHost}`,
       sourceHost: remoteHost,
     };
+  }
+
+  if (summary.runtime === 'hermes') {
+    return buildLocalPushSourceMeta('hermes', localHost);
   }
 
   return buildLocalPushSourceMeta('openclaw', localHost);

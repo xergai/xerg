@@ -1,13 +1,13 @@
 ---
 name: xerg
-description: Audit OpenClaw workflows in dollars. Local-first audits with compare mode, remote and Railway support, CI gates, and structured recommendations.
+description: Audit OpenClaw and Hermes workflows in dollars. Local-first audits with compare mode, OpenClaw remote support, CI gates, and structured recommendations.
 ---
 
 # Xerg
 
 Use `xerg` if it is already installed. If not, use `npx @xerg/cli` with the same arguments.
 
-Xerg audits OpenClaw workflows in dollars, not tokens. It reads gateway logs and session transcripts, surfaces five spend categories across confirmed waste and savings opportunities, and helps you measure fixes with `--compare`.
+Xerg audits OpenClaw and Hermes workflows in dollars, not tokens. It reads gateway logs and session transcripts, surfaces five spend categories across confirmed waste and savings opportunities, and helps you measure fixes with `--compare`.
 
 Local audits need no account. No data leaves your machine unless you explicitly `--push` results to the Xerg API.
 
@@ -27,6 +27,9 @@ Xerg needs one of these source inputs:
 - Local OpenClaw data at the default paths:
   - `/tmp/openclaw/openclaw-*.log`
   - `~/.openclaw/agents/*/sessions/*.jsonl`
+- Local Hermes data at the default paths:
+  - `~/.hermes/logs/agent.log*` with `gateway.log*` fallback
+  - `~/.hermes/sessions/`
 - Explicit paths via `--log-file` and/or `--sessions-dir`
 - An SSH target via `--remote`
 - A Railway target via `--railway`
@@ -36,8 +39,8 @@ Additional requirements:
 
 - `--compare` needs at least one previously stored compatible local snapshot
 - Pushing needs auth via `XERG_API_KEY`, `~/.xerg/config.json`, or `xerg login`
-- SSH audits require `ssh` and `rsync` on your local `PATH`
-- Railway audits require the `railway` CLI on your local `PATH`
+- SSH audits require `ssh` and `rsync` on your local `PATH` and are OpenClaw-only in this phase
+- Railway audits require the `railway` CLI on your local `PATH` and are OpenClaw-only in this phase
 
 ## Default Flow
 
@@ -57,6 +60,8 @@ xerg doctor --railway
 
 ```bash
 xerg audit
+xerg audit --runtime openclaw
+xerg audit --runtime hermes
 ```
 
 3. Choose the right output mode for the task:
@@ -94,11 +99,15 @@ Local defaults:
 xerg audit
 ```
 
+If both OpenClaw and Hermes are present locally, pass `--runtime openclaw` or `--runtime hermes` explicitly.
+
 Explicit local paths:
 
 ```bash
-xerg audit --log-file /path/to/openclaw.log
-xerg audit --sessions-dir /path/to/sessions
+xerg audit --runtime openclaw --log-file /path/to/openclaw.log
+xerg audit --runtime openclaw --sessions-dir /path/to/sessions
+xerg audit --runtime hermes --log-file ~/.hermes/logs/agent.log
+xerg audit --runtime hermes --sessions-dir ~/.hermes/sessions
 ```
 
 SSH remote:
@@ -166,7 +175,7 @@ Documented exit codes:
 
 - `0` success
 - `1` runtime error
-- `2` no OpenClaw data found
+- `2` no supported local runtime data found
 - `3` threshold exceeded
 
 Automation can branch on those codes instead of scraping terminal output.

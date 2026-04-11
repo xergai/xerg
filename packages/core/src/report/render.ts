@@ -204,29 +204,47 @@ function renderDailyTrendRows(
 
 export function renderDoctorReport(report: DoctorReport, options?: { commandPrefix?: string }) {
   const commandPrefix = options?.commandPrefix ?? 'xerg';
+  const status =
+    report.mode === 'resolved' && report.runtime
+      ? `${report.runtime === 'hermes' ? 'Hermes' : 'OpenClaw'} sources detected.`
+      : report.mode === 'ambiguous'
+        ? 'Multiple supported local runtimes detected.'
+        : 'No supported local sources detected.';
   const nextSteps = report.canAudit
     ? []
-    : [
-        '',
-        '## Next steps',
-        `- Try explicit local paths: ${commandPrefix} doctor --log-file /path/to/openclaw.log --sessions-dir /path/to/sessions`,
-        `- Inspect an SSH host: ${commandPrefix} doctor --remote user@host`,
-        `- Inspect a Railway service: ${commandPrefix} doctor --railway`,
-        '- Remote audits still analyze locally after Xerg pulls the source files to your machine.',
-      ];
+    : report.mode === 'ambiguous'
+      ? [
+          '',
+          '## Next steps',
+          `- Inspect OpenClaw only: ${commandPrefix} doctor --runtime openclaw`,
+          `- Inspect Hermes only: ${commandPrefix} doctor --runtime hermes`,
+          `- Try explicit local paths: ${commandPrefix} doctor --runtime hermes --log-file /path/to/log --sessions-dir /path/to/sessions`,
+        ]
+      : [
+          '',
+          '## Next steps',
+          `- Inspect OpenClaw locally: ${commandPrefix} doctor --runtime openclaw`,
+          `- Inspect Hermes locally: ${commandPrefix} doctor --runtime hermes`,
+          `- Try explicit local paths: ${commandPrefix} doctor --runtime hermes --log-file /path/to/log --sessions-dir /path/to/sessions`,
+          `- Inspect an SSH host for OpenClaw: ${commandPrefix} doctor --remote user@host`,
+          `- Inspect a Railway service for OpenClaw: ${commandPrefix} doctor --railway`,
+          '- Remote audits still analyze locally after Xerg pulls the source files to your machine.',
+        ];
 
   const sections = [
     '# Xerg doctor',
     '',
-    report.canAudit ? 'OpenClaw sources detected.' : 'No OpenClaw sources detected.',
+    status,
     '',
     '## Defaults',
-    `- gateway logs: ${report.defaults.gatewayPattern}`,
-    `- session files: ${report.defaults.sessionsPattern}`,
+    ...report.defaults.flatMap((defaults) => [
+      `- ${defaults.runtime === 'hermes' ? 'Hermes' : 'OpenClaw'} gateway logs: ${defaults.gatewayPattern}`,
+      `- ${defaults.runtime === 'hermes' ? 'Hermes' : 'OpenClaw'} session files: ${defaults.sessionsPattern}`,
+    ]),
     '',
     '## Sources',
     ...(report.sources.length > 0
-      ? report.sources.map((source) => `- [${source.kind}] ${source.path}`)
+      ? report.sources.map((source) => `- [${source.runtime}/${source.kind}] ${source.path}`)
       : ['- none']),
     '',
     '## Notes',

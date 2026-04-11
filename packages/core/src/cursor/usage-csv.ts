@@ -206,6 +206,7 @@ function createDetectedSource(path: string): DetectedSourceFile {
 
     return {
       kind: 'cursor-usage-csv',
+      runtime: 'cursor',
       path: resolvedPath,
       sizeBytes: stats.size,
       mtimeMs: stats.mtimeMs,

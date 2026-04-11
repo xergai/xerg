@@ -1,5 +1,11 @@
 # @xerg/cli
 
+## 0.3.0
+
+### Minor Changes
+
+- Add Hermes as a first-class local runtime alongside OpenClaw, including `--runtime` selection, local auto-detection, runtime-aware compare/push labels, updated bundled skill content, and refreshed docs for local-only Hermes support.
+
 ## 0.2.0
 
 ### Minor Changes

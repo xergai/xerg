@@ -3,7 +3,7 @@ title: Doctor
 description: Check local, SSH, or Railway audit readiness before you run a full Xerg audit.
 ---
 
-`npx @xerg/cli doctor` is the fastest way to confirm that Xerg can see OpenClaw data before you run an audit.
+`npx @xerg/cli doctor` is the fastest way to confirm that Xerg can see local OpenClaw or Hermes data before you run an audit.
 
 Examples use `npx @xerg/cli`. If you installed the CLI globally, substitute `xerg`.
 
@@ -26,9 +26,13 @@ Use `--verbose` when you want progress messages on stderr while doctor is checki
 Use explicit local paths when your data is not in the defaults:
 
 ```bash
-npx @xerg/cli doctor --log-file /path/to/openclaw.log
-npx @xerg/cli doctor --sessions-dir /path/to/sessions
+npx @xerg/cli doctor --runtime openclaw --log-file /path/to/openclaw.log
+npx @xerg/cli doctor --runtime openclaw --sessions-dir /path/to/sessions
+npx @xerg/cli doctor --runtime hermes --log-file ~/.hermes/logs/agent.log
+npx @xerg/cli doctor --runtime hermes --sessions-dir ~/.hermes/sessions
 ```
+
+If both OpenClaw and Hermes are present locally, pass `--runtime openclaw` or `--runtime hermes` so doctor checks the exact runtime you mean.
 
 To inspect a local Cursor usage export instead:
 
@@ -98,9 +102,9 @@ Railway checks these paths by default:
 
 ## When doctor says no data
 
-If doctor cannot find any OpenClaw data:
+If doctor cannot find any local OpenClaw or Hermes data:
 
-- verify that OpenClaw is writing gateway logs and session files
+- verify that your runtime is writing gateway logs and session files
 - pass explicit paths with `--log-file` and `--sessions-dir`
 - run `npx @xerg/cli doctor --remote user@host` to inspect an SSH target directly from your machine
 - run `npx @xerg/cli doctor --railway` to inspect a linked Railway service

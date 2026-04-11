@@ -5,12 +5,12 @@ description: Understand Xerg's local-first audit flow, local snapshot storage, r
 
 ## Local-first design
 
-Xerg runs its analysis locally. The CLI detects OpenClaw source files, normalizes them into runs and calls, computes spend, generates findings, and renders the report on your machine.
+Xerg runs its analysis locally. The CLI detects OpenClaw or Hermes source files, normalizes them into runs and calls, computes spend, generates findings, and renders the report on your machine.
 
 ## Local audit flow
 
 ```text
-OpenClaw gateway logs + session transcripts
+OpenClaw or Hermes gateway logs + session transcripts
   -> xerg audit
   -> terminal, JSON, or Markdown report
   -> optional local SQLite snapshot for compare and push
@@ -18,7 +18,7 @@ OpenClaw gateway logs + session transcripts
 
 At a high level, Xerg does this:
 
-1. Detect OpenClaw source files from defaults or explicit paths.
+1. Detect OpenClaw or Hermes source files from defaults or explicit paths.
 2. Normalize raw data into runs and model calls.
 3. Use observed cost where available and estimate missing cost from the pricing catalog when possible.
 4. Build findings and recommendation candidates.
@@ -37,9 +37,9 @@ Remote audits still analyze locally. Xerg first pulls telemetry files from the t
 
 Supported transports:
 
-- SSH
-- Railway
-- multi-source config via `--remote-config`
+- SSH for OpenClaw in this phase
+- Railway for OpenClaw in this phase
+- multi-source config via `--remote-config` for OpenClaw sources in this phase
 
 For SSH, Xerg prefers `rsync` and falls back to `tar` over SSH if needed. For Railway, it uses the `railway` CLI and handles PTY-safe transfer internally.
 

@@ -9,7 +9,8 @@ Examples use `npx @xerg/cli`. If you installed the CLI globally, substitute `xer
 
 | Symptom | What it means | What to do |
 | --- | --- | --- |
-| `No OpenClaw sources were detected...` or exit code `2` | Xerg could not find any local or pulled OpenClaw data. | Run `npx @xerg/cli doctor`, then pass `--log-file` and `--sessions-dir` as needed, or inspect SSH or Railway sources directly. |
+| `No ... sources were detected...` or exit code `2` | Xerg could not find any supported local runtime data, or any pulled OpenClaw data. | Run `npx @xerg/cli doctor`, then pass `--runtime`, `--log-file`, and `--sessions-dir` as needed, or inspect SSH or Railway sources directly for OpenClaw. |
+| `Could not determine whether the provided local files belong to OpenClaw or Hermes` | The explicit local paths look plausible for more than one supported runtime. | Re-run with `--runtime openclaw` or `--runtime hermes` so Xerg knows which parser to use. |
 | `The --compare flag needs local snapshot history...` | You used `--compare` with `--no-db`. | Remove `--no-db` or use `--db <path>` so Xerg has a local snapshot store. |
 | `No prior comparable audit was found...` in notes | Xerg completed, but no compatible baseline exists yet. | Re-run the same audit after your next change. |
 | Install fails around `better-sqlite3` | The native dependency could not build for the current environment. | Use Node 22 or 24 and install standard native build tooling for your platform. |

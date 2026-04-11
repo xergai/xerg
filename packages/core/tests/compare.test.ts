@@ -56,60 +56,84 @@ describe('comparison key derivation', () => {
   it('treats the same gateway directory and since window as comparable', () => {
     const first: DetectedSourceFile = {
       kind: 'gateway',
+      runtime: 'openclaw',
       path: '/tmp/openclaw/openclaw-2026-03-06.log',
       sizeBytes: 1,
       mtimeMs: 1,
     };
     const second: DetectedSourceFile = {
       kind: 'gateway',
+      runtime: 'openclaw',
       path: '/tmp/openclaw/openclaw-2026-03-07.log',
       sizeBytes: 1,
       mtimeMs: 2,
     };
 
-    expect(buildComparisonKey({ sources: [first], since: '24h' })).toBe(
-      buildComparisonKey({ sources: [second], since: '24H' }),
+    expect(buildComparisonKey({ runtime: 'openclaw', sources: [first], since: '24h' })).toBe(
+      buildComparisonKey({ runtime: 'openclaw', sources: [second], since: '24H' }),
     );
   });
 
   it('treats different gateway directories as incompatible', () => {
     const first: DetectedSourceFile = {
       kind: 'gateway',
+      runtime: 'openclaw',
       path: '/tmp/openclaw-a/openclaw-2026-03-06.log',
       sizeBytes: 1,
       mtimeMs: 1,
     };
     const second: DetectedSourceFile = {
       kind: 'gateway',
+      runtime: 'openclaw',
       path: '/tmp/openclaw-b/openclaw-2026-03-06.log',
       sizeBytes: 1,
       mtimeMs: 1,
     };
 
-    expect(buildComparisonKey({ sources: [first], since: '24h' })).not.toBe(
-      buildComparisonKey({ sources: [second], since: '24h' }),
+    expect(buildComparisonKey({ runtime: 'openclaw', sources: [first], since: '24h' })).not.toBe(
+      buildComparisonKey({ runtime: 'openclaw', sources: [second], since: '24h' }),
     );
   });
 
   it('treats the same sessions root as comparable and different since windows as incompatible', () => {
     const first: DetectedSourceFile = {
       kind: 'sessions',
+      runtime: 'openclaw',
       path: '/Users/test/.openclaw/agents/agent-a/sessions/2026-03-06-1.jsonl',
       sizeBytes: 1,
       mtimeMs: 1,
     };
     const second: DetectedSourceFile = {
       kind: 'sessions',
+      runtime: 'openclaw',
       path: '/Users/test/.openclaw/agents/agent-a/sessions/2026-03-06-2.jsonl',
       sizeBytes: 1,
       mtimeMs: 2,
     };
 
-    expect(buildComparisonKey({ sources: [first], since: '7d' })).toBe(
-      buildComparisonKey({ sources: [second], since: '7d' }),
+    expect(buildComparisonKey({ runtime: 'openclaw', sources: [first], since: '7d' })).toBe(
+      buildComparisonKey({ runtime: 'openclaw', sources: [second], since: '7d' }),
     );
-    expect(buildComparisonKey({ sources: [first], since: '7d' })).not.toBe(
-      buildComparisonKey({ sources: [second], since: '24h' }),
+    expect(buildComparisonKey({ runtime: 'openclaw', sources: [first], since: '7d' })).not.toBe(
+      buildComparisonKey({ runtime: 'openclaw', sources: [second], since: '24h' }),
+    );
+  });
+
+  it('treats different runtimes as incompatible even when the roots match', () => {
+    const source: DetectedSourceFile = {
+      kind: 'gateway',
+      runtime: 'openclaw',
+      path: '/tmp/shared/openclaw.log',
+      sizeBytes: 1,
+      mtimeMs: 1,
+    };
+
+    expect(buildComparisonKey({ runtime: 'openclaw', sources: [source], since: '24h' })).not.toBe(
+      buildComparisonKey({
+        runtime: 'hermes',
+        sources: [{ ...source, runtime: 'hermes' }],
+        since: '24h',
+      }),
     );
   });
 });

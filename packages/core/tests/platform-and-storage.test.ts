@@ -90,6 +90,68 @@ describe('stored audit snapshots', () => {
       stderrWrite.mockRestore();
     }
   });
+
+  it('backfills runtime metadata for older stored summaries', () => {
+    const tempDir = createTempDir();
+    const dbPath = join(tempDir, 'xerg.sqlite');
+    const { sqlite } = createDb(dbPath);
+    sqlite
+      .prepare(
+        `
+          INSERT INTO audit_snapshots (
+            id,
+            created_at,
+            summary_json
+          ) VALUES (?, ?, ?)
+        `,
+      )
+      .run(
+        'legacy-audit',
+        '2026-03-01T00:00:00.000Z',
+        JSON.stringify({
+          auditId: 'legacy-audit',
+          generatedAt: '2026-03-01T00:00:00.000Z',
+          comparisonKey: 'legacy-key',
+          comparison: null,
+          since: undefined,
+          runCount: 1,
+          callCount: 1,
+          totalSpendUsd: 1,
+          observedSpendUsd: 1,
+          estimatedSpendUsd: 0,
+          wasteSpendUsd: 0,
+          opportunitySpendUsd: 0,
+          structuralWasteRate: 0,
+          wasteByKind: [],
+          opportunityByKind: [],
+          spendByWorkflow: [],
+          spendByModel: [],
+          spendByDay: [],
+          wasteByDay: [],
+          findings: [],
+          notes: [],
+          sourceFiles: [
+            {
+              kind: 'gateway',
+              path: '/tmp/openclaw/openclaw-2026-03-06.log',
+              sizeBytes: 123,
+              mtimeMs: 456,
+            },
+          ],
+          pricingCoverage: null,
+          cursorUsage: null,
+          dbPath: undefined,
+        }),
+      );
+    sqlite.close();
+
+    const summaries = listStoredAuditSummaries(dbPath);
+
+    expect(summaries).toHaveLength(1);
+    expect(summaries[0].runtime).toBe('openclaw');
+    expect(summaries[0].sourceFiles[0]?.runtime).toBe('openclaw');
+    expect(summaries[0].comparisonKey).not.toBe('legacy-key');
+  });
 });
 
 function restoreEnv(key: string, value: string | undefined) {
