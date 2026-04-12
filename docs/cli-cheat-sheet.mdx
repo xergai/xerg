@@ -32,6 +32,16 @@ What they mean:
 - `audit --compare`: compares against the newest compatible saved snapshot
 - `audit --push`: sends the resulting summary to the hosted Xerg API
 
+Quick utility commands:
+
+```bash
+npx @xerg/cli --help
+npx @xerg/cli --version
+npx @xerg/cli -v
+```
+
+Use these when you want the top-level command list or just the installed CLI version.
+
 ## 2. Command map
 
 | Goal | Command | Use when |
@@ -443,6 +453,9 @@ npx @xerg/cli audit --push
 | `--service [id]` | `doctor`, `audit` | Chooses a Railway service explicitly |
 | `--push` | `audit` | Pushes the summary after computing it |
 | `--dry-run` | `audit --push`, `push` | Prints the payload instead of sending it |
+| `--file [path]` | `push` | Pushes one saved payload file instead of the most recent cached audit |
 | `--fail-above-waste-rate [n]` | `audit` | Exits `3` when waste rate is above the threshold |
 | `--fail-above-waste-usd [n]` | `audit` | Exits `3` when confirmed waste dollars are above the threshold |
 | `--verbose` | `doctor`, `audit` | Prints progress updates to stderr |
+| `-h`, `--help` | root, `doctor`, `audit`, `push` | Prints help for the selected command |
+| `-v`, `--version` | root | Prints the installed CLI version |
