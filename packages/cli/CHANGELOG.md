@@ -1,5 +1,11 @@
 # @xerg/cli
 
+## 0.4.0
+
+### Minor Changes
+
+- Add an init-first onboarding flow with new `init`, `connect`, and `mcp-setup` commands, reuse shared auth resolution across local and hosted follow-up, and refresh docs and bundled skill messaging around free local audits plus optional hosted setup.
+
 ## 0.3.0
 
 ### Minor Changes

@@ -1,6 +1,6 @@
 {
   "name": "@xerg/schemas",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Versioned TypeScript wire types for Xerg audit payloads, daily rollups, findings, comparisons, and recommendations.",
   "keywords": [
     "xerg",
