@@ -1,13 +1,30 @@
 ---
 title: Authentication and push
-description: Authenticate to the Xerg API, push audit summaries, and understand how hosted Pro features use workspace API keys.
+description: Use connect for the guided hosted path, push explicit audit summaries when you want to, and keep local auditing separate from paid hosted features.
 ---
 
-Use `--push` when you want the audit summary sent as part of the same command that computed it. Use `xerg push` when you want to send the most recent cached snapshot later.
+Use `connect` when you want the guided hosted path after the first local audit. Use `audit --push` or `xerg push` when you want explicit push behavior.
 
-> Hosted features such as the dashboard, Ask Xerg, and the hosted MCP server require a Pro or Enterprise workspace.
+> Local audits and compare are free. Hosted features such as the dashboard, Ask Xerg, and the hosted MCP server require a Pro or Enterprise workspace.
 
-## Recommended flow
+## Recommended hosted flow
+
+After your first local audit:
+
+```bash
+npx @xerg/cli connect
+```
+
+`connect`:
+
+- reuses auth from `XERG_API_KEY`, `~/.xerg/config.json`, or stored browser credentials when available
+- prompts before browser login when auth is missing
+- offers to push the latest cached audit, or the in-memory audit when called from `init`
+- stays non-interactive when auth is already configured and no prompt is needed
+
+You can skip it and keep using Xerg locally.
+
+## Explicit push flows
 
 Push immediately after computing an audit:
 
@@ -71,7 +88,7 @@ The same workspace API key can be used for hosted MCP access. See [hosted MCP](/
 
 ## Browser login
 
-Start the device flow:
+Start the device flow directly when you want browser auth without the hosted push prompt:
 
 ```bash
 npx @xerg/cli login
@@ -109,9 +126,10 @@ Use hosted MCP when you want a remote MCP client to read hosted audit history, t
 
 A common sequence is:
 
-1. run `xerg audit --push`
-2. verify the hosted audit in the dashboard
-3. connect a remote client to [hosted MCP](/hosted-mcp)
+1. run `xerg init` or `xerg audit`
+2. run `xerg connect`
+3. verify the hosted audit in the dashboard
+4. run `xerg mcp-setup` or connect a remote client to [hosted MCP](/hosted-mcp)
 
 ## Important gotchas
 
@@ -119,3 +137,4 @@ A common sequence is:
 - If you used `xerg audit --db /custom/path`, push immediately with `xerg audit --push`, or export the payload and use `xerg push --file`.
 - `--dry-run` on `xerg audit` requires `--push`.
 - If hosted MCP returns empty audit results, push an audit first so the workspace has hosted data to query.
+- If you authenticated with a stored browser login and hosted MCP still needs a workspace API key, create one in the dashboard and set `XERG_API_KEY`.

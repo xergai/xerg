@@ -1,6 +1,6 @@
 ---
 title: Installation
-description: Install and run the Xerg CLI, understand supported runtimes, and know what local dependencies it needs.
+description: Install and run the Xerg CLI, know the supported runtimes, and start with init or direct audit commands.
 ---
 
 ## Supported Node runtime
@@ -17,16 +17,21 @@ description: Install and run the Xerg CLI, understand supported runtimes, and kn
 ## Run without a global install
 
 ```bash
-npx @xerg/cli doctor
-npx @xerg/cli audit
+npx @xerg/cli@latest init
+```
+
+Direct commands remain available when you want explicit control:
+
+```bash
+npx @xerg/cli@latest doctor
+npx @xerg/cli@latest audit
 ```
 
 ## Install globally
 
 ```bash
 npm install -g @xerg/cli
-xerg doctor
-xerg audit
+xerg init
 ```
 
 ## Native dependency note
@@ -35,7 +40,18 @@ xerg audit
 
 - make sure you are on Node 22 or 24
 - retry after installing normal native build tooling for your platform
-- run `npx @xerg/cli doctor` once the install succeeds to confirm the package is working
+- run `npx @xerg/cli init` once the install succeeds to confirm the package is working
+
+## First-run defaults
+
+`xerg init` is the default first-run path in v1. It is interactive and best when you want the fastest local result.
+
+Use direct `doctor` / `audit` commands when:
+
+- you need non-interactive behavior
+- you want JSON or Markdown output immediately
+- you want to script specific runtime or path flags
+- you want remote OpenClaw audits directly
 
 ## Develop from this repo
 

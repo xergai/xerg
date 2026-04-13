@@ -4,12 +4,23 @@ import { styleText } from 'node:util';
 
 import { formatCommand, resolveCommandDisplay } from './command-display.js';
 import { runAuditCommand } from './commands/audit.js';
+import { runConnectCommand } from './commands/connect.js';
 import { runDoctorCommand } from './commands/doctor.js';
+import { runInitCommand } from './commands/init.js';
 import { runLoginCommand } from './commands/login.js';
 import { runLogoutCommand } from './commands/logout.js';
+import { runMcpSetupCommand } from './commands/mcp-setup.js';
 import { runPushCommand } from './commands/push.js';
 import { NoDataError } from './errors.js';
-import { renderAuditHelp, renderDoctorHelp, renderPushHelp, renderRootHelp } from './help.js';
+import {
+  renderAuditHelp,
+  renderConnectHelp,
+  renderDoctorHelp,
+  renderInitHelp,
+  renderMcpSetupHelp,
+  renderPushHelp,
+  renderRootHelp,
+} from './help.js';
 import { getCliVersion } from './version.js';
 
 type AuditCliOptions = {
@@ -95,6 +106,12 @@ async function run() {
     return;
   }
 
+  if (command === 'init') {
+    parseBareCommandOptions(argv.slice(1), renderInitHelp(commandDisplay.prefix), 'init');
+    await runInitCommand();
+    return;
+  }
+
   if (command === 'doctor') {
     const options = parseDoctorOptions(argv.slice(1));
     await runDoctorCommand({
@@ -110,6 +127,12 @@ async function run() {
     return;
   }
 
+  if (command === 'connect') {
+    parseBareCommandOptions(argv.slice(1), renderConnectHelp(commandDisplay.prefix), 'connect');
+    await runConnectCommand();
+    return;
+  }
+
   if (command === 'login') {
     await runLoginCommand();
     return;
@@ -120,9 +143,33 @@ async function run() {
     return;
   }
 
+  if (command === 'mcp-setup') {
+    parseBareCommandOptions(argv.slice(1), renderMcpSetupHelp(commandDisplay.prefix), 'mcp-setup');
+    await runMcpSetupCommand();
+    return;
+  }
+
   throw new Error(
     `Unknown command "${command}". Run \`${formatCommand('--help', commandDisplay.prefix)}\` to see available commands.`,
   );
+}
+
+function parseBareCommandOptions(raw: string[], helpText: string, commandName: string) {
+  const argv = expandEqualsArgs(raw);
+
+  for (const arg of argv) {
+    switch (arg) {
+      case '--help':
+      case '-h':
+        process.stdout.write(helpText);
+        process.exit(0);
+        break;
+      default:
+        throw new Error(
+          `Unknown ${commandName} option "${arg}". Run \`${formatCommand([commandName, '--help'], commandDisplay.prefix)}\` for usage.`,
+        );
+    }
+  }
 }
 
 function parseAuditOptions(raw: string[]) {

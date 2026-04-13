@@ -1,31 +1,33 @@
 ---
 title: Quickstart
-description: Run your first local Xerg audit, make one change, and compare before and after results.
+description: Use the init-first local path, compare the next run, and only opt into hosted follow-up if you want it.
 ---
 
 If you install `@xerg/cli` globally, replace `npx @xerg/cli` with `xerg`.
 
-## 1. Check that Xerg can see your local agent data
+## 1. Run the default first-run flow
 
 ```bash
-npx @xerg/cli doctor
+npx @xerg/cli@latest init
 ```
 
-Doctor reports whether Xerg can see gateway logs and session transcripts from the default OpenClaw or Hermes paths.
+`init` is interactive in v1. It:
 
-If both local runtimes are present, rerun with `--runtime openclaw` or `--runtime hermes`.
+- checks local OpenClaw and Hermes defaults
+- asks you to choose the runtime when both are detected
+- runs the first audit and stores the local snapshot
+- prints the normal terminal summary
+- offers optional hosted follow-up after the audit succeeds
 
-## 2. Run the first audit
+If no local data is found, `init` prints the default paths it checked plus the next-step commands for:
 
-```bash
-npx @xerg/cli audit
-```
+- explicit local paths
+- `npx @xerg/cli audit --remote user@host`
+- `npx @xerg/cli audit --railway`
 
-This prints a terminal summary with total spend, structural waste, opportunities, top workflows, and top models.
+Remote SSH and Railway guidance remain OpenClaw-only in this phase.
 
-By default, Xerg also stores a local snapshot so later runs can use `--compare`.
-
-## 3. Make one workflow or model change, then compare
+## 2. Make one workflow or model change, then compare
 
 ```bash
 npx @xerg/cli audit --compare
@@ -34,6 +36,19 @@ npx @xerg/cli audit --compare
 `--compare` looks for the newest compatible cached snapshot on your machine and adds before and after deltas.
 
 If no compatible baseline exists yet, Xerg does not fail. It adds a note telling you to run the same audit again after a fix.
+
+## 3. Use direct commands when you want explicit control
+
+Use the direct flows instead of `init` when you need non-interactive behavior, CI gates, or a specific output mode immediately:
+
+```bash
+npx @xerg/cli doctor
+npx @xerg/cli audit
+npx @xerg/cli audit --json
+npx @xerg/cli audit --markdown
+```
+
+If both local runtimes are present, add `--runtime openclaw` or `--runtime hermes`.
 
 ## 4. Export or automate
 
@@ -55,16 +70,29 @@ Fail CI if confirmed waste is too high:
 npx @xerg/cli audit --fail-above-waste-rate 0.30
 ```
 
-Push an audit summary to the Xerg API:
+Push an audit summary to the Xerg API explicitly:
 
 ```bash
 npx @xerg/cli audit --push
 ```
 
-If you have Xerg Pro or Enterprise, that push makes the audit available to hosted features such as the dashboard and the [hosted MCP server](/hosted-mcp).
+## 5. Optional hosted follow-up
+
+If you have Xerg Pro or Enterprise and want hosted features after the first local result:
+
+```bash
+npx @xerg/cli connect
+npx @xerg/cli mcp-setup
+```
+
+- `connect` reuses existing auth when present, or starts browser login and offers to push the latest audit
+- `mcp-setup` prints or writes hosted MCP config for Cursor, Claude Code, or another client
+
+You can skip both and keep using Xerg locally.
 
 ## Common next steps
 
+- Use [init](/init) when you want the exact first-run behavior documented command-by-command.
 - Use [audit](/audit) to learn the full command surface.
 - Use [remote audits](/remote-audits) if OpenClaw is running on SSH or Railway.
 - Use [compare](/compare) if you want to understand how snapshot compatibility works.

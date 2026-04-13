@@ -1,0 +1,89 @@
+---
+title: Init
+description: Use xerg init for the first local audit, understand what it detects, and know when to switch to direct commands.
+---
+
+`xerg init` is the default first-run path for the CLI.
+
+> `init` is interactive in v1. Use direct `doctor` / `audit` commands when you need non-interactive behavior or explicit flags immediately.
+
+## What `xerg init` does
+
+Run:
+
+```bash
+npx @xerg/cli@latest init
+```
+
+`init`:
+
+- checks the local OpenClaw and Hermes defaults
+- auto-selects the only detected runtime or asks you to choose when both are present
+- runs the first audit with local snapshot persistence enabled
+- prints the normal terminal summary
+- tells you to use `audit --compare` after the next fix
+- offers optional hosted follow-up with `connect` and `mcp-setup`
+
+## Supported local runtimes
+
+`init` only covers local OpenClaw and local Hermes detection.
+
+Current defaults:
+
+- OpenClaw gateway logs: `/tmp/openclaw/openclaw-*.log`
+- OpenClaw session transcripts: `~/.openclaw/agents/*/sessions/*.jsonl`
+- Hermes logs: `~/.hermes/logs/agent.log*` with `gateway.log*` fallback
+- Hermes session transcripts: `~/.hermes/sessions/`
+
+Cursor usage CSVs remain a direct `doctor` / `audit --cursor-usage-csv` workflow rather than part of `init`.
+
+## When to use `init` versus `audit`
+
+Use `init` when:
+
+- you are onboarding for the first time
+- you want the CLI to choose between detected local runtimes
+- you want a guided path from first audit to optional hosted setup
+
+Use `audit` directly when:
+
+- you need non-interactive behavior
+- you already know the runtime
+- you want JSON, Markdown, CI gates, or explicit path flags immediately
+- you want remote OpenClaw audits over SSH or Railway
+
+Examples:
+
+```bash
+npx @xerg/cli audit --runtime openclaw
+npx @xerg/cli audit --runtime hermes --json
+npx @xerg/cli audit --remote user@host
+npx @xerg/cli audit --railway
+```
+
+## What happens when no local data is found
+
+`init` does not guess. It prints:
+
+- the default local paths it checked
+- explicit local-path commands for OpenClaw and Hermes
+- remote OpenClaw-only next steps:
+  - `npx @xerg/cli audit --remote user@host`
+  - `npx @xerg/cli audit --railway`
+
+Remote SSH and Railway guidance remain OpenClaw-only in this phase.
+
+## What happens after a successful audit
+
+After the first audit, `init` tells you to re-run:
+
+```bash
+npx @xerg/cli audit --compare
+```
+
+Then it offers optional hosted follow-up:
+
+- `connect` for authentication and pushing the latest audit
+- `mcp-setup` for generating hosted MCP config for Cursor, Claude Code, or another client
+
+Hosted follow-up is optional. Local audits and compare remain available if you skip it.

@@ -1,23 +1,30 @@
 ---
 name: xerg
-description: Audit OpenClaw and Hermes workflows in dollars. Local-first audits with compare mode, OpenClaw remote support, CI gates, and structured recommendations.
+description: Audit OpenClaw and Hermes workflows in dollars. Local-first audits with init, compare mode, OpenClaw remote support, CI gates, and optional hosted follow-up.
 ---
 
 # Xerg
 
 Use `xerg` if it is already installed. If not, use `npx @xerg/cli` with the same arguments.
 
-Xerg audits OpenClaw and Hermes workflows in dollars, not tokens. It reads gateway logs and session transcripts, surfaces five spend categories across confirmed waste and savings opportunities, and helps you measure fixes with `--compare`.
+Xerg audits OpenClaw and Hermes workflows in dollars, not tokens. It reads gateway logs and session transcripts, surfaces confirmed waste plus savings opportunities, and helps you measure fixes with `--compare`.
 
-Local audits need no account. No data leaves your machine unless you explicitly `--push` results to the Xerg API.
+Local audits need no account. Hosted sync and hosted MCP are optional paid workspace features. No data leaves your machine unless you explicitly push results to Xerg Cloud.
 
 ## Quick Start
 
 ```bash
-xerg doctor
-xerg doctor --verbose
-xerg audit
+xerg init
 xerg audit --compare
+```
+
+Use direct commands when you need explicit control, non-interactive behavior, JSON output, or CI gates:
+
+```bash
+xerg doctor
+xerg audit
+xerg audit --json
+xerg audit --fail-above-waste-rate 0.30
 ```
 
 ## Inputs
@@ -38,13 +45,24 @@ Xerg needs one of these source inputs:
 Additional requirements:
 
 - `--compare` needs at least one previously stored compatible local snapshot
-- Pushing needs auth via `XERG_API_KEY`, `~/.xerg/config.json`, or `xerg login`
+- Pushing needs auth via `XERG_API_KEY`, `~/.xerg/config.json`, or browser credentials from `xerg login`
 - SSH audits require `ssh` and `rsync` on your local `PATH` and are OpenClaw-only in this phase
 - Railway audits require the `railway` CLI on your local `PATH` and are OpenClaw-only in this phase
 
 ## Default Flow
 
-1. Detect sources first when paths or connectivity are uncertain:
+1. Start with the default first-run path when you want the fastest local result:
+
+```bash
+xerg init
+```
+
+- `init` detects local OpenClaw or Hermes data
+- it runs a first audit with local snapshot persistence enabled
+- it offers optional hosted follow-up after the audit completes
+- if no local data is found, it prints explicit local-path commands plus remote OpenClaw-only guidance
+
+2. Detect sources directly when paths or connectivity are uncertain:
 
 ```bash
 xerg doctor
@@ -56,7 +74,7 @@ xerg doctor --railway
 - `xerg doctor --verbose` shows progress on stderr while Xerg checks local paths or remote transports
 - If local defaults are empty, prefer `xerg doctor --remote ...` or `xerg doctor --railway` instead of guessing paths
 
-2. Run a baseline audit:
+3. Run a baseline audit explicitly when you want direct control:
 
 ```bash
 xerg audit
@@ -64,7 +82,7 @@ xerg audit --runtime openclaw
 xerg audit --runtime hermes
 ```
 
-3. Choose the right output mode for the task:
+4. Choose the right output mode for the task:
 
 ```bash
 xerg audit
@@ -76,20 +94,26 @@ xerg audit --markdown
 - `xerg audit --json` is best for automation and agents
 - `xerg audit --markdown` is best for a shareable report
 
-4. After a workflow or model change, measure the delta:
+5. After a workflow or model change, measure the delta:
 
 ```bash
 xerg audit --compare
 xerg audit --compare --json
 ```
 
-5. Export or push only when needed:
+6. Export, push, or hosted-setup only when needed:
 
 ```bash
 xerg audit --markdown > xerg-audit.md
+xerg connect
+xerg mcp-setup
 xerg audit --push
 xerg push
 ```
+
+- `connect` is the guided hosted path: it reuses existing auth, prompts before browser login when needed, and offers to push the latest audit
+- `mcp-setup` prints or writes hosted MCP config for Cursor, Claude Code, or another client
+- local audits and compare remain available if you skip hosted setup
 
 ## Source Selection
 
@@ -211,6 +235,6 @@ Before finalizing work that used Xerg:
 - `--compare` and `--no-db` cannot be used together
 - Xerg is local-first: it stores economic metadata and audit snapshots locally, not prompt or response content
 - `XERG_API_KEY` is recommended for CI and non-interactive automation
-- If browser auth is needed locally, use `xerg login`; remove stored credentials with `xerg logout`
+- If browser auth is needed without the hosted setup flow, use `xerg login`; remove stored credentials with `xerg logout`
 - Pilot: [xerg.ai/pilot](https://xerg.ai/pilot)
 - Support: `query@xerg.ai`

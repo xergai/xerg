@@ -22,7 +22,7 @@
       {
         "group": "Get started",
         "root": "index",
-        "pages": ["quickstart", "installation", "doctor", "cli-cheat-sheet"]
+        "pages": ["quickstart", "init", "installation", "doctor", "cli-cheat-sheet"]
       },
       {
         "group": "Concepts",

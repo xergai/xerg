@@ -1,27 +1,42 @@
 # xerg
 
-Audit OpenClaw and Hermes workflows in dollars, compare fixes, and export daily spend and waste trends.
+Audit OpenClaw and Hermes workflows in dollars, compare fixes, and optionally connect hosted follow-up after the first local result.
 
-Xerg audits OpenClaw and Hermes workflows in dollars, not tokens. It reads local gateway logs and session transcripts, surfaces daily spend and waste rollups plus the highest-leverage findings, and lets you re-run the same audit with `--compare` so you can see exactly what changed after a fix.
+Xerg runs locally by default. Local audits and `--compare` are free. No account is required for local value, and no data leaves your machine unless you explicitly push results to Xerg Cloud.
 
-Everything runs locally by default. No account is required for local audits. No data leaves your machine unless you explicitly `--push` results to the Xerg API for a team dashboard.
-
-## 30-second quick start
+## Fastest first run
 
 ```bash
-npx @xerg/cli doctor
-npx @xerg/cli doctor --verbose
-npx @xerg/cli audit
-npx @xerg/cli audit --compare
+npx @xerg/cli@latest init
 ```
+
+`init` is the default first-run path. It:
+
+- detects local OpenClaw or Hermes data
+- runs a first audit and stores the local snapshot
+- prints the standard terminal summary
+- offers optional hosted follow-up with `connect` and `mcp-setup`
 
 Prefer a global install?
 
 ```bash
 npm install -g @xerg/cli
-xerg doctor
-xerg audit
+xerg init
 ```
+
+## Direct commands for explicit control
+
+If you already know what you want, skip `init` and use the direct flows:
+
+```bash
+npx @xerg/cli doctor
+npx @xerg/cli audit
+npx @xerg/cli audit --compare
+npx @xerg/cli audit --json
+npx @xerg/cli audit --markdown
+```
+
+Use these when you need non-interactive behavior, CI gates, JSON/Markdown output, or explicit runtime and path flags.
 
 ## Bundled skill
 
@@ -63,30 +78,23 @@ First savings test
 - Move heartbeat_monitor from Claude Opus to Sonnet
 ```
 
-## Commands
-
-- Inspect local audit readiness:
+## Common commands
 
 ```bash
-xerg doctor
-```
-
-- Run the first audit:
-
-```bash
-xerg audit
-```
-
-- Compare the latest run against the newest compatible prior local snapshot:
-
-```bash
+xerg init
 xerg audit --compare
+xerg connect
+xerg mcp-setup
 ```
 
-- Audit a specific window:
+More explicit examples:
 
 ```bash
+xerg doctor --runtime openclaw
+xerg audit --runtime hermes
 xerg audit --since 24h --compare
+xerg audit --push
+xerg push
 ```
 
 ## Works where your agent data lives
@@ -121,14 +129,26 @@ xerg audit --runtime hermes --sessions-dir ~/.hermes/sessions
 
 If only one supported local runtime is present, Xerg auto-selects it. If both OpenClaw and Hermes are present locally, rerun with `--runtime openclaw` or `--runtime hermes`.
 
-If your local machine has no OpenClaw or Hermes files, inspect remote targets directly instead:
+If local defaults are empty, `xerg init` prints next-step commands for explicit local paths plus remote OpenClaw-only flows:
 
 ```bash
-xerg doctor --remote user@host
-xerg doctor --railway
+xerg audit --remote user@host
+xerg audit --railway
 ```
 
-Remote SSH and Railway flows are still OpenClaw-only.
+## Hosted follow-up
+
+Hosted sync and hosted MCP are optional paid workspace features. The simplest hosted path is:
+
+```bash
+xerg connect
+xerg mcp-setup
+```
+
+- `connect` resolves auth from `XERG_API_KEY`, `~/.xerg/config.json`, or stored browser credentials, then offers to push the latest audit
+- `mcp-setup` prints or writes hosted MCP config for Cursor, Claude Code, or another client
+
+You can skip both and keep using local audits and compare.
 
 ## Authentication and config
 
@@ -136,7 +156,7 @@ Push commands resolve credentials in this order:
 
 1. `XERG_API_KEY`
 2. `~/.xerg/config.json`
-3. `xerg login` browser credentials stored at `~/.config/xerg/credentials.json`
+3. stored browser credentials from `xerg login` at `~/.config/xerg/credentials.json`
 
 Optional API URL overrides:
 
@@ -152,7 +172,9 @@ Example `~/.xerg/config.json`:
 }
 ```
 
-`xerg login` stores a browser-issued token in `~/.config/xerg/credentials.json`. That token store is separate from `~/.xerg/config.json`.
+`xerg connect` is the guided hosted path. `xerg login` remains available when you want browser auth without the push prompt.
+
+`xerg login` stores a browser-issued token in `~/.config/xerg/credentials.json`. That token store is separate from `~/.xerg/config.json`. Hosted MCP works best with a workspace API key.
 
 ## What the audit shows
 
@@ -178,6 +200,7 @@ Xerg v0 stores economic metadata and audit summaries locally. It does not store 
 ## Troubleshooting
 
 - `better-sqlite3` is a native dependency. If install fails, retry on a supported Node version and make sure standard native build tooling is available for your platform.
+- `xerg init` is interactive in v1. Use direct `doctor` / `audit` commands when you need non-interactive control.
 - `--verbose` prints progress updates to stderr for `xerg doctor` and `xerg audit`, which helps distinguish package install time from CLI runtime.
 - If `xerg audit --remote ...` fails before pulling files, verify that both `ssh` and `rsync` are installed and reachable on your `PATH`.
 - If `xerg audit --railway` fails immediately, verify that the `railway` CLI is installed, authenticated, and can access the target project.

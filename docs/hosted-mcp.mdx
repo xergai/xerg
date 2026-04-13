@@ -1,6 +1,6 @@
 ---
 title: Hosted MCP (Pro)
-description: Connect Xerg's hosted audit history, trends, recommendations, and selected control actions to remote MCP clients.
+description: Configure Cursor, Claude Code, or another client for Xerg's hosted MCP server after your first pushed audit.
 ---
 
 Xerg offers a hosted MCP server for paid workspaces. It lets remote MCP clients query the hosted data already pushed into your workspace instead of reading local audit data directly from disk.
@@ -28,6 +28,23 @@ You need:
 - at least one pushed audit if you want real hosted audit data in the workspace
 
 If the workspace is empty, start with [authentication and push](/auth-and-push) and send your first audit summary from the CLI.
+
+## Fastest setup path
+
+Use the guided MCP setup command:
+
+```bash
+npx @xerg/cli mcp-setup
+```
+
+`mcp-setup`:
+
+- checks existing auth first
+- offers browser login inline when auth is missing
+- asks whether you want Cursor, Claude Code, or another client
+- prints the hosted config snippet, or writes `.cursor/mcp.json` when a project-scoped Cursor directory already exists
+
+If you authenticated only with a stored browser login token, `mcp-setup` warns that some hosted MCP clients may still require a workspace API key. In that case, create one in the dashboard and set `XERG_API_KEY`.
 
 ## Endpoint and auth
 
@@ -105,10 +122,10 @@ This keeps the MCP server useful for automation while still making destructive o
 
 ## Recommended flow
 
-1. run a local audit with `xerg audit`
-2. push it with `xerg audit --push`
+1. run a local audit with `xerg init` or `xerg audit`
+2. push it with `xerg connect` or `xerg audit --push`
 3. confirm the hosted workspace has data
-4. connect your MCP client to `https://mcp.xerg.ai/mcp`
+4. run `xerg mcp-setup` or connect your MCP client to `https://mcp.xerg.ai/mcp`
 5. ask about waste, changes, or the next policy to create
 
 If you prefer a first-party hosted experience before connecting a third-party MCP client, use Ask Xerg in the dashboard after your first push.
