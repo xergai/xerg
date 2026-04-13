@@ -15,7 +15,7 @@ export interface PushCommandOptions {
 }
 
 export async function runPushCommand(options: PushCommandOptions) {
-  const payload = options.file ? loadPayloadFromFile(options.file) : loadPayloadFromCache();
+  const payload = options.file ? loadPayloadFromFile(options.file) : loadLatestCachedAuditPayload();
 
   if (options.dryRun) {
     process.stdout.write(`${JSON.stringify(payload, null, 2)}\n`);
@@ -61,7 +61,7 @@ function loadPayloadFromFile(filePath: string): AuditPushPayload {
   return payload;
 }
 
-function loadPayloadFromCache(): AuditPushPayload {
+export function loadLatestCachedAuditPayload(): AuditPushPayload {
   const dbPath = getDefaultDbPath();
   let summaries: ReturnType<typeof listStoredAuditSummaries>;
 

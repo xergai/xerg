@@ -1,6 +1,6 @@
 ---
 title: CLI cheat sheet
-description: A sequenced Xerg CLI reference covering first-run local audits, explicit paths, Cursor CSVs, remote OpenClaw audits, push flows, and CI gates.
+description: A sequenced Xerg CLI reference covering init-first onboarding, direct audit flows, hosted follow-up, remote OpenClaw audits, and CI gates.
 ---
 
 Examples use `npx @xerg/cli`. If you installed the CLI globally, substitute `xerg`.
@@ -9,28 +9,28 @@ Examples use `npx @xerg/cli`. If you installed the CLI globally, substitute `xer
 
 Use this page in order:
 
-- start with the four-command path
+- start with the init-first path
 - pick the source type you actually want to inspect
 - copy the exact command block for that workflow
 - come back to the later sections for push, CI, and troubleshooting
 
-## 1. Four-command path
+## 1. Init-first path
 
 If you only remember four commands, remember these:
 
 ```bash
-npx @xerg/cli doctor
-npx @xerg/cli audit
+npx @xerg/cli init
 npx @xerg/cli audit --compare
-npx @xerg/cli audit --push
+npx @xerg/cli connect
+npx @xerg/cli mcp-setup
 ```
 
 What they mean:
 
-- `doctor`: checks whether Xerg can see your local source files
-- `audit`: runs the baseline audit
+- `init`: detects local OpenClaw or Hermes data and runs the first audit
 - `audit --compare`: compares against the newest compatible saved snapshot
-- `audit --push`: sends the resulting summary to the hosted Xerg API
+- `connect`: handles hosted auth and offers to push the latest audit
+- `mcp-setup`: prints or writes hosted MCP config for a supported client
 
 Quick utility commands:
 
@@ -46,11 +46,14 @@ Use these when you want the top-level command list or just the installed CLI ver
 
 | Goal | Command | Use when |
 | --- | --- | --- |
+| Guided first audit | `init` | You want the fastest local-first onboarding path |
 | Check local readiness | `doctor` | You want to confirm paths and detection before auditing |
 | Run an audit | `audit` | You want spend, waste, opportunities, workflows, and models |
 | Compare before and after | `audit --compare` | You already have a prior compatible cached snapshot |
+| Connect to hosted Xerg | `connect` | You want guided auth and an optional push prompt |
 | Push a new result immediately | `audit --push` | You want to compute and push in one step |
 | Push a cached result later | `push` | You already ran an audit and want to send the latest saved snapshot |
+| Configure hosted MCP | `mcp-setup` | You want Cursor, Claude Code, or another client to use hosted MCP |
 | Authenticate in browser | `login` | You want hosted push or other API-backed features |
 | Remove saved credentials | `logout` | You want to clear local auth state |
 
@@ -58,6 +61,7 @@ Use these when you want the top-level command list or just the installed CLI ver
 
 Use this quick decision guide:
 
+- Brand-new first run: `npx @xerg/cli init`
 - Not sure whether Xerg can see your data: `npx @xerg/cli doctor`
 - Ready to run the first local audit: `npx @xerg/cli audit`
 - Want machine-readable output: `npx @xerg/cli audit --json`
@@ -66,18 +70,7 @@ Use this quick decision guide:
 - Want to analyze Cursor export data: `npx @xerg/cli audit --cursor-usage-csv [file]`
 - Want to inspect a remote OpenClaw target first: `npx @xerg/cli doctor --remote [user@host]` or `npx @xerg/cli doctor --railway`
 
-## 4. Pick the source you want to audit
-
-| Source | Best first command | Notes |
-| --- | --- | --- |
-| Local OpenClaw | `npx @xerg/cli doctor --runtime openclaw` | Use this when both local runtimes exist and you want OpenClaw specifically |
-| Local Hermes | `npx @xerg/cli doctor --runtime hermes` | Hermes support is local-only in this phase |
-| Local auto-detect | `npx @xerg/cli doctor` | Best when only one supported local runtime is present |
-| Local Cursor CSV | `npx @xerg/cli doctor --cursor-usage-csv [file]` | Uses exported usage rows instead of runtime logs and transcripts |
-| Remote OpenClaw over SSH | `npx @xerg/cli doctor --remote [user@host]` | Pulls remote files to your machine and analyzes them locally |
-| Remote OpenClaw on Railway | `npx @xerg/cli doctor --railway` | Uses your linked Railway context unless you pass explicit IDs |
-
-## 5. Local runtime basics
+## 4. Direct local audits
 
 Default local detection:
 
@@ -101,7 +94,7 @@ Use `--runtime` when:
 - you want deterministic behavior in automation
 - you are passing explicit local paths and already know the runtime
 
-## 6. Point Xerg at explicit local paths
+## 5. Point Xerg at explicit local paths
 
 OpenClaw:
 
@@ -126,7 +119,7 @@ Useful rule of thumb:
 - use `doctor` first when you are not sure the paths are correct
 - use `audit` once `doctor` shows the files you expect
 
-## 7. Analyze a Cursor usage CSV
+## 6. Analyze a Cursor usage CSV
 
 Inspect the CSV first:
 
@@ -143,7 +136,7 @@ npx @xerg/cli audit --cursor-usage-csv ~/Downloads/usage-events.csv --json
 
 Use this path when you want to analyze Cursor export rows instead of agent logs and session transcripts.
 
-## 8. Output modes
+## 7. Output modes and compare
 
 Human-readable terminal report:
 
@@ -169,8 +162,6 @@ Remember:
 - plain `audit` is best for manual inspection
 - `--json` is best for agents and scripts
 
-## 9. Compare and local snapshot storage
-
 Compare against the newest compatible saved audit:
 
 ```bash
@@ -183,19 +174,6 @@ Limit the comparison window:
 ```bash
 npx @xerg/cli audit --since 24h --compare
 npx @xerg/cli audit --since 7d --compare
-npx @xerg/cli audit --since 30m --compare
-```
-
-Use a custom database:
-
-```bash
-npx @xerg/cli audit --db /path/to/xerg.sqlite
-```
-
-Skip local persistence:
-
-```bash
-npx @xerg/cli audit --no-db
 ```
 
 Important:
@@ -203,7 +181,7 @@ Important:
 - `--compare` needs saved local snapshots
 - `--compare` and `--no-db` cannot be used together
 
-## 10. Remote OpenClaw audits
+## 8. Remote OpenClaw audits
 
 ### SSH
 
@@ -274,7 +252,14 @@ npx @xerg/cli audit --remote-config ~/.xerg/remotes.json
 
 Use this when one command needs to inspect several SSH and Railway sources.
 
-## 11. Push and authentication
+## 9. Hosted follow-up, push, and authentication
+
+Guided hosted path:
+
+```bash
+npx @xerg/cli connect
+npx @xerg/cli mcp-setup
+```
 
 Push as part of the audit:
 
@@ -316,10 +301,29 @@ XERG_API_KEY=sk_live_or_test_key npx @xerg/cli audit --push
 
 Useful distinction:
 
+- use `connect` when you want guided auth and an optional push prompt
 - use `audit --push` when you are computing a fresh audit right now
 - use `push` when you already have a saved audit snapshot and only want to send it
 
-## 12. CI gates and automation
+## 10. CI and automation
+
+Threshold gates:
+
+```bash
+npx @xerg/cli audit --fail-above-waste-rate 0.25
+npx @xerg/cli audit --fail-above-waste-usd 100
+```
+
+Machine-readable output:
+
+```bash
+npx @xerg/cli audit --json
+npx @xerg/cli audit --compare --json
+```
+
+Use `XERG_API_KEY` for non-interactive hosted automation.
+
+## 11. More CI gates and automation
 
 Fail on confirmed waste rate:
 
@@ -354,7 +358,7 @@ Exit codes:
 | `2` | no supported local runtime data found |
 | `3` | waste threshold exceeded |
 
-## 13. Troubleshooting shortcuts
+## 12. Troubleshooting shortcuts
 
 Verbose local discovery:
 
@@ -384,13 +388,12 @@ npx @xerg/cli audit --help
 npx @xerg/cli doctor --help
 ```
 
-## 14. Common copy-paste sequences
+## 13. Common copy-paste sequences
 
 First local audit:
 
 ```bash
-npx @xerg/cli doctor
-npx @xerg/cli audit
+npx @xerg/cli init
 ```
 
 Hermes local audit:
@@ -424,11 +427,11 @@ npx @xerg/cli audit --remote deploy@prod.example.com --since 24h
 Push into the hosted Xerg workspace:
 
 ```bash
-npx @xerg/cli login
-npx @xerg/cli audit --push
+npx @xerg/cli connect
+npx @xerg/cli mcp-setup
 ```
 
-## 15. Flag reference
+## 14. Flag reference
 
 | Flag | Applies to | What it does |
 | --- | --- | --- |

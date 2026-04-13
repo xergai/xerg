@@ -21,6 +21,15 @@ export async function runLoginCommand() {
     return;
   }
 
+  const data = await performDeviceLogin();
+  storeCredentials(data.token);
+  const teamInfo = data.teamName ? ` (team: ${data.teamName})` : '';
+  process.stderr.write(
+    `\n${colorSuccess('Authenticated successfully')}${teamInfo}.\nCredentials saved to ${getCredentialsPath()}.\n`,
+  );
+}
+
+export async function performDeviceLogin(): Promise<{ token: string; teamName?: string }> {
   const apiUrl = process.env.XERG_API_URL || DEFAULT_API_URL;
   const deviceCodeUrl = `${apiUrl}/v1/auth/device-code`;
 
@@ -70,13 +79,7 @@ export async function runLoginCommand() {
       });
 
       if (res.status === 200) {
-        const data = (await res.json()) as { token: string; teamName?: string };
-        storeCredentials(data.token);
-        const teamInfo = data.teamName ? ` (team: ${data.teamName})` : '';
-        process.stderr.write(
-          `\n${colorSuccess('Authenticated successfully')}${teamInfo}.\nCredentials saved to ${getCredentialsPath()}.\n`,
-        );
-        return;
+        return (await res.json()) as { token: string; teamName?: string };
       }
 
       if (res.status === 428) {

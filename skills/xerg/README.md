@@ -1,8 +1,8 @@
 # Xerg
 
-Xerg audits OpenClaw and Hermes workflows in dollars, not tokens. It reads gateway logs and session transcripts, surfaces five spend categories across confirmed waste and savings opportunities, and gives you a concrete first fix to try. Run it again with `--compare` and you can see exactly what changed.
+Xerg audits OpenClaw and Hermes workflows in dollars, not tokens. It reads gateway logs and session transcripts, surfaces confirmed waste plus savings opportunities, and lets you measure fixes with `--compare`.
 
-Everything runs locally by default. The CLI is open source (MIT), published on npm as `@xerg/cli`, and the full source is at [github.com/xergai/xerg](https://github.com/xergai/xerg). No account is required for local audits. No data leaves your machine unless you explicitly `--push` results to the Xerg API for a team dashboard.
+Everything runs locally by default. The CLI is open source (MIT), published on npm as `@xerg/cli`, and the full source is at [github.com/xergai/xerg](https://github.com/xergai/xerg). No account is required for local audits. Hosted sync and hosted MCP are optional paid workspace features.
 
 ## Install
 
@@ -13,7 +13,7 @@ npm install -g @xerg/cli
 Or run without installing:
 
 ```bash
-npx @xerg/cli audit
+npx @xerg/cli init
 ```
 
 ## What It Finds
@@ -27,10 +27,16 @@ npx @xerg/cli audit
 ## Quick Start
 
 ```bash
-xerg doctor
-xerg doctor --verbose
-xerg audit
+xerg init
 xerg audit --compare
+```
+
+Use direct commands when you want explicit control:
+
+```bash
+xerg doctor --runtime openclaw
+xerg audit --runtime hermes
+xerg audit --json
 ```
 
 ## Works Where Your Agents Run
@@ -41,6 +47,17 @@ xerg audit --compare
 - Multiple sources: `xerg audit --remote-config ~/.xerg/remotes.json` for OpenClaw sources in this phase
 
 If local defaults are empty, inspect the target directly first with `xerg doctor --remote user@host` or `xerg doctor --railway`.
+
+## Optional Hosted Follow-Up
+
+```bash
+xerg connect
+xerg mcp-setup
+```
+
+- `connect` offers browser auth and pushing the latest audit
+- `mcp-setup` prints or writes hosted MCP config for supported clients
+- local audits and compare remain available if you skip hosted setup
 
 ## CI And Automation
 

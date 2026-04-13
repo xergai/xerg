@@ -20,6 +20,16 @@ This repo currently keeps the user-facing release surfaces in sync on the same s
 - npm schemas listing content in `packages/schemas/package.json` and `packages/schemas/README.md` when contract language changes
 - ClawHub listing content in `skills/xerg/README.md` and `skills/xerg/SKILL.md`
 
+## Messaging invariants
+
+Keep these points stable across README, docs, npm, and skill surfaces:
+
+- local audits and `--compare` are free
+- hosted sync and hosted MCP are optional cloud features
+- users can skip hosted setup and keep using Xerg locally
+- paid requirements must be disclosed before hosted auth or hosted setup begins
+- paid-feature messaging must not undermine the free local-first value path
+
 ## What is automated
 
 - Mintlify previews/deployments are handled by the docs integration when docs change on GitHub.

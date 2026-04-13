@@ -1,19 +1,20 @@
 ---
 title: Xerg
-description: Audit OpenClaw and Hermes agent spend in dollars, compare before and after changes, run OpenClaw remote audits, and gate CI on waste thresholds.
+description: Start with local OpenClaw or Hermes audits, compare fixes, use remote OpenClaw audits when needed, and add hosted follow-up only if you want it.
 ---
 
 Xerg audits OpenClaw and Hermes usage in dollars rather than tokens. It reads local gateway logs and session transcripts, normalizes runs locally, and surfaces where spend is leaking.
 
-> Hosted features such as dashboard pushes, Ask Xerg, and the hosted MCP server require a Pro or Enterprise workspace.
+> Local audits and `--compare` are free. Hosted pushes, Ask Xerg, and hosted MCP are optional paid workspace features.
 
 ## What Xerg does
 
+- Guides first-time local setup with `xerg init`.
 - Audits local OpenClaw and Hermes activity from default paths or explicit files.
 - Compares the current audit with the newest compatible cached snapshot.
 - Audits OpenClaw SSH and Railway targets from your local machine.
 - Exports human-readable, Markdown, and machine-readable JSON output.
-- Pushes summaries to the Xerg API and can fail CI when confirmed waste is above a threshold.
+- Connects to Xerg Cloud with `xerg connect`, pushes summaries when you choose, and can fail CI when confirmed waste is above a threshold.
 - Exposes hosted audit history, recommendations, and selected control actions through a hosted MCP server for paid workspaces.
 
 ## What Xerg surfaces
@@ -39,19 +40,19 @@ If your data lives elsewhere, use `--log-file` and `--sessions-dir`.
 ## Start here
 
 1. [Install Xerg](/installation).
-2. [Run the quickstart](/quickstart).
+2. Start with [`xerg init`](/init) or [run the quickstart](/quickstart).
 3. Keep the most useful commands nearby with the [CLI cheat sheet](/cli-cheat-sheet).
 4. If the data lives elsewhere, start with [doctor](/doctor). Use [remote audits](/remote-audits) for OpenClaw SSH and Railway targets.
 5. Learn the core model in [waste taxonomy](/waste-taxonomy), [metrics](/metrics), and [how it works](/how-it-works).
-6. When you want hosted features, use [push summaries](/auth-and-push) and [hosted MCP](/hosted-mcp).
+6. When you want hosted features, use [connect and push](/auth-and-push) and [hosted MCP](/hosted-mcp).
 7. When you want local automation, use [CI gates](/ci-gates).
 
 ## Hosted and Pro features
 
 If you use Xerg Pro or Enterprise, you can:
 
-- push audit summaries into a hosted workspace with [authentication and push](/auth-and-push)
-- query hosted audit history and recommendations from remote clients with [hosted MCP](/hosted-mcp)
+- connect and push audit summaries into a hosted workspace with [authentication and push](/auth-and-push)
+- configure Cursor or Claude Code for hosted audit access with [hosted MCP](/hosted-mcp)
 - use Ask Xerg in the dashboard after your workspace has hosted data
 
 ## Important v0 limits

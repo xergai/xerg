@@ -8,6 +8,7 @@ import { formatCommand } from '../command-display.js';
 export interface PushConfig {
   apiKey: string;
   apiUrl: string;
+  source: 'env' | 'config' | 'stored';
 }
 
 const DEFAULT_API_URL = 'https://api.xerg.ai';
@@ -21,6 +22,7 @@ export function loadPushConfig(): PushConfig {
     return {
       apiKey: envKey,
       apiUrl: envUrl || DEFAULT_API_URL,
+      source: 'env',
     };
   }
 
@@ -32,6 +34,7 @@ export function loadPushConfig(): PushConfig {
       return {
         apiKey: parsed.apiKey,
         apiUrl: envUrl || parsed.apiUrl || DEFAULT_API_URL,
+        source: 'config',
       };
     }
   } catch {
@@ -43,6 +46,7 @@ export function loadPushConfig(): PushConfig {
     return {
       apiKey: storedToken,
       apiUrl: envUrl || DEFAULT_API_URL,
+      source: 'stored',
     };
   }
 

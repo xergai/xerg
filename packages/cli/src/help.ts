@@ -3,21 +3,46 @@ import { type CommandDisplay, formatCommand } from './command-display.js';
 export function renderRootHelp(version: string, display: CommandDisplay) {
   return `${display.name} ${version}
 
-Waste intelligence for OpenClaw and Hermes workflows plus local Cursor usage CSVs.
+Waste intelligence for OpenClaw and Hermes workflows.
 
 Usage:
   ${formatCommand('<command> [options]', display.prefix)}
 
-Commands:
+Getting started:
+  init       Detect local runtimes, run a first audit, and offer optional cloud follow-up.
+
+Audit and inspect:
   audit    Analyze OpenClaw or Hermes logs, or a local Cursor usage CSV.
   doctor   Inspect OpenClaw or Hermes sources, or a local Cursor usage CSV.
+
+Cloud:
+  connect    Authenticate and optionally push your latest audit to Xerg Cloud.
   push     Push a cached audit snapshot to the Xerg API.
   login    Authenticate with the Xerg API via browser.
   logout   Remove stored Xerg API credentials.
+  mcp-setup  Generate hosted MCP client configuration.
 
 Global options:
   -h, --help     Show help
   -v, --version  Show version
+`;
+}
+
+export function renderInitHelp(commandPrefix: string) {
+  return `${formatCommand('init', commandPrefix)}
+
+Detect local OpenClaw or Hermes runtimes, run a first audit, and offer optional cloud follow-up.
+
+Usage:
+  ${formatCommand('init', commandPrefix)}
+
+Notes:
+  - Interactive only in v1
+  - Uses local runtime auto-detection
+  - Runs a first local audit with snapshot persistence enabled
+  - Offers optional Xerg Cloud connect and hosted MCP setup after a successful audit
+
+  -h, --help                  Show help
 `;
 }
 
@@ -88,7 +113,7 @@ Options:
 
 Authentication:
   Set XERG_API_KEY in your environment, add "apiKey" to ~/.xerg/config.json,
-  or run \`${formatCommand('login', commandPrefix)}\` to authenticate via browser.
+  or run \`${formatCommand('connect', commandPrefix)}\` / \`${formatCommand('login', commandPrefix)}\` to authenticate via browser.
   Browser login stores a token at ~/.config/xerg/credentials.json by default.
 `;
 }
@@ -122,6 +147,42 @@ Railway options (OpenClaw only):
   --service <id>              Railway service ID
 
   Railway checks require the railway CLI on your PATH.
+
+  -h, --help                  Show help
+`;
+}
+
+export function renderConnectHelp(commandPrefix: string) {
+  return `${formatCommand('connect', commandPrefix)}
+
+Authenticate with Xerg Cloud and optionally push the latest audit.
+
+Usage:
+  ${formatCommand('connect', commandPrefix)}
+
+Notes:
+  - Shows paid-workspace disclosure before hosted setup
+  - Reuses existing auth from XERG_API_KEY, ~/.xerg/config.json, or stored browser login
+  - Standalone non-interactive mode reports auth status and skips the push prompt
+  - When called after ${formatCommand('init', commandPrefix)}, it can push the in-memory audit directly
+
+  -h, --help                  Show help
+`;
+}
+
+export function renderMcpSetupHelp(commandPrefix: string) {
+  return `${formatCommand('mcp-setup', commandPrefix)}
+
+Generate hosted MCP client configuration for Cursor, Claude Code, or another MCP client.
+
+Usage:
+  ${formatCommand('mcp-setup', commandPrefix)}
+
+Notes:
+  - Interactive in v1 because client selection is prompt-driven
+  - Uses the hosted MCP endpoint at https://mcp.xerg.ai/mcp
+  - Can write a project-scoped Cursor config when .cursor/ already exists
+  - Local audits and compare stay available even if you skip hosted MCP setup
 
   -h, --help                  Show help
 `;

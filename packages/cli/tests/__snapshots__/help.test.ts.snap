@@ -3,17 +3,24 @@
 exports[`renderRootHelp > keeps the root help output stable 1`] = `
 "xerg 9.9.9
 
-Waste intelligence for OpenClaw and Hermes workflows plus local Cursor usage CSVs.
+Waste intelligence for OpenClaw and Hermes workflows.
 
 Usage:
   xerg <command> [options]
 
-Commands:
+Getting started:
+  init       Detect local runtimes, run a first audit, and offer optional cloud follow-up.
+
+Audit and inspect:
   audit    Analyze OpenClaw or Hermes logs, or a local Cursor usage CSV.
   doctor   Inspect OpenClaw or Hermes sources, or a local Cursor usage CSV.
+
+Cloud:
+  connect    Authenticate and optionally push your latest audit to Xerg Cloud.
   push     Push a cached audit snapshot to the Xerg API.
   login    Authenticate with the Xerg API via browser.
   logout   Remove stored Xerg API credentials.
+  mcp-setup  Generate hosted MCP client configuration.
 
 Global options:
   -h, --help     Show help
