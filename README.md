@@ -14,7 +14,7 @@ This repository contains:
 Run the guided local-first path without installing anything:
 
 ```bash
-npx @xerg/cli@latest init
+npx @xerg/cli init
 ```
 
 `init` detects local OpenClaw or Hermes data, runs a first audit, stores the local snapshot for later `--compare` runs, and then offers optional hosted follow-up.
@@ -22,9 +22,9 @@ npx @xerg/cli@latest init
 Prefer explicit control?
 
 ```bash
-npx @xerg/cli@latest doctor
-npx @xerg/cli@latest audit
-npx @xerg/cli@latest audit --compare
+npx @xerg/cli doctor
+npx @xerg/cli audit
+npx @xerg/cli audit --compare
 ```
 
 Use those direct commands when you already know which source you want, you need non-interactive behavior, or you want JSON / Markdown / CI flows immediately.
@@ -34,8 +34,8 @@ Use those direct commands when you already know which source you want, you need 
 If you have a paid workspace and want hosted features after the first local audit:
 
 ```bash
-npx @xerg/cli@latest connect
-npx @xerg/cli@latest mcp-setup
+npx @xerg/cli connect
+npx @xerg/cli mcp-setup
 ```
 
 - `connect` reuses existing auth when present, or walks through browser login and offers to push the latest audit
