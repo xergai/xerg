@@ -7,7 +7,7 @@ Xerg runs locally by default. Local audits and `--compare` are free. No account 
 ## Fastest first run
 
 ```bash
-npx @xerg/cli@latest init
+npx @xerg/cli init
 ```
 
 `init` is the default first-run path. It:
