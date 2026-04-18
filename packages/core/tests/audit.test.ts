@@ -23,6 +23,13 @@ describe('xerg audit', () => {
     expect(summary.findings.some((finding) => finding.kind === 'loop-waste')).toBe(true);
     expect(summary.findings.some((finding) => finding.kind === 'candidate-downgrade')).toBe(true);
     expect(summary.findings.some((finding) => finding.kind === 'context-outlier')).toBe(true);
+    expect(
+      summary.findings.every((finding) => finding.scope === 'global' || finding.scopeLabel),
+    ).toBe(true);
+    expect(summary.findings.find((finding) => finding.kind === 'loop-waste')?.scopeId).toBe(
+      summary.findings.find((finding) => finding.kind === 'loop-waste')?.scopeLabel,
+    );
+    expect(summary.recommendations.length).toBeGreaterThan(0);
     expect(summary.spendByDay).toEqual([
       {
         date: '2026-03-06',

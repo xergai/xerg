@@ -2,7 +2,6 @@ import { rmSync } from 'node:fs';
 import {
   auditAgentRuntime,
   auditCursorUsageCsv,
-  buildRecommendations,
   renderMarkdownSummary,
   renderTerminalSummary,
   toWirePayload,
@@ -375,12 +374,11 @@ async function runMultiRemoteAudit(
     if (options.json) {
       const output =
         summaries.length === 1
-          ? { ...summaries[0].summary, recommendations: buildRecommendations(summaries[0].summary) }
+          ? summaries[0].summary
           : {
               sources: summaries.map((s) => ({
                 name: s.name,
                 ...s.summary,
-                recommendations: buildRecommendations(s.summary),
               })),
             };
       process.stdout.write(`${JSON.stringify(output, null, 2)}\n`);
@@ -466,9 +464,7 @@ function renderOutput(summary: AuditSummary, options: AuditCommandOptions) {
   }
 
   if (options.json) {
-    const recommendations = buildRecommendations(summary);
-    const output = { ...summary, recommendations };
-    process.stdout.write(`${JSON.stringify(output, null, 2)}\n`);
+    process.stdout.write(`${JSON.stringify(summary, null, 2)}\n`);
     return;
   }
 

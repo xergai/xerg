@@ -31,6 +31,7 @@ function buildSummary(overrides: Partial<AuditSummary> = {}): AuditSummary {
     spendByDay: [],
     wasteByDay: [],
     findings: [],
+    recommendations: [],
     notes: [],
     sourceFiles: [],
     pricingCoverage: null,

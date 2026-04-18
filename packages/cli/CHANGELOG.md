@@ -1,5 +1,11 @@
 # @xerg/cli
 
+## 0.5.0
+
+### Minor Changes
+
+- Upgrade the shared recommendation contract to payload v2, include ranked recommendations on the push wire format, add stable recommendation IDs plus structured scope labels, and replace the terminal "First savings test" block with the new Action queue summary.
+
 ## 0.4.0
 
 ### Minor Changes

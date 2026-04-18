@@ -1,6 +1,6 @@
 # @xerg/schemas
 
-Versioned TypeScript wire types for Xerg audit payloads, daily rollups, findings, comparisons, and recommendations.
+Versioned TypeScript wire types for Xerg audit payloads, daily rollups, findings, comparisons, and the hosted Action Center recommendation contract.
 
 ## What it is
 
@@ -11,6 +11,7 @@ It is intentionally small and stable:
 - TypeScript-first types for Xerg wire payloads
 - Daily spend and waste rollups for hosted dashboards and ingestion pipelines
 - A runtime `AUDIT_PUSH_PAYLOAD_VERSION` constant for compatibility checks
+- The ranked recommendation contract used by Xerg Cloud, Ask Xerg, and hosted MCP
 - A dependency-light package surface for backends, ingestion services, and internal tooling
 
 ## What it is not
@@ -53,10 +54,10 @@ Current version:
 ```ts
 import { AUDIT_PUSH_PAYLOAD_VERSION } from '@xerg/schemas';
 
-AUDIT_PUSH_PAYLOAD_VERSION; // 1
+AUDIT_PUSH_PAYLOAD_VERSION; // 2
 ```
 
-Daily series such as `spendByDay` and `wasteByDay` were added without bumping the payload version because they are additive fields that older consumers can ignore safely.
+Version `2` adds the richer `XergRecommendation` contract to the pushed payload. Recommendations are now first-class wire data rather than a local-only CLI add-on.
 
 ## Exports
 
@@ -68,6 +69,9 @@ Primary exports include:
 - `WireFinding`
 - `WireComparison`
 - `XergRecommendation`
+- `XergRecommendationPriorityBucket`
+- `XergRecommendationSurface`
+- `XergRecommendationCategory`
 - `AUDIT_PUSH_PAYLOAD_VERSION`
 
 ## Use cases
@@ -75,3 +79,4 @@ Primary exports include:
 - Share a single payload contract between the Xerg CLI and backend services
 - Type audit ingestion pipelines without copying interface definitions
 - Gate processing logic on an explicit payload version
+- Keep hosted action queues, MCP tools, and dashboard recommendation cards aligned with the CLI

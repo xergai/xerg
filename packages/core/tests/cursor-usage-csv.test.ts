@@ -182,6 +182,10 @@ describe('cursor usage csv audit', () => {
     expect(summary.findings.some((finding) => finding.kind === 'max-mode-concentration')).toBe(
       true,
     );
+    expect(
+      summary.findings.every((finding) => finding.scope === 'global' || finding.scopeLabel),
+    ).toBe(true);
+    expect(summary.recommendations.length).toBeGreaterThan(0);
     expect(summary.opportunitySpendUsd).toBeGreaterThan(0);
     expect(summary.spendByWorkflow[0]?.key).toBe('on-demand / max mode');
     expect(summary.spendByModel[0]?.key).toBe('anthropic/claude-sonnet-4-5');

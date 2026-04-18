@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-import { auditCursorUsageCsv } from '../src/audit.js';
+import { auditCursorUsageCsv, auditOpenClaw } from '../src/audit.js';
 import {
   renderDoctorReport,
   renderMarkdownSummary,
@@ -10,6 +10,7 @@ import {
 
 const root = process.cwd();
 const cursorUsageCsv = join(root, 'fixtures', 'cursor', 'usage-sample.csv');
+const gatewayLog = join(root, 'fixtures', 'openclaw', 'gateway', 'openclaw-2026-03-06.log');
 
 describe('renderDoctorReport', () => {
   it('includes remote next steps when no local sources are detected', () => {
@@ -80,5 +81,21 @@ describe('renderDoctorReport', () => {
     expect(renderTerminalSummary(summary)).toContain('2026-04-03:');
     expect(renderMarkdownSummary(summary)).toContain('## Daily trend');
     expect(renderMarkdownSummary(summary)).toContain('2026-04-01:');
+  });
+
+  it('renders the new Action queue block and compare command for runtime audits', async () => {
+    const summary = await auditOpenClaw({
+      logFile: gatewayLog,
+      noDb: true,
+    });
+
+    const terminal = renderTerminalSummary(summary);
+    const markdown = renderMarkdownSummary(summary);
+
+    expect(terminal).toContain('## Action queue');
+    expect(terminal).toContain('Fix now');
+    expect(terminal).toContain('Test next');
+    expect(terminal).toContain('How to validate: `xerg audit --compare --push`');
+    expect(markdown).toContain('## Action queue');
   });
 });

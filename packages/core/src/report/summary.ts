@@ -1,3 +1,4 @@
+import { buildRecommendations } from '../recommendations.js';
 import type {
   AuditRuntime,
   AuditSummary,
@@ -64,8 +65,7 @@ export function buildAuditSummary(input: {
   const generatedAt = isoNow();
   const spendByDay = buildSpendByDay(input.runs);
   const observedDays = buildObservedUtcDayRange(input.runs);
-
-  return {
+  const summary: AuditSummary = {
     auditId: sha1(
       `${generatedAt}:${input.runs.length}:${input.sources.map((source) => source.path).join('|')}`,
     ),
@@ -111,6 +111,7 @@ export function buildAuditSummary(input: {
     spendByDay,
     wasteByDay: buildWasteByDay(input.wasteAttributions, observedDays, wasteSpendUsd),
     findings: input.findings,
+    recommendations: [],
     notes: [
       'Cost per outcome is intentionally unavailable in v0. Xerg is measuring waste intelligence only.',
       'Opportunity findings are directional recommendations, not proven waste.',
@@ -118,4 +119,8 @@ export function buildAuditSummary(input: {
     sourceFiles: input.sources,
     dbPath: input.dbPath,
   };
+
+  summary.recommendations = buildRecommendations(summary);
+
+  return summary;
 }

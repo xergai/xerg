@@ -109,6 +109,7 @@ export function buildCursorUsageFindings(runs: NormalizedRun[]): FindingBuildRes
       summary,
       scope: 'global',
       scopeId: 'all',
+      scopeLabel: 'Cursor usage',
       costImpactUsd: cacheImpactUsd,
       details: {
         cacheReadShare: round(cacheReadShare),
@@ -145,6 +146,7 @@ export function buildCursorUsageFindings(runs: NormalizedRun[]): FindingBuildRes
         summary: `Max mode accounts for ${(maxModeSpendShare * 100).toFixed(0)}% of billed spend across ${maxModeCalls.length} paid row${maxModeCalls.length === 1 ? '' : 's'}. This is a strong candidate for splitting work between premium and standard passes.`,
         scope: 'global',
         scopeId: 'all',
+        scopeLabel: 'Cursor usage',
         costImpactUsd: round(maxModeSpendUsd * 0.2),
         details: {
           maxModeSpendUsd: round(maxModeSpendUsd),

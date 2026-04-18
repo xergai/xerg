@@ -1,7 +1,8 @@
 import type { WireComparison } from './wire-comparison.js';
 import type { WireFinding } from './wire-finding.js';
+import type { XergRecommendation } from './xerg-recommendation.js';
 
-export const AUDIT_PUSH_PAYLOAD_VERSION = 1 as const;
+export const AUDIT_PUSH_PAYLOAD_VERSION = 2 as const;
 
 export type AuditPushPayloadVersion = typeof AUDIT_PUSH_PAYLOAD_VERSION;
 export type PushEnvironment = 'local' | 'remote' | 'railway';
@@ -55,6 +56,7 @@ export interface AuditPushPayload {
     spendByDay: DailySpendBreakdown[];
     wasteByDay: DailyWasteBreakdown[];
     findings: WireFinding[];
+    recommendations: XergRecommendation[];
     notes: string[];
     comparison?: WireComparison | null;
   };

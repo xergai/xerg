@@ -4,6 +4,13 @@ import {
   AUDIT_PUSH_PAYLOAD_VERSION,
   type AuditPushPayload,
   type XergRecommendation,
+  type XergRecommendationCategory,
+  type XergRecommendationConfidence,
+  type XergRecommendationEffort,
+  type XergRecommendationPriorityBucket,
+  type XergRecommendationScope,
+  type XergRecommendationSeverity,
+  type XergRecommendationSurface,
 } from '../src/index.js';
 
 describe('@xerg/schemas contracts', () => {
@@ -29,6 +36,7 @@ describe('@xerg/schemas contracts', () => {
         spendByDay: [],
         wasteByDay: [],
         findings: [],
+        recommendations: [],
         notes: [],
         comparison: null,
       },
@@ -43,23 +51,43 @@ describe('@xerg/schemas contracts', () => {
 
     expect(payload.version).toBe(AUDIT_PUSH_PAYLOAD_VERSION);
     expect(payload.meta.environment).toBe('local');
+    expect(payload.summary.recommendations).toEqual([]);
   });
 
-  it('keeps recommendation action types constrained', () => {
+  it('exposes the v2 recommendation contract and enum unions', () => {
+    const bucket: XergRecommendationPriorityBucket = 'fix_now';
+    const surface: XergRecommendationSurface = 'model_routing';
+    const category: XergRecommendationCategory = 'model_fit';
+    const severity: XergRecommendationSeverity = 'low';
+    const confidence: XergRecommendationConfidence = 'high';
+    const effort: XergRecommendationEffort = 'low';
+    const scope: XergRecommendationScope = 'workflow';
     const recommendation: XergRecommendation = {
       id: 'rec-123',
       findingId: 'finding-123',
       kind: 'candidate-downgrade',
       title: 'Evaluate a cheaper model',
-      description: 'Try a lower-cost model and compare quality.',
+      summary: 'Try a lower-cost model and compare quality.',
+      priorityBucket: bucket,
+      recommendedOrder: 1,
+      implementationSurface: surface,
+      category,
+      severity,
       estimatedSavingsUsd: 8.4,
-      confidence: 'high',
-      actionType: 'model-switch',
-      suggestedChange: {
-        candidate: 'gpt-4o-mini',
-      },
+      estimatedSavingsPct: 0.1234,
+      confidence,
+      effort,
+      scope,
+      scopeId: 'triage',
+      scopeLabel: 'triage',
+      whereToChange: 'Re-map triage to a cheaper model in the routing layer.',
+      validationPlan:
+        'A/B the cheaper model, then rerun `xerg audit --compare --push`. Confirm spend drops without a quality regression.',
+      actions: ['Try a cheaper model on this workflow.', 'Compare quality on a labeled sample.'],
     };
 
-    expect(recommendation.actionType).toBe('model-switch');
+    expect(recommendation.implementationSurface).toBe('model_routing');
+    expect(recommendation.scope).toBe('workflow');
+    expect(recommendation.actions).toHaveLength(2);
   });
 });
