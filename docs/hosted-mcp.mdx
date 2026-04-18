@@ -13,7 +13,7 @@ Use hosted MCP when you want a remote client such as Cursor or Claude Code to:
 
 - inspect the latest hosted audit
 - compare recent spend and waste trends
-- read ranked recommendations and source summaries
+- read ranked recommendations, where-to-change guidance, and source summaries
 - push new hosted audit payloads or ingestion jobs
 - manage hosted policy drafts with explicit write safety
 
@@ -109,6 +109,8 @@ Write tools:
 - `xerg_upsert_policy`
 - `xerg_delete_policy`
 - `xerg_create_policy_from_recommendation`
+
+`xerg_recommendations` returns the richer v2 recommendation shape used by the hosted Action Center, including `priorityBucket`, `implementationSurface`, `scopeLabel`, `whereToChange`, `validationPlan`, and `actions`.
 
 ## Permissions and write safety
 

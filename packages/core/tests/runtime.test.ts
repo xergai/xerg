@@ -4,6 +4,8 @@ import { join } from 'node:path';
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import type { DetectedSourceFile } from '../src/types.js';
+
 const root = process.cwd();
 const openClawLogFile = join(root, 'fixtures', 'openclaw', 'gateway', 'openclaw-2026-03-06.log');
 const openClawSessionsDir = join(root, 'fixtures', 'openclaw', 'sessions');
@@ -27,8 +29,24 @@ async function loadHermesDetection() {
   return import('../src/detect/hermes.js');
 }
 
+async function loadCoreIndexWithDetections(input: {
+  openclawSources?: DetectedSourceFile[];
+  hermesSources?: DetectedSourceFile[];
+}) {
+  vi.resetModules();
+  vi.doMock('../src/detect/openclaw.js', () => ({
+    detectOpenClawSources: async () => input.openclawSources ?? [],
+  }));
+  vi.doMock('../src/detect/hermes.js', () => ({
+    detectHermesSources: async () => input.hermesSources ?? [],
+  }));
+  return import('../src/index.js');
+}
+
 afterEach(() => {
   vi.restoreAllMocks();
+  vi.doUnmock('../src/detect/openclaw.js');
+  vi.doUnmock('../src/detect/hermes.js');
   while (tempDirs.length > 0) {
     const dir = tempDirs.pop();
     if (dir) {
@@ -62,6 +80,9 @@ describe('Hermes detection and normalization', () => {
     expect(summary.callCount).toBeGreaterThan(4);
     expect(summary.findings.some((finding) => finding.kind === 'retry-waste')).toBe(true);
     expect(summary.findings.some((finding) => finding.kind === 'candidate-downgrade')).toBe(true);
+    expect(
+      summary.findings.every((finding) => finding.scope === 'global' || finding.scopeLabel),
+    ).toBe(true);
   });
 });
 
@@ -89,7 +110,7 @@ describe('runtime auto-resolution', () => {
   });
 
   it('fails with a no-data error when no supported local runtime is present', async () => {
-    const { auditAgentRuntime } = await loadCoreIndex();
+    const { auditAgentRuntime } = await loadCoreIndexWithDetections({});
 
     await expect(auditAgentRuntime({ noDb: true, commandPrefix: 'xerg' })).rejects.toThrow(
       'No supported local runtime sources were detected.',
@@ -140,7 +161,7 @@ describe('runtime auto-resolution', () => {
     const tempDir = createTempDir('xerg-runtime-missing-paths-');
     const missingLogPath = join(tempDir, 'missing.log');
 
-    const { auditAgentRuntime } = await loadCoreIndex();
+    const { auditAgentRuntime } = await loadCoreIndexWithDetections({});
     await expect(
       auditAgentRuntime({
         logFile: missingLogPath,
@@ -173,7 +194,7 @@ describe('runtime auto-resolution', () => {
     const tempDir = createTempDir('xerg-runtime-doctor-missing-');
     const missingLogPath = join(tempDir, 'missing.log');
 
-    const { doctorAgentRuntime } = await loadCoreIndex();
+    const { doctorAgentRuntime } = await loadCoreIndexWithDetections({});
     const report = await doctorAgentRuntime({
       logFile: missingLogPath,
     });

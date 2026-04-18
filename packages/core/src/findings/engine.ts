@@ -42,6 +42,7 @@ export function buildFindings(runs: NormalizedRun[]): FindingBuildResult {
         summary: `${retryCandidates.length} failed call${retryCandidates.length === 1 ? '' : 's'} were followed by additional work, making their spend pure retry overhead.`,
         scope: 'global',
         scopeId: 'all',
+        scopeLabel: 'workspace',
         costImpactUsd: round(retryCost),
         details: {
           failedCallCount: retryCandidates.length,
@@ -70,7 +71,8 @@ export function buildFindings(runs: NormalizedRun[]): FindingBuildResult {
           title: `Workflow "${run.workflow}" ran beyond efficient loop bounds`,
           summary: `This run reached ${maxIteration} iterations. Xerg treats the spend after iteration 5 as likely loop waste.`,
           scope: 'run',
-          scopeId: run.id,
+          scopeId: run.workflow,
+          scopeLabel: run.workflow,
           costImpactUsd: round(loopCost),
           details: {
             workflow: run.workflow,
@@ -110,6 +112,7 @@ export function buildFindings(runs: NormalizedRun[]): FindingBuildResult {
             summary: `Xerg found ${outlierRuns.length} run${outlierRuns.length === 1 ? '' : 's'} in this workflow with input token volume far above the workflow average.`,
             scope: 'workflow',
             scopeId: workflow,
+            scopeLabel: workflow,
             costImpactUsd: round(outlierCost),
             details: {
               workflow,
@@ -136,6 +139,7 @@ export function buildFindings(runs: NormalizedRun[]): FindingBuildResult {
             'This workflow name looks like a recurring heartbeat or monitoring loop. Review whether the cadence and model tier are justified.',
           scope: 'workflow',
           scopeId: workflow,
+          scopeLabel: workflow,
           costImpactUsd: round(idleCost),
           details: {
             workflow,
@@ -165,6 +169,7 @@ export function buildFindings(runs: NormalizedRun[]): FindingBuildResult {
             'An expensive model is being used on a workflow that looks operationally simple. Treat this as an A/B test candidate, not proven waste.',
           scope: 'workflow',
           scopeId: workflow,
+          scopeLabel: workflow,
           costImpactUsd: round(spend * 0.3),
           details: {
             workflow,

@@ -51,6 +51,15 @@ Savings opportunities
 
 ## Findings
 
+## Action queue
+Fix now
+- none
+Test next
+- none
+Watch
+- none
+How to validate: \`xerg audit --compare --push\`
+
 ## Notes
 - Cursor CSV audits analyze exported usage rows rather than raw session transcripts.
 - OpenClaw-specific retry, loop, and session-level workflow findings are still unavailable for Cursor CSV inputs because the export does not include retries, iterations, or real workflow IDs.

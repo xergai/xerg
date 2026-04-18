@@ -206,18 +206,22 @@ Automation can branch on those codes instead of scraping terminal output.
 
 ## Recommendations
 
-When using `--json`, expect a `recommendations` array alongside the audit summary. Recommendation items include:
+When using `--json`, expect a `recommendations` array alongside the audit summary. Each recommendation item includes:
 
-- `id`, `findingId`, `kind`, `title`, `description`
-- `estimatedSavingsUsd`, `confidence`, `actionType`
-- optional `suggestedChange`
+- `id`, `findingId`, `kind`, `title`, `summary`
+- `priorityBucket`, `recommendedOrder`, `implementationSurface`, `category`
+- `severity`, `confidence`, `effort`
+- `estimatedSavingsUsd`, `estimatedSavingsPct`
+- `scope`, `scopeId`, `scopeLabel`
+- `whereToChange`, `validationPlan`, `actions`
 
-Current recommendation kinds fall into two buckets:
+Current recommendation kinds map into the Action queue buckets:
 
-- Confirmed waste: `retry-waste`, `loop-waste`
-- Savings opportunities or directional findings: `context-outlier`, `idle-spend`, `candidate-downgrade`
+- `fix_now`: `retry-waste`, `loop-waste`
+- `test_next`: `context-outlier`, `idle-spend`, `candidate-downgrade`, `cache-carryover`, `max-mode-concentration`
+- `watch`: unknown or uncategorized findings
 
-Prefer reversible or high-confidence fixes first. Treat model downgrades and context reductions as A/B-test candidates, not guaranteed savings.
+Prefer high-confidence or reversible fixes first. Treat model downgrades, context changes, and Cursor behavior changes as compare-friendly experiments, not guaranteed savings.
 
 ## Checks
 

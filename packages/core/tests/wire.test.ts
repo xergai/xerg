@@ -22,7 +22,7 @@ describe('toWirePayload', () => {
     const summary = await auditOpenClaw({ logFile: gatewayLog, noDb: true });
     const payload = toWirePayload(summary, testMeta);
 
-    expect(payload.version).toBe(1);
+    expect(payload.version).toBe(2);
     expect(payload.summary.auditId).toBe(summary.auditId);
     expect(payload.summary.generatedAt).toBe(summary.generatedAt);
     expect(payload.summary.comparisonKey).toBe(summary.comparisonKey);
@@ -36,6 +36,7 @@ describe('toWirePayload', () => {
     expect(payload.summary.structuralWasteRate).toBe(summary.structuralWasteRate);
     expect(payload.summary.spendByDay).toEqual(summary.spendByDay);
     expect(payload.summary.wasteByDay).toEqual(summary.wasteByDay);
+    expect(payload.summary.recommendations).toEqual(summary.recommendations);
     expect(payload.summary.notes).toEqual(summary.notes);
   });
 
@@ -168,5 +169,6 @@ describe('toWirePayload', () => {
     expect(payload.summary.spendByModel).toEqual(summary.spendByModel);
     expect(payload.summary.spendByDay).toEqual(summary.spendByDay);
     expect(payload.summary.wasteByDay).toEqual(summary.wasteByDay);
+    expect(payload.summary.recommendations).toEqual(summary.recommendations);
   });
 });

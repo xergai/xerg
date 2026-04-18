@@ -74,8 +74,14 @@ Waste taxonomy
 - Downgrade candidates: $4.80
 - Idle waste: $3.37
 
-First savings test
-- Move heartbeat_monitor from Claude Opus to Sonnet
+Action queue
+Fix now
+- Reduce retry waste in workspace: $12.40 (high)
+Test next
+- Evaluate a cheaper model for heartbeat_monitor: $4.80 (low)
+Watch
+- none
+How to validate: `xerg audit --compare --push`
 ```
 
 ## Common commands
@@ -183,7 +189,7 @@ Example `~/.xerg/config.json`:
 - Observed vs. estimated cost (always labeled)
 - Confirmed waste: retry, loop, cache carryover where applicable
 - Savings opportunities: context bloat, downgrade candidates, idle, max mode concentration where applicable
-- Savings recommendations with suggested A/B tests
+- Ranked recommendations with where-to-change guidance and compare validation steps
 - Before/after deltas on re-audit
 
 ## Privacy

@@ -12,4 +12,13 @@ export type {
   FindingTaxonomyBucket,
   SpendBreakdown,
 } from './audit-push-payload.js';
-export type { XergRecommendation } from './xerg-recommendation.js';
+export type {
+  XergRecommendation,
+  XergRecommendationCategory,
+  XergRecommendationConfidence,
+  XergRecommendationEffort,
+  XergRecommendationPriorityBucket,
+  XergRecommendationScope,
+  XergRecommendationSeverity,
+  XergRecommendationSurface,
+} from './xerg-recommendation.js';

@@ -59,6 +59,7 @@ export function toWirePayload(summary: AuditSummary, meta: WirePayloadMeta): Aud
       spendByDay: summary.spendByDay,
       wasteByDay: summary.wasteByDay,
       findings: summary.findings.map(toWireFinding),
+      recommendations: summary.recommendations,
       notes: summary.notes,
       comparison: summary.comparison ? toWireComparison(summary.comparison) : null,
     },

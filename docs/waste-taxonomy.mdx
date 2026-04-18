@@ -1,6 +1,6 @@
 ---
 title: Waste taxonomy
-description: Understand Xerg's five spend categories, confidence levels, and the difference between confirmed waste and directional opportunities.
+description: Understand Xerg's finding kinds, confidence levels, and the difference between confirmed waste and directional opportunities.
 ---
 
 Xerg classifies spend into two groups:
@@ -10,7 +10,7 @@ Xerg classifies spend into two groups:
 
 This distinction is important because only confirmed waste contributes to `wasteSpendUsd`, `structuralWasteRate`, and CI threshold checks.
 
-## The five finding kinds
+## The current finding kinds
 
 ### Retry waste
 
@@ -76,6 +76,32 @@ Typical fix:
 - move to event-driven triggering
 - use a cheaper model for routine checks
 
+### Cache carryover
+
+Classification: `waste`  
+Confidence: `medium`
+
+For Cursor usage audits, Xerg flags extreme long-session cache carryover as waste when too much stale cached context is being dragged through the session.
+
+Typical fix:
+
+- summarize long chats into a short recall note
+- start a fresh chat
+- carry forward only the facts that still matter
+
+### Max mode concentration
+
+Classification: `opportunity`  
+Confidence: `medium`
+
+For Cursor usage audits, Xerg flags workflows or usage patterns that lean too heavily on max mode instead of escalating selectively.
+
+Typical fix:
+
+- default to standard mode
+- escalate only when standard mode fails
+- review auto-escalation habits
+
 ## Confidence levels
 
 | Level | Meaning |
@@ -88,6 +114,6 @@ Typical fix:
 
 - `retry-waste` and `loop-waste` roll up into confirmed structural waste
 - `context-outlier`, `idle-spend`, and `candidate-downgrade` roll up into opportunity impact
-- the first savings test in the terminal report may prioritize an opportunity even when it is not confirmed waste
+- the Action queue in the terminal report may prioritize an opportunity even when it is not confirmed waste
 
 For the recommendation object shape returned in JSON mode, see [findings and recommendations](/findings-and-recommendations).

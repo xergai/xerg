@@ -1,9 +1,9 @@
 ---
 title: Findings and recommendations
-description: Understand Xerg's five spend categories, what is confirmed waste, and what recommendation objects mean.
+description: Understand Xerg's finding kinds, what is confirmed waste, and what the v2 recommendation objects mean.
 ---
 
-Xerg surfaces five finding kinds. Two are confirmed waste. Three are savings opportunities that should be tested rather than treated as proven waste.
+Xerg surfaces seven named finding kinds today. Two are confirmed waste, three are workflow opportunities, and two are Cursor-specific usage opportunities.
 
 For the conceptual view of how these categories are meant to be interpreted, see [waste taxonomy](/waste-taxonomy).
 
@@ -16,6 +16,8 @@ For the conceptual view of how these categories are meant to be interpreted, see
 | `context-outlier` | Context bloat | `opportunity` | medium | A workflow with at least 3 runs had one or more runs whose input token volume was far above its own baseline. |
 | `idle-spend` | Idle waste | `opportunity` | medium | A workflow name looks like a recurring heartbeat, cron, monitor, or poll loop. |
 | `candidate-downgrade` | Downgrade candidates | `opportunity` | low | An expensive model appears to be used on a simple operational workflow. Treat this as an A/B test candidate. |
+| `cache-carryover` | Cache carryover | `waste` | medium | A long Cursor session is carrying too much stale cached context forward. |
+| `max-mode-concentration` | Max mode concentration | `opportunity` | medium | Cursor is leaning too heavily on max mode rather than escalating selectively. |
 
 ## What counts as confirmed waste
 
@@ -30,7 +32,7 @@ The opportunity classes roll up into `opportunitySpendUsd` and are shown as dire
 
 ## Recommendation objects
 
-When you run `xerg audit --json`, Xerg adds a `recommendations` array derived from the findings. Each recommendation uses the `@xerg/schemas` shape:
+When you run `xerg audit --json`, Xerg includes a ranked `recommendations` array derived from the findings. The same recommendation objects are now part of the v2 push payload as well.
 
 | Field | Meaning |
 | --- | --- |
@@ -38,21 +40,34 @@ When you run `xerg audit --json`, Xerg adds a `recommendations` array derived fr
 | `findingId` | The finding this recommendation came from |
 | `kind` | The source finding kind |
 | `title` | Human-readable next step |
-| `description` | Why this recommendation exists |
+| `summary` | Why this recommendation exists |
+| `priorityBucket` | `fix_now`, `test_next`, or `watch` |
+| `recommendedOrder` | Rank within this audit after bucket and savings sorting |
+| `implementationSurface` | Where the fix lives, such as `retry_policy`, `model_routing`, or `user_behavior` |
+| `category` | `structural_efficiency`, `model_fit`, `context_hygiene`, `cadence_activity`, or `other` |
+| `severity` | `high`, `medium`, or `low` |
 | `estimatedSavingsUsd` | Expected dollar impact |
+| `estimatedSavingsPct` | Expected impact as a share of total spend |
 | `confidence` | `high`, `medium`, or `low` |
-| `actionType` | One of `model-switch`, `cache-config`, `prompt-trim`, `dedup`, or `other` |
-| `suggestedChange` | Optional structured hint for automation |
+| `effort` | `low`, `medium`, or `high` |
+| `scope` | `workspace`, `source`, or `workflow` |
+| `scopeId` | Stable scope identifier used for recommendation identity |
+| `scopeLabel` | Display-ready label for the scope |
+| `whereToChange` | Operator-facing guidance on where the change belongs |
+| `validationPlan` | Compare-aware instructions for proving the result |
+| `actions` | 2–3 concrete action bullets |
 
 ## Current recommendation patterns
 
-| Finding kind | Typical action |
+| Finding kind | Bucket | Typical action |
 | --- | --- |
-| `retry-waste` | add retry backoff or lower retry count |
-| `loop-waste` | cap iteration depth or add an early exit |
-| `context-outlier` | trim prompt or context size |
-| `idle-spend` | reduce cadence or switch to event-driven work |
-| `candidate-downgrade` | A/B test a cheaper model |
+| `retry-waste` | `fix_now` | add retry backoff or lower retry count |
+| `loop-waste` | `fix_now` | cap iteration depth or add an early exit |
+| `context-outlier` | `test_next` | trim prompt or context size |
+| `idle-spend` | `test_next` | reduce cadence or switch to event-driven work |
+| `candidate-downgrade` | `test_next` | A/B test a cheaper model |
+| `cache-carryover` | `test_next` | reset or summarize long Cursor chats |
+| `max-mode-concentration` | `test_next` | reserve max mode for the hardest Cursor turns |
 
 ## What not to overread
 

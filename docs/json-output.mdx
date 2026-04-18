@@ -5,7 +5,7 @@ description: Use Xerg's machine-readable summary and push payload formats for au
 
 Xerg has two related JSON outputs:
 
-- `xerg audit --json` returns the local audit summary plus recommendations
+- `xerg audit --json` returns the local audit summary including recommendations
 - `xerg audit --push --dry-run` and `xerg push --dry-run` return the push payload that would be sent to the Xerg API
 
 The shared wire types are published in `@xerg/schemas`.
@@ -49,7 +49,7 @@ Shape:
 
 Key details:
 
-- `recommendations` are added by the CLI on top of the audit summary
+- `recommendations` are part of the audit summary itself
 - `sourceFiles` and `dbPath` are present here because this is the local summary format
 - `comparison` is `null` unless a compatible baseline was found
 - `spendByDay` and `wasteByDay` use UTC `YYYY-MM-DD` buckets
@@ -115,6 +115,7 @@ Shape:
     "spendByDay": [],
     "wasteByDay": [],
     "findings": [],
+    "recommendations": [],
     "notes": [],
     "comparison": null
   },
@@ -130,7 +131,8 @@ Shape:
 
 Key details:
 
-- the push payload does not include `sourceFiles`, `dbPath`, or `recommendations`
+- the push payload does not include `sourceFiles` or `dbPath`
+- in payload v2, the push payload does include `recommendations`
 - the push payload now includes daily spend and confirmed waste rollups for charting
 - `audit --push --dry-run` prints only the payload, not the normal audit report
 - `meta.environment` is `local`, `remote`, or `railway` depending on how the audit was run
@@ -142,7 +144,8 @@ The push payload is a mapped wire contract, not a raw dump of the internal local
 - `AuditPushPayload` is the top-level type sent by the CLI
 - `WireFinding` intentionally excludes internal `details`
 - `WireComparison` includes the top-line delta fields only
-- per-workflow deltas, per-model deltas, and recommendation arrays are not part of the push payload
+- per-workflow deltas and per-model deltas are not part of the push payload
+- `summary.recommendations` is part of payload version `2`
 
 ## When to use which JSON
 

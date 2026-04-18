@@ -71,6 +71,37 @@ describe('Hermes CLI runtime support', () => {
     expect(output.getStderr()).toBe('');
   });
 
+  it('includes full v2 recommendations in JSON output', async () => {
+    const output = captureOutput();
+
+    try {
+      await runAuditCommand({
+        runtime: 'hermes',
+        logFile: hermesLogFile,
+        sessionsDir: hermesSessionsDir,
+        json: true,
+        noDb: true,
+      });
+    } finally {
+      output.restore();
+    }
+
+    const parsed = JSON.parse(output.getStdout()) as {
+      recommendations?: Array<Record<string, unknown>>;
+    };
+
+    expect(parsed.recommendations?.[0]).toMatchObject({
+      id: expect.any(String),
+      kind: expect.any(String),
+      priorityBucket: expect.any(String),
+      implementationSurface: expect.any(String),
+      category: expect.any(String),
+      whereToChange: expect.any(String),
+      validationPlan: expect.any(String),
+      actions: expect.any(Array),
+    });
+  });
+
   it('rejects Hermes remote audit flags for now', async () => {
     await expect(
       runAuditCommand({

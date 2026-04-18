@@ -1,4 +1,4 @@
-import type { PushEnvironment } from '@xerg/schemas';
+import type { PushEnvironment, XergRecommendation } from '@xerg/schemas';
 
 export type AgentRuntime = 'openclaw' | 'hermes';
 
@@ -157,6 +157,7 @@ export interface Finding {
   summary: string;
   scope: 'global' | 'workflow' | 'run';
   scopeId: string;
+  scopeLabel?: string;
   costImpactUsd: number;
   details: Record<string, unknown>;
 }
@@ -269,6 +270,7 @@ export interface AuditSummary {
   spendByDay: DailySpendBreakdown[];
   wasteByDay: DailyWasteBreakdown[];
   findings: Finding[];
+  recommendations: XergRecommendation[];
   notes: string[];
   sourceFiles: DetectedSourceFile[];
   pricingCoverage?: PricingCoverage | null;

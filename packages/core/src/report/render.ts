@@ -1,3 +1,4 @@
+import type { XergRecommendation } from '@xerg/schemas';
 import type {
   AuditSummary,
   CursorUsageCsvDoctorReport,
@@ -83,23 +84,6 @@ function topFinding(summary: AuditSummary, classification: 'waste' | 'opportunit
     .sort((left, right) => right.costImpactUsd - left.costImpactUsd)[0];
 }
 
-function topSavingsTest(summary: AuditSummary) {
-  return (
-    summary.findings
-      .filter((finding) => finding.classification === 'opportunity')
-      .sort((left, right) => {
-        const leftPriority = left.kind === 'candidate-downgrade' ? 1 : 0;
-        const rightPriority = right.kind === 'candidate-downgrade' ? 1 : 0;
-
-        if (leftPriority !== rightPriority) {
-          return rightPriority - leftPriority;
-        }
-
-        return right.costImpactUsd - left.costImpactUsd;
-      })[0] ?? null
-  );
-}
-
 function renderFindingList(findings: Finding[], emptyLabel: string) {
   if (findings.length === 0) {
     return [`- ${emptyLabel}`];
@@ -108,6 +92,37 @@ function renderFindingList(findings: Finding[], emptyLabel: string) {
   return findings.slice(0, 5).map((finding) => {
     return `- ${finding.title}: ${formatUsd(finding.costImpactUsd)} (${finding.confidence})`;
   });
+}
+
+function renderActionQueueRow(label: string, recommendation?: XergRecommendation) {
+  if (!recommendation) {
+    return [`${label}`, '- none'];
+  }
+
+  return [
+    label,
+    `- ${recommendation.title} [${recommendation.scopeLabel}]: ${formatUsd(recommendation.estimatedSavingsUsd)} (${recommendation.severity})`,
+  ];
+}
+
+function renderActionQueue(summary: AuditSummary) {
+  const fixNow = summary.recommendations.find(
+    (recommendation) => recommendation.priorityBucket === 'fix_now',
+  );
+  const testNext = summary.recommendations.find(
+    (recommendation) => recommendation.priorityBucket === 'test_next',
+  );
+  const watch = summary.recommendations.find(
+    (recommendation) => recommendation.priorityBucket === 'watch',
+  );
+
+  return [
+    '## Action queue',
+    ...renderActionQueueRow('Fix now', fixNow),
+    ...renderActionQueueRow('Test next', testNext),
+    ...renderActionQueueRow('Watch', watch),
+    'How to validate: `xerg audit --compare --push`',
+  ];
 }
 
 function describeSpendDelta(delta: SpendDelta) {
@@ -401,6 +416,8 @@ function renderCursorTerminalSummary(summary: AuditSummary) {
     '## Findings',
     ...renderFindingList(summary.findings, 'none detected'),
     '',
+    ...renderActionQueue(summary),
+    '',
     ...renderCursorCompareBlock(summary),
     ...(summary.comparison ? [''] : []),
     '## Notes',
@@ -446,6 +463,8 @@ function renderCursorMarkdownSummary(summary: AuditSummary) {
     ...summary.findings.slice(0, 10).map((finding) => {
       return `- **${finding.title}** (${finding.classification}, ${finding.confidence}) — ${finding.summary} Estimated impact: ${formatUsd(finding.costImpactUsd)}.`;
     }),
+    '',
+    ...renderActionQueue(summary),
     ...(summary.comparison ? ['', ...renderCursorCompareBlock(summary)] : []),
     '',
     '## Notes',
@@ -462,7 +481,6 @@ export function renderTerminalSummary(summary: AuditSummary) {
   const opportunityFindings = summary.findings.filter(
     (finding) => finding.classification === 'opportunity',
   );
-  const topSavings = topSavingsTest(summary);
   const topWaste = topFinding(summary, 'waste');
 
   return [
@@ -492,13 +510,8 @@ export function renderTerminalSummary(summary: AuditSummary) {
     '## Opportunities',
     ...renderFindingList(opportunityFindings, 'none detected'),
     '',
-    '## First savings test',
-    ...(topSavings
-      ? [
-          `- Start with ${topSavings.title}: ${formatUsd(topSavings.costImpactUsd)} of potential impact`,
-          `- Why this test first: ${topSavings.summary}`,
-        ]
-      : ['- No savings test surfaced yet']),
+    ...renderActionQueue(summary),
+    '',
     ...(topWaste
       ? [`- Confirmed leak to close first: ${topWaste.title}`]
       : ['- Confirmed leak to close first: none']),
@@ -542,6 +555,8 @@ export function renderMarkdownSummary(summary: AuditSummary) {
     ...summary.findings.slice(0, 10).map((finding) => {
       return `- **${finding.title}** (${finding.classification}, ${finding.confidence}) — ${finding.summary} Estimated impact: ${formatUsd(finding.costImpactUsd)}.`;
     }),
+    '',
+    ...renderActionQueue(summary),
   ];
 
   if (summary.comparison) {
