@@ -1,6 +1,6 @@
 ---
 title: Hosted MCP (Pro)
-description: Configure Cursor, Claude Code, or another client for Xerg's hosted MCP server after your first pushed audit.
+description: Configure Cursor, Claude Code, Codex, or another client for Xerg's hosted MCP server after your first pushed audit.
 ---
 
 Xerg offers a hosted MCP server for paid workspaces. It lets remote MCP clients query the hosted data already pushed into your workspace instead of reading local audit data directly from disk.
@@ -9,7 +9,7 @@ Xerg offers a hosted MCP server for paid workspaces. It lets remote MCP clients 
 
 ## When to use hosted MCP
 
-Use hosted MCP when you want a remote client such as Cursor or Claude Code to:
+Use hosted MCP when you want a remote client such as Cursor, Claude Code, or Codex to:
 
 - inspect the latest hosted audit
 - compare recent spend and waste trends
@@ -41,7 +41,7 @@ npx @xerg/cli mcp-setup
 
 - checks existing auth first
 - offers browser login inline when auth is missing
-- asks whether you want Cursor, Claude Code, or another client
+- asks whether you want Cursor, Claude Code, Codex, or another client
 - prints the hosted config snippet, or writes `.cursor/mcp.json` when a project-scoped Cursor directory already exists
 
 If you authenticated only with a stored browser login token, `mcp-setup` warns that some hosted MCP clients may still require a workspace API key. In that case, create one in the dashboard and set `XERG_API_KEY`.
@@ -60,7 +60,38 @@ Send your workspace API key as a Bearer token on every request:
 Authorization: Bearer <XERG_API_KEY>
 ```
 
-Example remote MCP config:
+Client config shapes differ. Use the shape your MCP client expects.
+
+Cursor and Claude Code project config:
+
+```json
+{
+  "mcpServers": {
+    "xerg": {
+      "type": "http",
+      "url": "https://mcp.xerg.ai/mcp",
+      "headers": {
+        "Authorization": "Bearer <XERG_API_KEY>"
+      }
+    }
+  }
+}
+```
+
+Codex config in `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.xerg]
+enabled = true
+url = "https://mcp.xerg.ai/mcp"
+
+[mcp_servers.xerg.http_headers]
+Authorization = "Bearer <XERG_API_KEY>"
+```
+
+Restart Codex after editing `~/.codex/config.toml`; MCP tools are loaded when a session starts.
+
+Generic single-server object for clients that ask for one remote server entry:
 
 ```json
 {
@@ -86,6 +117,7 @@ Common examples:
 
 - Cursor remote MCP
 - Claude Code
+- Codex
 - Claude Desktop via `mcp-remote`
 - other desktop or server MCP clients that support remote HTTP MCP
 
