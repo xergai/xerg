@@ -211,4 +211,38 @@ describe('mcp setup flow', () => {
     expect(output.getStdout()).toContain('https://mcp.xerg.ai/mcp');
     expect(output.getStderr()).toContain('.cursor/mcp.json');
   });
+
+  it('prints a Codex config.toml snippet when Codex is selected', async () => {
+    vi.doMock('../src/cloud.js', async () => {
+      const actual = await vi.importActual<typeof import('../src/cloud.js')>('../src/cloud.js');
+      return {
+        ...actual,
+        authenticateAndLoadPushConfig: vi.fn(),
+        loadPushConfigOrNull: () => ({
+          apiKey: 'sk_test_token',
+          apiUrl: 'https://api.xerg.ai',
+          source: 'env' as const,
+        }),
+      };
+    });
+    vi.doMock('../src/prompts.js', () => ({
+      hasPromptTty: () => true,
+      promptConfirm: vi.fn(),
+      promptSelect: vi.fn().mockResolvedValue('codex'),
+    }));
+
+    const { runMcpSetupFlow } = await import('../src/commands/mcp-setup.js');
+    const output = captureOutput();
+
+    try {
+      await runMcpSetupFlow();
+    } finally {
+      output.restore();
+    }
+
+    expect(output.getStdout()).toContain('[mcp_servers.xerg]');
+    expect(output.getStdout()).toContain('url = "https://mcp.xerg.ai/mcp"');
+    expect(output.getStdout()).toContain('Authorization = "Bearer sk_test_token"');
+    expect(output.getStderr()).toContain('~/.codex/config.toml');
+  });
 });

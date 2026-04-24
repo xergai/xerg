@@ -152,7 +152,7 @@ xerg mcp-setup
 ```
 
 - `connect` resolves auth from `XERG_API_KEY`, `~/.xerg/config.json`, or stored browser credentials, then offers to push the latest audit
-- `mcp-setup` prints or writes hosted MCP config for Cursor, Claude Code, or another client
+- `mcp-setup` prints or writes hosted MCP config for Cursor, Claude Code, Codex, or another client
 
 You can skip both and keep using local audits and compare.
 

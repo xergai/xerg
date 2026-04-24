@@ -12,8 +12,9 @@ import { hasPromptTty, promptConfirm, promptSelect } from '../prompts.js';
 import type { PushConfig } from '../push/index.js';
 
 const HOSTED_MCP_URL = 'https://mcp.xerg.ai/mcp';
+const MCP_SERVER_NAME = 'xerg';
 
-type McpClient = 'cursor' | 'claude-code' | 'other';
+type McpClient = 'cursor' | 'claude-code' | 'codex' | 'other';
 
 export async function runMcpSetupCommand() {
   await runMcpSetupFlow();
@@ -61,6 +62,11 @@ export async function runMcpSetupFlow() {
       description: 'Project-scoped Claude Code MCP config',
     },
     {
+      name: 'Codex',
+      value: 'codex',
+      description: 'Codex config.toml snippet',
+    },
+    {
       name: 'Other',
       value: 'other',
       description: 'Print the hosted HTTP MCP snippet for another client',
@@ -71,6 +77,14 @@ export async function runMcpSetupFlow() {
 
   if (client === 'cursor') {
     await handleCursorSetup(snippet, config);
+    return;
+  }
+
+  if (client === 'codex') {
+    process.stdout.write(`${buildCodexMcpConfig(config)}\n`);
+    process.stderr.write(
+      'Add this to `~/.codex/config.toml`, then restart Codex so it loads the Xerg MCP tools.\n',
+    );
     return;
   }
 
@@ -114,7 +128,7 @@ async function handleCursorSetup(snippet: string, config: PushConfig) {
 function buildHostedMcpConfig(config: PushConfig) {
   return {
     mcpServers: {
-      xerg: {
+      [MCP_SERVER_NAME]: {
         type: 'http',
         url: HOSTED_MCP_URL,
         headers: {
@@ -123,6 +137,21 @@ function buildHostedMcpConfig(config: PushConfig) {
       },
     },
   };
+}
+
+function buildCodexMcpConfig(config: PushConfig) {
+  return [
+    `[mcp_servers.${MCP_SERVER_NAME}]`,
+    'enabled = true',
+    `url = ${tomlString(HOSTED_MCP_URL)}`,
+    '',
+    `[mcp_servers.${MCP_SERVER_NAME}.http_headers]`,
+    `Authorization = ${tomlString(`Bearer ${config.apiKey}`)}`,
+  ].join('\n');
+}
+
+function tomlString(value: string) {
+  return JSON.stringify(value);
 }
 
 function writeCursorConfig(filePath: string, config: PushConfig) {

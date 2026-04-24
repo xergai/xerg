@@ -112,7 +112,7 @@ xerg push
 ```
 
 - `connect` is the guided hosted path: it reuses existing auth, prompts before browser login when needed, and offers to push the latest audit
-- `mcp-setup` prints or writes hosted MCP config for Cursor, Claude Code, or another client
+- `mcp-setup` prints or writes hosted MCP config for Cursor, Claude Code, Codex, or another client
 - local audits and compare remain available if you skip hosted setup
 
 ## Source Selection

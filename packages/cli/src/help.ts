@@ -173,7 +173,7 @@ Notes:
 export function renderMcpSetupHelp(commandPrefix: string) {
   return `${formatCommand('mcp-setup', commandPrefix)}
 
-Generate hosted MCP client configuration for Cursor, Claude Code, or another MCP client.
+Generate hosted MCP client configuration for Cursor, Claude Code, Codex, or another MCP client.
 
 Usage:
   ${formatCommand('mcp-setup', commandPrefix)}
@@ -182,6 +182,7 @@ Notes:
   - Interactive in v1 because client selection is prompt-driven
   - Uses the hosted MCP endpoint at https://mcp.xerg.ai/mcp
   - Can write a project-scoped Cursor config when .cursor/ already exists
+  - Prints a Codex config.toml snippet when Codex is selected
   - Local audits and compare stay available even if you skip hosted MCP setup
 
   -h, --help                  Show help
