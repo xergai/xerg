@@ -4,6 +4,8 @@ Audit OpenClaw and Hermes workflows in dollars, compare fixes, and optionally co
 
 Xerg runs locally by default. Local audits and `--compare` are free. No account is required for local value, and no data leaves your machine unless you explicitly push results to Xerg Cloud.
 
+The `npx @xerg/cli` path fetches and executes the published npm package before running Xerg. If you want to avoid a runtime fetch, install once with `npm install -g @xerg/cli` or run a local build from source.
+
 ## Fastest first run
 
 ```bash
@@ -53,6 +55,8 @@ node_modules/@xerg/cli/skills/xerg/SKILL.md
 ```
 
 For a global install, the same file lives inside the global npm package directory instead. That file is a packaged copy of the canonical repo skill at [`skills/xerg/SKILL.md`](../../skills/xerg/SKILL.md). Use it if your agent platform imports skills from disk; installing the npm package does not automatically register the skill with every agent product.
+
+The bundled skill frontmatter declares the CLI/package surface plus optional Xerg Cloud, SSH, rsync, and Railway requirements so registries can distinguish the default local audit workflow from opt-in hosted sync and remote audit workflows.
 
 ## Supported runtime
 

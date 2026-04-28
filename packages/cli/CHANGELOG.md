@@ -1,5 +1,11 @@
 # @xerg/cli
 
+## 0.5.1
+
+### Patch Changes
+
+- Declare the Xerg skill runtime metadata for ClawHub security scans and document the local, remote, and hosted data-flow boundaries.
+
 ## 0.5.0
 
 ### Minor Changes

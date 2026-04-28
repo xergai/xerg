@@ -1,6 +1,47 @@
 ---
 name: xerg
 description: Audit OpenClaw and Hermes workflows in dollars. Local-first audits with init, compare mode, OpenClaw remote support, CI gates, and optional hosted follow-up.
+homepage: https://xerg.ai
+metadata:
+  openclaw:
+    homepage: https://xerg.ai
+    links:
+      repository: https://github.com/xergai/xerg
+      documentation: https://xerg.ai/docs
+    primaryEnv: XERG_API_KEY
+    requires:
+      anyBins:
+        - xerg
+        - npx
+      config:
+        - ~/.xerg/config.json
+        - ~/.config/xerg/credentials.json
+        - ~/.xerg/remotes.json
+    install:
+      - kind: node
+        package: "@xerg/cli"
+        bins:
+          - xerg
+    envVars:
+      - name: XERG_API_KEY
+        required: false
+        description: Optional Xerg Cloud workspace API key for explicit push, connect, and hosted MCP setup.
+      - name: XERG_API_URL
+        required: false
+        description: Optional override for the Xerg API endpoint; defaults to https://api.xerg.ai.
+    dependencies:
+      - name: "@xerg/cli"
+        type: npm
+        repository: https://github.com/xergai/xerg
+      - name: ssh
+        type: other
+        url: https://www.openssh.com/
+      - name: rsync
+        type: other
+        url: https://rsync.samba.org/
+      - name: railway
+        type: npm
+        repository: https://github.com/railwayapp/cli
 ---
 
 # Xerg
@@ -10,6 +51,8 @@ Use `xerg` if it is already installed. If not, use `npx @xerg/cli` with the same
 Xerg audits OpenClaw and Hermes workflows in dollars, not tokens. It reads gateway logs and session transcripts, surfaces confirmed waste plus savings opportunities, and helps you measure fixes with `--compare`.
 
 Local audits need no account. Hosted sync and hosted MCP are optional paid workspace features. No data leaves your machine unless you explicitly push results to Xerg Cloud.
+
+The initial `npx @xerg/cli` path fetches and executes the published npm package. To avoid that runtime fetch, install and review the CLI first with `npm install -g @xerg/cli`, or use a locally built `xerg` binary.
 
 ## Quick Start
 
@@ -48,6 +91,14 @@ Additional requirements:
 - Pushing needs auth via `XERG_API_KEY`, `~/.xerg/config.json`, or browser credentials from `xerg login`
 - SSH audits require `ssh` and `rsync` on your local `PATH` and are OpenClaw-only in this phase
 - Railway audits require the `railway` CLI on your local `PATH` and are OpenClaw-only in this phase
+
+## Security And Data Flow
+
+Default `doctor`, `init`, `audit`, `--compare`, `--json`, and `--markdown` commands analyze data on the local machine. They read OpenClaw, Hermes, or Cursor usage files, compute economic summaries, print reports, and may write local SQLite snapshots for future comparison.
+
+Remote OpenClaw audits over SSH, Railway, or `--remote-config` pull selected gateway logs and session files to local temporary storage, then run the same local audit engine. These flows require the corresponding remote transport credentials already configured on the machine.
+
+Hosted sync is opt-in. `connect`, `audit --push`, `push`, and `mcp-setup` use `XERG_API_KEY`, `~/.xerg/config.json`, or browser login credentials only for Xerg Cloud actions. The push payload contains audit totals, daily rollups, findings, recommendations, comparison deltas, and source metadata; it does not include raw prompt or response content, local source file paths, local database paths, or internal finding details.
 
 ## Default Flow
 

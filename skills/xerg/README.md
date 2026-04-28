@@ -4,6 +4,8 @@ Xerg audits OpenClaw and Hermes workflows in dollars, not tokens. It reads gatew
 
 Everything runs locally by default. The CLI is open source (MIT), published on npm as `@xerg/cli`, and the full source is at [github.com/xergai/xerg](https://github.com/xergai/xerg). No account is required for local audits. Hosted sync and hosted MCP are optional paid workspace features.
 
+The `npx @xerg/cli` path fetches and executes the published npm package before running Xerg. If you want to review the code first and avoid that fetch on each use, install the CLI globally with `npm install -g @xerg/cli` or run a local build.
+
 ## Install
 
 ```bash
@@ -58,6 +60,13 @@ xerg mcp-setup
 - `connect` offers browser auth and pushing the latest audit
 - `mcp-setup` prints or writes hosted MCP config for supported clients
 - local audits and compare remain available if you skip hosted setup
+
+## Security And Data Flow
+
+- Local audits read OpenClaw, Hermes, or Cursor usage files and may write local SQLite snapshots for `--compare`.
+- SSH, Railway, and `--remote-config` audits pull selected OpenClaw files to local temporary storage before analysis.
+- Xerg Cloud sync only happens when you run `connect`, `audit --push`, `push`, or `mcp-setup`.
+- Push payloads include audit totals, rollups, findings, recommendations, comparison deltas, and source metadata. They exclude raw prompt and response content, local source file paths, local database paths, and internal finding details.
 
 ## CI And Automation
 

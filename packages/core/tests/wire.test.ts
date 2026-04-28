@@ -73,6 +73,28 @@ describe('toWirePayload', () => {
     expect(summaryObj).not.toHaveProperty('since');
   });
 
+  it('keeps raw prompts, responses, and local-only details out of the push payload', async () => {
+    const summary = await auditOpenClaw({ logFile: gatewayLog, noDb: true });
+    const rawPrompt = 'customer-secret-prompt-do-not-push';
+    const rawResponse = 'customer-secret-response-do-not-push';
+    const localDbPath = '/tmp/xerg-private.sqlite';
+
+    expect(summary.findings.length).toBeGreaterThan(0);
+    summary.dbPath = localDbPath;
+    summary.findings[0].details = {
+      prompt: rawPrompt,
+      response: rawResponse,
+      sourceFile: gatewayLog,
+    };
+
+    const payloadJson = JSON.stringify(toWirePayload(summary, testMeta));
+
+    expect(payloadJson).not.toContain(rawPrompt);
+    expect(payloadJson).not.toContain(rawResponse);
+    expect(payloadJson).not.toContain(gatewayLog);
+    expect(payloadJson).not.toContain(localDbPath);
+  });
+
   it('keeps cursor-only local fields out of the push payload', async () => {
     const summary = await auditCursorUsageCsv({ cursorUsageCsv, noDb: true });
     const payload = toWirePayload(summary, testMeta);

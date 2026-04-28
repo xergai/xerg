@@ -59,7 +59,7 @@ This wire payload is intentionally narrower than the local summary:
 - it omits local file paths
 - it omits local database path details
 - it omits internal finding `details`
-- it does not include the recommendation array
+- it includes ranked recommendations without raw prompt or response content
 
 ## Privacy boundaries
 
@@ -70,5 +70,6 @@ The docs and codebase currently support these claims:
 - Xerg stores local economic metadata and audit summaries
 - the push payload excludes local file paths and internal debug-style fields
 - prompt and response content are not part of the push wire schema
+- hosted sync only happens through explicit `connect`, `audit --push`, `push`, or `mcp-setup` commands
 
 For the exact local summary and wire payload shapes, see [json output](/json-output).
