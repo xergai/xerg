@@ -114,6 +114,39 @@ try {
     throw new Error('Bundled Xerg skill did not contain expected frontmatter.');
   }
 
+  const expectedSkillMetadata = [
+    'metadata:',
+    'openclaw:',
+    'primaryEnv: XERG_API_KEY',
+    'anyBins:',
+    '- xerg',
+    '- npx',
+    'package: "@xerg/cli"',
+    '- ~/.xerg/config.json',
+    '- ~/.config/xerg/credentials.json',
+    'name: XERG_API_KEY',
+    'required: false',
+  ];
+
+  for (const snippet of expectedSkillMetadata) {
+    if (!bundledSkill.includes(snippet)) {
+      throw new Error(`Bundled Xerg skill is missing expected ClawHub metadata: ${snippet}`);
+    }
+  }
+
+  const installedPackageJson = JSON.parse(
+    readFileSync(join(installDir, 'node_modules', '@xerg', 'cli', 'package.json'), 'utf8'),
+  );
+  const installLifecycleScripts = ['preinstall', 'install', 'postinstall'].filter(
+    (scriptName) => installedPackageJson?.scripts?.[scriptName],
+  );
+
+  if (installLifecycleScripts.length > 0) {
+    throw new Error(
+      `Installed package unexpectedly declares install lifecycle scripts: ${installLifecycleScripts.join(', ')}`,
+    );
+  }
+
   process.stdout.write('CLI package smoke test passed.\n');
 } finally {
   rmSync(tempRoot, { recursive: true, force: true });

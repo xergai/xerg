@@ -38,6 +38,17 @@ The skill describes how an agent should use Xerg well:
 - how to interpret confirmed waste versus directional opportunities
 - what to verify before finishing an audit task
 
+## Registry metadata
+
+The skill frontmatter declares the runtime surface that ClawHub and agent registries need to understand:
+
+- `xerg` or `npx` as the CLI entry point
+- `@xerg/cli` as the npm package source
+- optional Xerg Cloud credentials and config paths for explicit hosted commands
+- optional SSH, rsync, and Railway dependencies for remote OpenClaw audits
+
+These declarations are intentionally broader than the default local audit path because the same skill also documents opt-in hosted sync and remote audit workflows.
+
 ## Important caveat
 
 Installing `@xerg/cli` does not automatically register the bundled skill with every agent product. Some tools can import skills from disk directly. Others need you to copy or link the skill into that product's own skill directory or use its import flow.
