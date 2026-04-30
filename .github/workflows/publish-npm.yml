@@ -166,7 +166,7 @@ jobs:
           fi
 
       - name: Install ClawHub CLI
-        run: npm install --global clawhub@0.9.0
+        run: npm install --global clawhub@0.12.0
 
       - name: Log in to ClawHub
         env:
