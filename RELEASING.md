@@ -34,6 +34,7 @@ Keep these points stable across README, docs, npm, and skill surfaces:
 
 - Mintlify previews/deployments are handled by the docs integration when docs change on GitHub.
 - `.github/workflows/publish-npm.yml` verifies the repo, publishes npm packages, and publishes the ClawHub skill.
+- The publish workflow pins `clawhub@0.12.0`; owner-triggered ClawHub rescans require `clawhub >=0.12.0`.
 - `scripts/sync-cli-skill.mjs` copies the canonical skill file into the npm CLI package during build and pack.
 
 ## What is still manual
