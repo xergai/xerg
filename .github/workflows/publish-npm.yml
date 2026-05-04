@@ -155,7 +155,53 @@ jobs:
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
+      - name: Check existing npm CLI version
+        id: npm_cli
+        env:
+          XERG_CLI_VERSION: ${{ steps.clawhub_meta.outputs.version }}
+        run: |
+          set +e
+          NPM_VIEW_OUTPUT="$(npm view "@xerg/cli@$XERG_CLI_VERSION" version --registry=https://registry.npmjs.org 2>&1)"
+          NPM_VIEW_STATUS=$?
+          set -e
+
+          if [ "$NPM_VIEW_STATUS" -eq 0 ]; then
+            echo "@xerg/cli@$XERG_CLI_VERSION already exists on npm."
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          elif echo "$NPM_VIEW_OUTPUT" | grep -q "E404"; then
+            echo "@xerg/cli@$XERG_CLI_VERSION does not exist on npm yet."
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "$NPM_VIEW_OUTPUT" >&2
+            exit "$NPM_VIEW_STATUS"
+          fi
+
+      - name: Install ClawHub CLI
+        run: npm install --global clawhub@0.12.0
+
+      - name: Check existing ClawHub skill version
+        id: clawhub_skill
+        env:
+          XERG_SKILL_VERSION: ${{ steps.clawhub_meta.outputs.version }}
+        run: |
+          set +e
+          CLAWHUB_INSPECT_OUTPUT="$(clawhub inspect xerg --version "$XERG_SKILL_VERSION" --json 2>&1)"
+          CLAWHUB_INSPECT_STATUS=$?
+          set -e
+
+          if [ "$CLAWHUB_INSPECT_STATUS" -eq 0 ]; then
+            echo "xerg@$XERG_SKILL_VERSION already exists on ClawHub."
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          elif echo "$CLAWHUB_INSPECT_OUTPUT" | grep -qi "Version not found"; then
+            echo "xerg@$XERG_SKILL_VERSION does not exist on ClawHub yet."
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "$CLAWHUB_INSPECT_OUTPUT" >&2
+            exit "$CLAWHUB_INSPECT_STATUS"
+          fi
+
       - name: Verify ClawHub token is configured
+        if: ${{ steps.clawhub_skill.outputs.exists != 'true' }}
         env:
           CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
         run: |
@@ -165,15 +211,14 @@ jobs:
             exit 1
           fi
 
-      - name: Install ClawHub CLI
-        run: npm install --global clawhub@0.12.0
-
       - name: Log in to ClawHub
+        if: ${{ steps.clawhub_skill.outputs.exists != 'true' }}
         env:
           CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
         run: clawhub login --token "$CLAWHUB_TOKEN" --no-browser
 
       - name: Publish Xerg skill to ClawHub
+        if: ${{ steps.clawhub_skill.outputs.exists != 'true' }}
         env:
           XERG_SKILL_VERSION: ${{ steps.clawhub_meta.outputs.version }}
           XERG_SKILL_CHANGELOG: ${{ steps.clawhub_meta.outputs.changelog }}
@@ -187,5 +232,6 @@ jobs:
             --tags "$XERG_SKILL_TAGS"
 
       - name: Publish @xerg/cli
+        if: ${{ steps.npm_cli.outputs.exists != 'true' }}
         working-directory: packages/cli
         run: npm publish --access public
